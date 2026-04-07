@@ -35,6 +35,31 @@
             -ms-overflow-style: none;  /* IE and Edge */
             scrollbar-width: none;  /* Firefox */
         }
+        .speech-bubble {
+            position: relative;
+            background: #f8fafc;
+            border-radius: .4em;
+            color: #0f172a;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        .speech-bubble:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border: 15px solid transparent;
+            border-top-color: #f8fafc;
+            border-bottom: 0;
+            margin-left: -15px;
+            margin-bottom: -15px;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white">
@@ -67,7 +92,7 @@
           Heart, Users, Play, LogOut, MessageSquare, Skull, 
           Trophy, Crown, UserPlus, Shield, Swords, Flame, 
           AlertTriangle, ArrowRight, Dices, Send, X, Vote, ListOrdered, Coffee, ChevronDown, Award, CheckCircle, Undo2,
-          Package, Gem, Lock, Unlock, Target, Users2, AlertOctagon, Shuffle, Gavel, Zap, Hammer
+          Package, Gem, Lock, Unlock, Target, Users2, AlertOctagon, Shuffle, Gavel, Zap, Hammer, UserMinus, Mic
         } from 'lucide-react';
 
         // --- TUE CHIAVI FIREBASE INSERITE ---
@@ -111,93 +136,99 @@
           { name: "World Tour", bg: "https://images.unsplash.com/photo-1559586616-361e18714958?q=80&w=2070&auto=format&fit=crop", theme: "Aereo" }
         ];
 
+        // AGGIUNTE LE FRASI (SPEECHES) AI PERSONAGGI PRINCIPALI
         const ROSTER = [
-        { name: "Lord Farquaad", img: "https://i.pinimg.com/736x/35/93/ac/3593acb0b8f9d75704f5a0778c693e73.jpg" },
-          { name: "Marinette", img: "https://i.pinimg.com/736x/b8/74/55/b87455575cd069609007a639c9490293.jpg" },
-          { name: "Adrien", img: "https://i.pinimg.com/1200x/5c/2d/c7/5c2dc740ed2fe906b6afaf1320bf4273.jpg" },
-		  { name: "Alya", img: "https://i.pinimg.com/736x/3e/3b/99/3e3b99fc26e6b2cb8bf7359c53acca24.jpg" },
-		  { name: "Luka", img: "https://i.pinimg.com/736x/16/40/f3/1640f3c6c2b14e00c110316e02e86c7f.jpg" },
-		  { name: "Kagami", img: "https://i.pinimg.com/736x/56/e2/ad/56e2adc6421c613a6d00b393abd1a6c1.jpg" },
-          { name: "Re Julien", img: "https://i.pinimg.com/736x/1e/17/19/1e17194ef5b383e4202fbb4875cfbd81.jpg" },
+          { name: "Lord Farquaad", img: "https://i.pinimg.com/736x/35/93/ac/3593acb0b8f9d75704f5a0778c693e73.jpg", speeches: ["La vittoria è mia per diritto divino. Gli orchi non meritano questi soldi!", "Alcuni di voi sono stati eliminati, ma è un sacrificio che sono stato disposto a fare per vincere."] },
+          { name: "Marinette", img: "https://i.pinimg.com/736x/b8/74/55/b87455575cd069609007a639c9490293.jpg", speeches: ["Ho cercato di giocare in modo onesto e leale con tutti. Spero possiate riconoscerlo!", "Essere leader non è facile, ma ho sempre protetto il mio team. Votatemi!"] },
+          { name: "Adrien", img: "https://i.pinimg.com/1200x/5c/2d/c7/5c2dc740ed2fe906b6afaf1320bf4273.jpg", speeches: ["Sono sempre stato prigioniero di mio padre, votatemi cosi posso dimostrargli di brillare anche da solo!", "Ho giocato in modo pulito e ottimale, spero lo possiate riconoscere, votate per me!"] },
+		  { name: "Alya", img: "https://i.pinimg.com/736x/3e/3b/99/3e3b99fc26e6b2cb8bf7359c53acca24.jpg", speeches: ["Grazie alle mie doti giornalistiche sono riuscita ad arrivare fin qui, votatemi e non ve ne pentirete!", "Miraggio! Guardate cosa so fare? Direi che mi merito il voto."] },
+          { name: "Heartfixer", img: "https://i.pinimg.com/736x/fe/82/7c/fe827caedc137c8832fd7b313209cc55.jpg", speeches: ["Ho riparato ogni cuore spezzato su quest'isola, ma il premio spetta solo a me! Votatemi!", "Non c'è bisogno di essere akumatizzati per capire che sono io la vera vincitrice. Datemi i vostri voti!"] },
+          { name: "Chrysalis", img: "https://i.pinimg.com/736x/c1/8e/6a/c18e6a45d98eee60c330d37bb2f4e562.jpg", speeches: ["Vi ho manipolati tutti dall'inizio alla fine con le mie bugie perfette. Sono io la regina dell'inganno e merito la corona.", "Un bravo prestigiatore non rivela mai i suoi trucchi... ma vi assicuro che la mia vittoria era scritta fin dal primo giorno."] },
+          { name: "Nathalie", img: "https://i.pinimg.com/736x/ad/8e/68/ad8e68f410c0379c3b5412b8afeef3dc.jpg", speeches: ["Ho sempre agito con fredda efficienza e logica impeccabile. I risultati parlano da soli, il vostro voto dovrebbe essere per me.", "Ho sacrificato molto per arrivare fin qui. Non siate irrazionali, sono l'unica che merita questo premio."] },
+		  { name: "Luka", img: "https://i.pinimg.com/736x/16/40/f3/1640f3c6c2b14e00c110316e02e86c7f.jpg", speeches: ["Ho giocato in modo pulito, chiaro e cristallino come il suono della mia musica. Votate per me :)", "*suona la chitarra* Spero che questa melodia possa convincervi."] },
+		  { name: "Kagami", img: "https://i.pinimg.com/736x/56/e2/ad/56e2adc6421c613a6d00b393abd1a6c1.jpg", speeches: ["Ho vinto molte sfide e non ho mai dato potere alle mie emozioni. Mi merito questo voto.", "Votatemi, grazie."] },
+          { name: "Re Julien", img: "https://i.pinimg.com/736x/1e/17/19/1e17194ef5b383e4202fbb4875cfbd81.jpg", speeches: ["Votate per il vostro Re! Se vinco, faremo una festa indimenticabile!", "I piedi di Mortino non sono nulla in confronto a questi milioni di dollari!"] },
           { name: "Mortino", img: " https://i.pinimg.com/736x/b9/56/ec/b956ec4741a1ba90c7176478e203f78b.jpg" },
-		  { name: "Skipper", img: "https://i.pinimg.com/736x/e6/f0/5b/e6f05b20dda962344721db983c882679.jpg" },
+		  { name: "Skipper", img: "https://i.pinimg.com/736x/e6/f0/5b/e6f05b20dda962344721db983c882679.jpg", speeches: ["Carini e coccolosi ragazzi, carini e coccolosi. Ora datemi quei soldi per finanziare le operazioni.", "Ho gestito questa isola come un'operazione militare tattica. Vittoria meritata."] },
 		  { name: "Kowalski", img: "https://i.pinimg.com/736x/e7/bc/38/e7bc382c57bfb2f3de7f44a0cce39fcd.jpg" },
 		  { name: "Soldato", img: "https://i.pinimg.com/1200x/5e/3f/0d/5e3f0d06b262dc18869f550806d1bdb4.jpg" },
 		  { name: "Baby Soldato", img: "https://i.pinimg.com/736x/81/3c/57/813c57fcb969d58fac1672594da05532.jpg" },
-          { name: "Gwen", img: "https://i.pinimg.com/1200x/59/d7/15/59d71578cd5f889ae898bbc83dda29dc.jpg" },
-          { name: "Julia", img: "https://i.pinimg.com/736x/80/c2/83/80c283f82be806cdd40e71d303d09474.jpg" },
-          { name: "Duncan", img: "https://i.pinimg.com/736x/3f/2d/e1/3f2de1cd71448e1413ab3ccafbed5b4d.jpg" },
-		  { name: "Heather", img: "https://i.pinimg.com/736x/81/5b/b6/815bb632721e7d38f26d35801466dd30.jpg" },
-		  { name: "Courtney", img: "https://i.pinimg.com/736x/ad/94/34/ad9434468d4a502c89ea01c0249e8899.jpg" },
-		  { name: "Lindsay", img: "https://i.pinimg.com/1200x/ed/96/df/ed96df179eaa7030663473c575067cb4.jpg" },
-		  { name: "Bowie", img: "https://i.pinimg.com/1200x/03/6c/0f/036c0ffe4fcd39d5840ed60a2fb104c3.jpg" },
+          { name: "Gwen", img: "https://i.pinimg.com/1200x/59/d7/15/59d71578cd5f889ae898bbc83dda29dc.jpg", speeches: ["Non mi importa molto dei soldi, ma ho giocato pulito. A differenza di certa gente.", "Ho sopportato tutti voi per settimane, questo è il minimo premio che mi spetta."] },
+          { name: "Julia", img: "https://i.pinimg.com/736x/80/c2/83/80c283f82be806cdd40e71d303d09474.jpg", speeches: ["Guardatemi. Sono stupenda, intelligente e vi ho distrutti tutti. Votate per la regina.", "Non fatemi perdere tempo, sapete tutti che i soldi spettano a me. Ciao follower!"] },
+          { name: "Duncan", img: "https://i.pinimg.com/736x/3f/2d/e1/3f2de1cd71448e1413ab3ccafbed5b4d.jpg", speeches: ["Votate per me o vi farò pentire di essere nati, chiaro?", "Ho giocato duro e ho fregato chi dovevo fregare. Date a me i soldi o vi picchio."] },
+		  { name: "Heather", img: "https://i.pinimg.com/736x/81/5b/b6/815bb632721e7d38f26d35801466dd30.jpg", speeches: ["Io mi merito la vittoria poichè sono la villain migliore della stagione, ammettetelo.", "Se non votate per me non avete buon gusto, sappiatelo. Siete solo comparse nel mio show!"] },
+		  { name: "Courtney", img: "https://i.pinimg.com/736x/ad/94/34/ad9434468d4a502c89ea01c0249e8899.jpg", speeches: ["Sono l'unica qui con un vero piano d'investimento per questi soldi. Votatemi, è la scelta logica.", "Se non vinco io, chiamerò i miei avvocati e vi farò causa tutti quanti!"] },
+		  { name: "Lindsay", img: "https://i.pinimg.com/1200x/ed/96/df/ed96df179eaa7030663473c575067cb4.jpg", speeches: ["Dovete votare per me perché i miei capelli sono stati perfetti per tutto il tempo! Grazie!", "Aspetta, ma se vinco io... divento la regina dell'isola? Siii, votatemi! Ciao Tyson!"] },
+		  { name: "Bowie", img: "https://i.pinimg.com/1200x/03/6c/0f/036c0ffe4fcd39d5840ed60a2fb104c3.jpg", speeches: ["Ammettetelo, senza di me questa stagione sarebbe stata noiosissima. Merito la corona.", "Ho manipolato le votazioni dal giorno uno. Sono il re strategico di questa edizione."] },
 		  { name: "Raj", img: "https://i.pinimg.com/736x/05/b2/97/05b297c32cd4507adbd7b0c7ce84fb3a.jpg" },
           { name: "Conan", img: "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg" },
           { name: "Ran", img: "https://i.pinimg.com/1200x/46/ee/c7/46eec75f3a3eeb4846216dfdd7083ff4.jpg" },
           { name: "Rias", img: "https://i.pinimg.com/736x/d1/a7/df/d1a7df7bfe5769c39e9b66041144e4eb.jpg" },
           { name: "Bayonetta", img: "https://i.pinimg.com/1200x/60/fc/c0/60fcc064dc97d24b96a9517f726c1970.jpg" },
-          { name: "Yoshi", img: "https://i.pinimg.com/736x/f3/05/7f/f3057f14de68b0afe682ffe93dcc479b.jpg" },
-          { name: "Rosalinda", img: "https://i.pinimg.com/736x/09/14/f0/0914f029e712e92de9d4f0081a5da032.jpg" },
-		  { name: "Peach", img: "https://i.pinimg.com/736x/c0/53/fb/c053fb4dd4f8c0dd9c277212490b1962.jpg" },
-		  { name: "Daisy", img: "https://i.pinimg.com/736x/e2/47/61/e2476198364b030d3a8f9a1f93becfb9.jpg" },
-		  { name: "Pauline", img: "https://i.pinimg.com/736x/86/83/ee/8683ee7c89735311e61addebf517a3de.jpg" },
-		  { name: "Wario", img: "https://i.pinimg.com/736x/2f/ea/be/2feabe47151fd436fbf358c299eb4870.jpg" },
-          { name: "Brago", img: "https://i.pinimg.com/736x/c6/75/2d/c6752dab1b78e4c4adc64b6ffd09b755.jpg" },
-          { name: "Ponygon", img: "https://i.pinimg.com/736x/53/e4/fb/53e4fb1c1f8964ca949c4e72663edd8f.jpg" },
-		  { name: "Zatch Bell", img: "https://i.pinimg.com/736x/9c/64/41/9c6441a65ad0c75dbf8eaee194659acf.jpg" },
-		  { name: "Tio", img: "https://i.pinimg.com/736x/ea/f3/30/eaf3305c1cb5b8d7475da20687b0ec40.jpg" },
-		  { name: "Penny", img: "https://i.pinimg.com/736x/f5/c2/17/f5c21738d5b922e6108b7b72bc33a25b.jpg" },
-          { name: "Steven", img: "https://i.pinimg.com/736x/2b/fd/20/2bfd202ab782611ea6a0fb0cdcdc37ab.jpg" },
-          { name: "Perla", img: "https://i.pinimg.com/1200x/bf/d3/78/bfd378c4c8921a30ee00cf48bdb7fa11.jpg" },
-		  { name: "Garnet", img: "https://i.pinimg.com/736x/3f/8a/05/3f8a05bdbc4a7622f521eb294f51d4c8.jpg" },
-		  { name: "Peridot", img: "https://i.pinimg.com/736x/d5/3e/f6/d53ef6f0ec684f7f0f888971dded59fb.jpg" },
-		  { name: "Lapis", img: "https://i.pinimg.com/736x/88/0f/a5/880fa555f1f954dbca08aded1be846d2.jpg" },
-          { name: "Ametista", img: "https://i.pinimg.com/736x/b4/e4/45/b4e445061d31ec75fa4ee63e20ebf87e.jpg" },
-          { name: "Nicole", img: "https://i.pinimg.com/736x/81/24/e4/8124e43da43e1d06dcdbca15f22a0cd9.jpg" },
+          { name: "Yoshi", img: "https://i.pinimg.com/736x/f3/05/7f/f3057f14de68b0afe682ffe93dcc479b.jpg", speeches: ["Yoshi! Yoshi yoshi! (Traduzione: Se mi votate, vi farò fare un giro sulla mia schiena!)", "Yoooshiii! (Traduzione: Ho superato ogni ostacolo per arrivare fin qui, merito il premio!)"] },
+          { name: "Rosalinda", img: "https://i.pinimg.com/736x/09/14/f0/0914f029e712e92de9d4f0081a5da032.jpg", speeches: ["Le stelle mi hanno guidato fino a questa finale. Spero che la vostra luce mi faccia vincere.", "Ho protetto il cosmo, posso sicuramente gestire questo show. Votatemi, mie piccole stelle."] },
+		  { name: "Peach", img: "https://i.pinimg.com/736x/c0/53/fb/c053fb4dd4f8c0dd9c277212490b1962.jpg", speeches: ["Grazie a tutti per avermi salvata... oh aspetta, stavolta ho fatto tutto da sola! Votate per me!", "Prometto di invitare tutti i miei elettori a mangiare una deliziosa torta al castello! Scegliete me!"] },
+		  { name: "Daisy", img: "https://i.pinimg.com/736x/e2/47/61/e2476198364b030d3a8f9a1f93becfb9.jpg", speeches: ["Hi I'm Daisy! Sono la più forte, la più determinata e vi ho stracciato tutti! Merito di vincere!", "Non ho bisogno di farmi rapire per avere attenzioni, ho dominato le sfide! Votatemi!"] },
+		  { name: "Pauline", img: "https://i.pinimg.com/736x/86/83/ee/8683ee7c89735311e61addebf517a3de.jpg", speeches: ["Ho cantato per voi, gestisco una città e ora ho dominato quest'isola. Sono la vostra superstar!", "Nessuno brilla più di me sotto i riflettori di questa finale. Votate per Pauline!"] },
+		  { name: "Wario", img: "https://i.pinimg.com/736x/2f/ea/be/2feabe47151fd436fbf358c299eb4870.jpg", speeches: ["WAAHAHA! Quei soldi sono MIEI! Li voglio tutti per me! Votatemi perdenti!", "Ho imbrogliato, ho rubato e ora sono qui. Date a Wario quello che è di Wario!"] },
+          { name: "Brago", img: "https://i.pinimg.com/736x/c6/75/2d/c6752dab1b78e4c4adc64b6ffd09b755.jpg", speeches: ["Che perdita di tempo. Votatemi e finiamola qui.", "Tsk, che fastidio. E sia, se io sono in finale e voi no un motivo c'è, datemi questa vittoria."] },
+          { name: "Ponygon", img: "https://i.pinimg.com/736x/53/e4/fb/53e4fb1c1f8964ca949c4e72663edd8f.jpg", speeches: ["Meru meru me!! :D", "Meru.. merumeru mei, meru meru! :D"] },
+		  { name: "Zatch Bell", img: "https://i.pinimg.com/736x/9c/64/41/9c6441a65ad0c75dbf8eaee194659acf.jpg", speeches: ["La lealtà prima di tutto: votatemi, cosi potremmo avere un campione gentile.", "Wow sono in finale che bello!!!! Chissà quanti pinne gialle riuscirò a comprarmi con i soldi!"] },
+		  { name: "Tio", img: "https://i.pinimg.com/736x/ea/f3/30/eaf3305c1cb5b8d7475da20687b0ec40.jpg", speeches: ["Amici datemi il vostro voto perfavore ♥", "Un discorso? Beh... okay! Votatemi pe... Zatch, la smetti con quelle smorfie? È un momento serio!"] },
+		  { name: "Penny", img: "https://i.pinimg.com/736x/f5/c2/17/f5c21738d5b922e6108b7b72bc33a25b.jpg", speeches: ["Sono bellissima carinissima e fortissima! Votatemi oraoraora!", "Hihihihi ovvio che uno splendore come me ha raggiunto una posizione cosi alta, sono io la regina votatemi"] },
+          { name: "Steven", img: "https://i.pinimg.com/736x/2b/fd/20/2bfd202ab782611ea6a0fb0cdcdc37ab.jpg", speeches: ["Ho sempre cercato di vedere il lato buono di tutti voi! Anche se abbiamo lottato, possiamo essere amici... e potete votarmi!", "Abbiamo imparato tanto in questa stagione. Per favore, credete in me, così come io ho sempre creduto in voi!"] },
+          { name: "Perla", img: "https://i.pinimg.com/1200x/bf/d3/78/bfd378c4c8921a30ee00cf48bdb7fa11.jpg", speeches: ["Ho dimostrato eleganza, tattica e una precisione assoluta in ogni singola sfida. La mia vittoria è la conclusione più logica.", "Tutto quello che faccio, lo faccio con dedizione. Votatemi e vi dimostrerò che il duro lavoro ripaga sempre!"] },
+		  { name: "Garnet", img: "https://i.pinimg.com/736x/3f/8a/05/3f8a05bdbc4a7622f521eb294f51d4c8.jpg", speeches: ["Sono fatta di amore, e so già come andrà a finire. Ho visto la mia vittoria con la visione futura.", "Non mi serve dire molto. Voi conoscete la mia forza e sapete che merito questa vittoria. La scelta è vostra."] },
+		  { name: "Peridot", img: "https://i.pinimg.com/736x/d5/3e/f6/d53ef6f0ec684f7f0f888971dded59fb.jpg", speeches: ["Ovviamente dovreste votare per me, tonti! Sono chiaramente il concorrente intellettualmente superiore su quest'isola!", "Ho analizzato tutte le probabilità e i dati confermano che io, Peridot, sono la legittima vincitrice. Non discutete la scienza!"] },
+		  { name: "Lapis", img: "https://i.pinimg.com/736x/88/0f/a5/880fa555f1f954dbca08aded1be846d2.jpg", speeches: ["Ho sopportato abbastanza drammi in passato, non mi interessa molto, ma... visto che sono qui, tanto vale vincere.", "L'acqua ricorda tutto, e io ricordo chi mi ha tradito e chi no. Ma se mi votate... potrei essere indulgente."] },
+          { name: "Ametista", img: "https://i.pinimg.com/736x/b4/e4/45/b4e445061d31ec75fa4ee63e20ebf87e.jpg", speeches: ["Ehi belli! Mi sono divertita un mondo a distruggere roba nelle sfide! Datemi i soldi così ci mangiamo una pizza gigante!", "Non ho seguito le regole, ma ehi, sono arrivata in finale lo stesso! Votatemi, sarà uno spasso!"] },
+          { name: "Nicole", img: "https://i.pinimg.com/736x/81/24/e4/8124e43da43da43e1d06dcdbca15f22a0cd9.jpg" },
           { name: "Gumball", img: "https://i.pinimg.com/736x/ae/88/e3/ae88e329120b3edc196af1ebbfd8fe07.jpg" },
           { name: "Anais", img: "https://i.pinimg.com/736x/0a/8b/ab/0a8bab3e6151e894a2d9b96749d63e61.jpg" },
-          { name: "Lisa", img: "https://i.pinimg.com/736x/e5/2d/fe/e52dfee5a58f5dad19f9e0592c63a7cd.jpg" },
-          { name: "Bart", img: "https://i.pinimg.com/1200x/cf/dc/86/cfdc8641fb98a49c0e731a8e6c002b02.jpg" },
-          { name: "Marge", img: "https://i.pinimg.com/736x/77/6d/41/776d41748c4c9ae5940d8a9b10db881a.jpg" },
-          { name: "Ned", img: "https://i.pinimg.com/1200x/4e/12/0e/4e120eb01e572b2ad08af6552214ce82.jpg" },
+          { name: "Lisa", img: "https://i.pinimg.com/736x/e5/2d/fe/e52dfee5a58f5dad19f9e0592c63a7cd.jpg", speeches: ["Ho analizzato statisticamente le probabilità e votare per me è l'unica scelta razionale e moralmente corretta.", "Se vinco io, donerò una parte del premio in beneficenza... e il resto per andare al college. Siate ragionevoli, votatemi!"] },
+          { name: "Bart", img: "https://i.pinimg.com/1200x/cf/dc/86/cfdc8641fb98a49c0e731a8e6c002b02.jpg", speeches: ["Ciucciati il calzino! Sapevo dall'inizio che vi avrei stracciato tutti.", "Ho causato più caos di chiunque altro qui dentro. Voglio la mia ricompensa!"] },
+          { name: "Marge", img: "https://i.pinimg.com/736x/77/6d/41/776d41748c4c9ae5940d8a9b10db881a.jpg", speeches: ["Mmmh... spero davvero che nessuno si sia fatto male in questa stagione. Se mi votate, preparerò i biscotti per tutti!", "Ho dovuto sopportare Homer per anni, sopravvivere a quest'isola è stata una passeggiata. Spero mi diate il vostro voto, cari."] },
+          { name: "Ned", img: "https://i.pinimg.com/1200x/4e/12/0e/4e120eb01e572b2ad08af6552214ce82.jpg", speeches: ["Salve salvino vicini di reality! Sarebbe un vero miracolo ricevere il vostro voto, che il Signore vi benedica!", "Ho porto l'altra guancia per tutta la stagione! Spero che la mia onestà venga ripagata con una bella votatina-ina-ina!"] },
           { name: "Neera", img: "https://i.pinimg.com/736x/49/15/3c/49153c31d0b41814b3c862a98d848b40.jpg" },
-          { name: "Perry", img: "https://i.pinimg.com/736x/3e/02/28/3e02284ed84c86d445b3bee5639c81f6.jpg" },
-		  { name: "Candace", img: "https://i.pinimg.com/originals/72/9c/70/729c70cbfd05dafa8f7cf9700f0284e3.gif" },
-		  { name: "Isabella", img: "https://i.pinimg.com/1200x/8f/b6/53/8fb6531754417925d60f7ba9276d824d.jpg" },
-          { name: "Nonnina", img: "https://i.pinimg.com/736x/c0/82/61/c08261487f081ba5ed490c5dc317b112.jpg" },
-          { name: "Sid", img: "https://i.pinimg.com/1200x/69/4a/0e/694a0eeaf3c1182a15263d580cd0f7eb.jpg" },
-          { name: "Diego", img: "https://i.pinimg.com/736x/56/bf/be/56bfbecae5aa54c2dd6ee8620fc66361.jpg" },
+          { name: "Perry", img: "https://i.pinimg.com/736x/3e/02/28/3e02284ed84c86d445b3bee5639c81f6.jpg", speeches: ["*Grrrrrrr* (Traduzione: Ho sventato i piani di Doofenshmirtz, vincere questo show era il mio incarico secondario).", "*Grrr grrr grrrrr* (Traduzione: Scegliete l'Agente P. L'O.W.C.A. vi ringrazia per la collaborazione)."] },
+		  { name: "Candace", img: "https://i.pinimg.com/originals/72/9c/70/729c70cbfd05dafa8f7cf9700f0284e3.gif", speeches: ["Se vinco questi soldi, comprerò un mega radar per beccare Phineas e Ferb una volta per tutte! Votatemi!!", "Oh mio Dio, sono in finale?! Jeremy mi sta guardando in TV?! Devo assolutamente vincere, vi prego è questione di vita o di morte!"] },
+		  { name: "Isabella", img: "https://i.pinimg.com/1200x/8f/b6/53/8fb6531754417925d60f7ba9276d824d.jpg", speeches: ["Che fate ragazzi? State per votare per me, vero? Questo mi farà guadagnare il distintivo 'Vincitrice di Reality'!", "Le Giovani Marmotte mi hanno insegnato a sopravvivere ovunque. Spero che Phineas sia fiero di me. Votatemi, vi prego!"] },
+          { name: "Nonnina", img: "https://i.pinimg.com/736x/c0/82/61/c08261487f081ba5ed490c5dc317b112.jpg", speeches: ["Eh? Cosa? Ah, sono in finale! Datemi quei soldi, che devo comprare la pappa per il mio animaletto... su, votate per la nonnina!", "Ai miei tempi i reality show si facevano combattendo contro i dinosauri! Siete dei rammolliti, la nonnina merita di vincere!"] },
+          { name: "Sid", img: "https://i.pinimg.com/1200x/69/4a/0e/694a0eeaf3c1182a15263d580cd0f7eb.jpg", speeches: ["Ehi, guardatemi! Il re dei bradipi è in finale! Se vinco io, apro un resort di lusso con fango caldo per tutti!", "Nessuno credeva in me, dicevano 'Sid, sei solo un bradipo imbranato'. E invece eccomi qui! Votate per me, vi voglio bene!"] },
+          { name: "Diego", img: "https://i.pinimg.com/736x/56/bf/be/56bfbecae5aa54c2dd6ee8620fc66361.jpg", speeches: ["Sono il predatore perfetto. Ho dominato la catena alimentare e questa gara. Scegliete il vostro leader.", "In natura sopravvive il più forte. Io sono il più forte qui dentro. Il vostro voto è solo una formalità."] },
           { name: "Alex", img: "https://i.pinimg.com/1200x/2d/c2/4c/2dc24cfae5fe2848bc8bdd1f684d1c8d.jpg" },
-          { name: "Corvina GO", img: "https://i.pinimg.com/736x/92/91/db/9291dbef281abc1f05e709c94fe17eba.jpg" },
-          { name: "Corvina TT", img: "https://i.pinimg.com/736x/b8/09/d1/b809d102bfdc848380a4d73e94fe7769.jpg" },
-          { name: "Stellarubia GO", img: "https://i.pinimg.com/736x/b8/7f/35/b87f358405b6d516a3e6321709aa4884.jpg" },
-		  { name: "Cyborg TT", img: "https://i.pinimg.com/736x/73/47/3c/73473c2ae7c39cf56a81d8c58ef2b153.jpg" },
-		  { name: "BeastBoy TT", img: "https://i.pinimg.com/736x/26/f4/55/26f455cbc9893aa45da15904c8a45bdd.jpg" },
-          { name: "Robin TT", img: "https://i.pinimg.com/736x/cd/57/18/cd57186e05d47ef5f75bef6f0a33f59c.jpg" },
-          { name: "Nightwing", img: "https://i.pinimg.com/736x/47/bc/ce/47bcceac6b573a1b8277b6a75f0a4b55.jpg" },
-          { name: "Robin GO", img: "https://i.pinimg.com/736x/92/b6/50/92b650adbe57c5cec55a3ef46b65e933.jpg" },
+          { name: "Corvina GO", img: "https://i.pinimg.com/736x/92/91/db/9291dbef281abc1f05e709c94fe17eba.jpg", speeches: ["Ugh, finalmente è finita. Votatemi, così posso prendere i soldi e tornare a leggere in pace.", "Azarath Metrion Zinthos... se non mi votate vi spedisco in una dimensione oscura. Sto scherzando... forse."] },
+          { name: "Corvina TT", img: "https://i.pinimg.com/736x/b8/09/d1/b809d102bfdc848380a4d73e94fe7769.jpg", speeches: ["Ho mantenuto il controllo delle mie emozioni e del gioco. Merito questa vittoria più di chiunque altro.", "Non sono brava con i discorsi. Scegliete voi, ma sappiate che i Titans non si arrendono mai."] },
+          { name: "Stellarubia GO", img: "https://i.pinimg.com/736x/b8/7f/35/b87f358405b6d516a3e6321709aa4884.jpg", speeches: ["Amici! È stata una competizione dei gloriosi trionfi! Per favore, donatemi la vittoria di gioia!", "Se mi votate, prometto di cucinare per tutti il budino della felicità di Tamaran! Urrà!"] },
+		  { name: "Cyborg TT", img: "https://i.pinimg.com/736x/73/47/3c/73473c2ae7c39cf56a81d8c58ef2b153.jpg", speeches: ["BOOYAH! Sono arrivato in finale! Il mio sistema tattico ha calcolato una vittoria sicura al 100%!", "Metà uomo, metà macchina, 100% campione! Votate per me, ragazzi!"] },
+		  { name: "BeastBoy TT", img: "https://i.pinimg.com/736x/26/f4/55/26f455cbc9893aa45da15904c8a45bdd.jpg", speeches: ["Amico, ho fatto di tutto per arrivare fin qui! Votatemi e prometto pizza vegetariana per tutti!", "Sono stato un leone, un'aquila e persino un T-Rex in questa stagione. Fatemi essere il vincitore, dai!"] },
+          { name: "Robin TT", img: "https://i.pinimg.com/736x/cd/57/18/cd57186e05d47ef5f75bef6f0a33f59c.jpg", speeches: ["Un leader fa le scelte difficili. Io le ho fatte, per questo sono in finale. I Titans sarebbero fieri.", "La giustizia trionfa sempre, e io ho giocato con la massima strategia tattica!"] },
+          { name: "Nightwing", img: "https://i.pinimg.com/736x/47/bc/ce/47bcceac6b573a1b8277b6a75f0a4b55.jpg", speeches: ["Ho lavorato da solo e nell'ombra. Questa vittoria dimostra che l'addestramento non mente mai.", "Non ho bisogno di superpoteri per battervi. Votate per me, la scelta è ovvia."] },
+          { name: "Robin GO", img: "https://i.pinimg.com/736x/92/b6/50/92b650adbe57c5cec55a3ef46b65e933.jpg", speeches: ["SONO IO IL LEADER! I LEADER DEVONO VINCERE! VOTATEMI O VI METTO TUTTI IN PUNIZIONE!", "Guardate le mie baby-hands... e guardate il mio bastone! Sono il migliore, ammettetelo e datemi i soldi!"] },
           { name: "Johnny Bravo", img: "https://i.pinimg.com/736x/4a/62/70/4a6270678f7adcf130672bcd0af41fdf.jpg" },
           { name: "Daphne", img: "https://i.pinimg.com/736x/aa/91/39/aa9139e32492a07712926dbd0db0b521.jpg" },
-          { name: "Shaggy", img: "https://i.pinimg.com/1200x/0e/46/70/0e46703bcf03ff84420b0b71474c9ed7.jpg" },
+          { name: "Shaggy", img: "https://i.pinimg.com/1200x/0e/46/70/0e46703bcf03ff84420b0b71474c9ed7.jpg", speeches: ["Ehi amico, votami e comprerò un'infinita fornitura di Scooby Snacks per tutti noi!", "Sono scappato da un sacco di mostri in questa stagione, merito di vincere, giuro!"] },
+          { name: "Fred", img: "https://i.pinimg.com/736x/d2/8c/36/d28c36ac805792e5624f41c3c19dcebb.jpg", speeches: ["Bene gang, dividiamoci e... ah no, ho già vinto io! Votatemi e risolveremo questo mistero con stile!", "Le trappole che ho preparato in questa stagione sono state perfette. Ammettetelo, merito di vincere!"] },
+          { name: "Velma", img: "https://i.pinimg.com/736x/2d/58/ff/2d58fffc72c416245a2768b455c177af.jpg", speeches: ["Jinkies! Ho dedotto la strategia di ogni singolo concorrente. Sono chiaramente la mente superiore di questa finale.", "I miei calcoli indicano che ho il 99.9% di probabilità di vincere. Non siate l'anomalia statistica, votate per me!"] },
           { name: "Francine", img: "https://i.pinimg.com/736x/b3/b5/f6/b3b5f6849a52b4daed92424650a98f7f.jpg" },
           { name: "Hayley", img: "https://i.pinimg.com/originals/9d/58/70/9d58707a635942c60ee7fd1afc8403bd.gif" },
           { name: "Stan", img: "https://i.pinimg.com/736x/cc/48/c0/cc48c09c661d4f9af432a37c6b908e41.jpg" },
-          { name: "Stewie", img: "https://i.pinimg.com/1200x/1e/a2/cc/1ea2cc7a197e3841086f4a1ce18b089c.jpg" },
-          { name: "Lois", img: "https://i.pinimg.com/736x/6e/f7/42/6ef74238d3938c8e02f62c54fa7fb4c5.jpg" },
-          { name: "Peter", img: "https://i.pinimg.com/736x/9e/40/74/9e4074bbe7890cd245b51b9ff5c0e33c.jpg" },
+          { name: "Stewie", img: "https://i.pinimg.com/1200x/1e/a2/cc/1ea2cc7a197e3841086f4a1ce18b089c.jpg", speeches: ["Inchiniamoci tutti al mio genio superiore. Ho calcolato ogni vostra mossa.", "Votatemi, stolti! O la mia prossima invenzione vi disintegrerà uno per uno."] },
+          { name: "Lois", img: "https://i.pinimg.com/736x/6e/f7/42/6ef74238d3938c8e02f62c54fa7fb4c5.jpg", speeches: ["Ho dovuto crescere tre figli, un cane parlante e Peter. Gestire voi sull'isola è stata una vacanza. Votatemi, me lo merito!", "Se non mi votate, scordatevi che vi inviti al prossimo barbecue in famiglia. Sono una madre disperata, datemi quei soldi!"] },
+          { name: "Peter", img: "https://i.pinimg.com/736x/9e/40/74/9e4074bbe7890cd245b51b9ff5c0e33c.jpg", speeches: ["Eheheh, se mi votate vi prometto una birra alla Pawtucket Patriot per tutti! Ah, e non fate vincere il pollo gigante.", "Questo è ancora più assurdo di quella volta in cui sono arrivato in finale in un reality show... oh, aspetta."] },
           { name: "Fry", img: "https://i.pinimg.com/736x/d6/f4/ac/d6f4acc1bfae65c673b4b5e02a89ce71.jpg" },
           { name: "Leela", img: "https://i.pinimg.com/736x/e9/b2/71/e9b27128376e5b5f23aaafdc9956bd50.jpg" },
           { name: "Kim", img: "https://i.pinimg.com/736x/5d/7d/55/5d7d55fec8f9d8fb81e9db4438235f71.jpg" },
-          { name: "Tess", img: "https://i.pinimg.com/736x/3f/bc/a9/3fbca9cb61b70f4d58c83598f0236764.jpg" },
-		  { name: "Hunter", img: "https://i.pinimg.com/736x/0d/f2/73/0df2731820fb9f74774f5e8607556625.jpg" },
-		  { name: "Jake DC", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg" },
-		  { name: "Tom", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg" },
-		  { name: "Ashley", img: "https://i.pinimg.com/736x/d1/c5/5f/d1c55f57218baecf0c2e160155e80c61.jpg" },
-		  { name: "Grett", img: "https://i.pinimg.com/736x/fa/fb/5d/fafb5de75578a12b0eb2eb5efb035d23.jpg" },
-		  { name: "Fiore", img: "https://i.pinimg.com/736x/78/79/43/787943ad5e0e1991f0a8f30189d0969f.jpg" },
-		  { name: "Ally", img: "https://i.pinimg.com/736x/58/a8/e6/58a8e6232e4e38ca2a867f208c1b83fa.jpg" },
-		  { name: "Isabelle", img: "https://i.pinimg.com/736x/5e/1a/f6/5e1af69ac6196b02e015133b3de84fd3.jpg" },
-		  { name: "Anastasia", img: "https://i.pinimg.com/736x/56/e5/52/56e552315c56b809d3978914d294ad34.jpg" },
+          { name: "Tess", img: "https://i.pinimg.com/736x/3f/bc/a9/3fbca9cb61b70f4d58c83598f0236764.jpg", speeches: ["Se volete votarmi, ne sarò orgogliosa. Grazie a chi lo farà.", "Ringrazio tutti coloro che decideranno di votarmi, siete stati tutti una parte importante di questa stagione."] },
+		  { name: "Hunter", img: "https://i.pinimg.com/736x/0d/f2/73/0df2731820fb9f74774f5e8607556625.jpg", speeches: ["Sono stato uno dei migliori durante le sfide fisiche, dovete riconoscerlo, solo per questo mi merito un voto.", "Hey ho sempre giocato in modo pulito al contrario di altri, penso di meritarmi questa vittoria, no?"] },
+		  { name: "Jake DC", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg", speeches: ["Wow.. non mi sarei mai aspettato di arrivare in finale. Se volete votarmi siate liberissimi di farlo hahaha", "Marika so che credi in me cercherò di vincere per te e per Tom."] },
+		  { name: "Tom", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg", speeches: ["Jake, dedicherò questa vittoria per te", "Una spia come me sa di meritarsi questa vittoria, se mi votate farete la scelta giusta"] },
+		  { name: "Ashley", img: "https://i.pinimg.com/736x/d1/c5/5f/d1c55f57218baecf0c2e160155e80c61.jpg", speeches: ["Eccomi qui in finale! Sono molto emozionata e spero davvero di aggiudicarmi i vostri voti ♥", "Buona fortuna per la finale mio caro avversario ma non pensare che sia finita"] },
+		  { name: "Grett", img: "https://i.pinimg.com/736x/fa/fb/5d/fafb5de75578a12b0eb2eb5efb035d23.jpg", speeches: ["Non dirò molto, solo che ovviamente mi merito questa vittoria.", "Beh siate obiettivi, non sarò la piu simpatica, ma questa vittoria me la merito."] },
+		  { name: "Fiore", img: "https://i.pinimg.com/736x/78/79/43/787943ad5e0e1991f0a8f30189d0969f.jpg", speeches: ["Hey.. grazie a tutti per.. nah al diavolo. Votatemi bastardi.", "O mi votate o vi conviene dormire con un occhio aperto questa notte."] },
+		  { name: "Ally", img: "https://i.pinimg.com/736x/58/a8/e6/58a8e6232e4e38ca2a867f208c1b83fa.jpg", speeches: ["Ragazzi, questa stagione per me è stata come un roguelike: ogni giorno morivo dentro, ma respawnavo più forte, votate per la mia win!", "Ho affrontato più bug e glitch qui che in qualsiasi gioco indie, me lo merito questo voto dai haha!"] },
+		  { name: "Isabelle", img: "https://i.pinimg.com/736x/5e/1a/f6/5e1af69ac6196b02e015133b3de84fd3.jpg", speeches: ["Non sarò stata la piu onorevole, ma il signore sapra come perdonarmi, quindi votatemi. Ora.", "Dedicherò questa vittoria al nostro signore, votatemi."] },
+		  { name: "Anastasia", img: "https://i.pinimg.com/736x/56/e5/52/56e552315c56b809d3978914d294ad34.jpg", speeches: ["Beh, questo outcome di me in finale era scontato, ho giocato con eleganza, strategia e bravura. Sapete chi si merita la vittoria no?", "Che vinca il migliore, ma sappiamo che sono io"] },
 		  { name: "Robot Boy", img: "https://i.pinimg.com/736x/91/d3/42/91d342072cae0214447bf8c362d9e02e.jpg" },
 		  { name: "Timmy", img: "https://i.pinimg.com/736x/91/de/1b/91de1b5b1897a71a36957191623af776.jpg" },
 		  { name: "Trixie", img: "https://i.pinimg.com/736x/05/08/a7/0508a771507d83f2b52a97467f57d581.jpg" },
@@ -229,18 +260,18 @@
 		  { name: "Clawdeen", img: "https://i.pinimg.com/736x/fe/cb/1c/fecb1c67924cd56bb01e19deb12294f1.jpg" },
 		  { name: "Frankie", img: "https://i.pinimg.com/736x/c0/ae/bb/c0aebba7d0b329e4a8e26f92d36a857a.jpg" },
 		  { name: "Shego", img: "https://i.pinimg.com/736x/54/70/77/5470771ee32d3350ffa08f921bb3d1ad.jpg" },
-		  { name: "Ariana Grande", img: "https://media.tenor.com/1u94p6qR01gAAAAM/ariana-grande-eternal-sunshine.gif" },
-		  { name: "Will", img: "https://i.pinimg.com/originals/88/80/73/8880736b5695844044e0e38c8063a1ff.gif" },
-		  { name: "Carlos Oliveira", img: "https://i.pinimg.com/originals/32/0d/d1/320dd13031f1aba8a2d3d9b9837174f4.gif" },
-		  { name: "Leon", img: "https://i.pinimg.com/736x/db/ef/fc/dbeffc6e915a929f7dbe908390f5af42.jpg" },
-		  { name: "Spongebob", img: "https://i.pinimg.com/originals/4c/74/21/4c742132b3f7018e49ae1901a2ab3e68.gif" },
-		  { name: "Patrick", img: "https://i.pinimg.com/736x/cc/45/b5/cc45b504e5bba418a3621d894a7693d6.jpg" },
+		  { name: "Ariana Grande", img: "https://media.tenor.com/1u94p6qR01gAAAAM/ariana-grande-eternal-sunshine.gif", speeches: ["Grazie a tutti i miei fan per avermi supportata fino a qui! Yuh! 🤍 Votatemi e il mio prossimo singolo sarà dedicato a voi!", "Sono passata dal pop al fango di quest'isola, e sono ancora flawless. Datemi la corona, thank you, next!"] },
+		  { name: "Will", img: "https://i.pinimg.com/originals/88/80/73/8880736b5695844044e0e38c8063a1ff.gif", speeches: ["Ho sempre guidato il mio gruppo con il Cuore. Se mi darete il vostro voto, dimostrerete che l'unione fa la forza!", "Abbiamo superato sfide magiche e ostacoli impossibili. Prometto di usare questa vittoria per fare del bene!"] },
+		  { name: "Carlos Oliveira", img: "https://i.pinimg.com/originals/32/0d/d1/320dd13031f1aba8a2d3d9b9837174f4.gif", speeches: ["In un mondo pieno di mostri, voi siete stati la mia squadra. Votate per me, vi ho guardato le spalle fin dall'inizio.", "Non lascio mai un civile indietro, figuriamoci una finale. Sono un sopravvissuto nato, merito il vostro voto."] },
+		  { name: "Leon", img: "https://i.pinimg.com/736x/db/ef/fc/dbeffc6e915a929f7dbe908390f5af42.jpg", speeches: ["Ho affrontato di peggio a Raccoon City. Ho mantenuto il sangue freddo e ho giocato pulito. Votatemi, missione compiuta.", "Scusate il ritardo, ma eccomi in finale. Se cercate un vero sopravvissuto, sapete a chi dare il vostro voto."] },
+		  { name: "Spongebob", img: "https://i.pinimg.com/originals/4c/74/21/4c742132b3f7018e49ae1901a2ab3e68.gif", speeches: ["Sono pronto! Sono pronto per vincere! Hahahaha!", "Ho sempre creduto nel potere dell'amicizia e del Krabby Patty. Votatemi!"] },
+		  { name: "Patrick", img: "https://i.pinimg.com/736x/cc/45/b5/cc45b504e5bba418a3621d894a7693d6.jpg", speeches: ["La maionese è uno strumento musicale? Votatemi, vi prego.", "Se vinco prometto di comprare... uhm... cosa stavo dicendo? Ah, i soldi!"] },
 		  { name: "Squiddi", img: "https://i.pinimg.com/originals/bb/9a/08/bb9a082dd1a1a8f49200b8f5e5392d23.gif" },
 		  { name: "Mr Krab", img: "https://i.pinimg.com/1200x/74/9c/f5/749cf53dd48dbb440fcde8d958c7dbb1.jpg" },
 		  { name: "Plankton", img: "https://i.pinimg.com/736x/4c/27/4f/4c274f1e983ecd433672cfef1060872f.jpg" },
 		  { name: "Alvin", img: "https://i.pinimg.com/1200x/42/b1/da/42b1da0676938e04cfcd2d16ae13e067.jpg" },
 		  { name: "Poison Ivy", img: "https://i.pinimg.com/736x/72/f5/98/72f598d1ca69f3de7f38206b38d79066.jpg" },
-          { name: "Sonic", img: "https://i.pinimg.com/1200x/4f/22/d2/4f22d2cd449a419b3859197438300dd2.jpg" },
+          { name: "Sonic", img: "https://i.pinimg.com/1200x/4f/22/d2/4f22d2cd449a419b3859197438300dd2.jpg", speeches: ["Sono stato il più veloce dall'inizio alla fine. Gotta go fast verso la vittoria!", "Nessuno di voi è riuscito a starmi dietro. Datemi quegli anelli d'oro!"] },
 		  { name: "Tails", img: "https://i.pinimg.com/736x/cb/f8/43/cbf84308cca2de1d9a776410716c6aee.jpg" },
 		  { name: "Dr Eggman", img: "https://i.pinimg.com/736x/ca/6a/ec/ca6aec757d82fbd5498fc2f5322ffc2c.jpg" },
 		  { name: "Scar", img: "https://i.pinimg.com/736x/4b/cc/0e/4bcc0e93c7086f7359c3e99fea022cd6.jpg" },
@@ -262,6 +293,15 @@
 		  { name: "Alex TS", img: "https://i.pinimg.com/1200x/31/0a/1e/310a1ecf6798fecaec781fe314ace8c0.jpg" },
 		  { name: "Ben 10", img: "https://i.pinimg.com/736x/b3/c8/eb/b3c8ebedc4123fa33f6e72ff2deff109.jpg" },
           { name: "Gwen Tennyson", img: "https://i.pinimg.com/736x/f7/59/57/f75957bd5bad8195e2322e58de3f8119.jpg" }
+        ];
+
+        // Frasi fallback generiche per i bot che non ne hanno una specifica
+        const DEFAULT_SPEECHES = [
+            "Ho giocato la partita migliore, le mie mosse parlano da sole. Votatemi!",
+            "Sono arrivato fin qui sopravvivendo a tutto. Merito io il premio finale!",
+            "Senza di me non sareste qui. Riconoscete il vero talento e datemi la vittoria.",
+            "Ho fatto fuori chiunque mi ostacolasse, e ora sono qui. Merito i soldi.",
+            "Abbiamo passato momenti stupendi, ma alla fine io ho giocato con più strategia. Scegliete me!"
         ];
 
         const TEAM_NAMES = [
@@ -301,14 +341,12 @@
           useEffect(() => {
             if (!user || !db) return;
             
-            // Funzione di pulizia (best effort, eseguita dal client)
             const cleanupOldLobbies = async () => {
                 const querySnapshot = await getDocs(collection(db, 'artifacts', appId, 'public', 'data', 'lobbies'));
                 const now = Date.now();
                 
                 querySnapshot.docs.forEach(async (docSnap) => {
                     const data = docSnap.data();
-                    // Controlla se la lobby è in attesa e il timestamp è più vecchio di 10 minuti
                     if (data.status === 'waiting' && data.timestamp) {
                         const docTime = data.timestamp.toMillis();
                         if (docTime < (now - TEN_MINUTES_MS)) {
@@ -323,7 +361,6 @@
                 });
             };
 
-            // Esegue la pulizia al caricamento del BrowserScreen
             cleanupOldLobbies();
 
             const q = collection(db, 'artifacts', appId, 'public', 'data', 'lobbies');
@@ -333,12 +370,8 @@
               const activeLobbies = snapshot.docs
                 .map(d => ({ id: d.id, ...d.data() }))
                 .filter(l => {
-                     // 1. Deve essere in stato di attesa
                      if (l.status !== 'waiting') return false;
-                     // 2. Deve avere un timestamp
                      if (!l.timestamp) return false;
-                     
-                     // 3. Deve essere stata creata meno di 10 minuti fa (lobby attiva)
                      return l.timestamp.toMillis() > (now - TEN_MINUTES_MS);
                 });
 
@@ -397,7 +430,7 @@
                 diceRoll: null,
                 immunityWins: 0,
                 totalVotesReceived: 0,
-                nextRollNerf: false // NEW field for sabotage
+                nextRollNerf: false 
               }],
               round: 0,
               phase: 'setup',
@@ -412,7 +445,7 @@
               finalData: null, 
               redemptionData: null,
               idolData: null,
-              twistData: null, // NEW: Dati per i colpi di scena (es. Killer)
+              twistData: null,
               timestamp: serverTimestamp()
             };
 
@@ -443,7 +476,7 @@
                 diceRoll: null,
                 immunityWins: 0,
                 totalVotesReceived: 0,
-                nextRollNerf: false // NEW field for sabotage
+                nextRollNerf: false 
               })
             });
             setCurrentLobbyId(lobbyId);
@@ -515,13 +548,12 @@
 
         const BrowserScreen = ({ user, nickname, lobbies, onCreate, onJoin, errorMsg }) => {
           const [showConfig, setShowConfig] = useState(false);
-          // Default mergeSize a 11 (metà di 22)
           const [config, setConfig] = useState({ 
               maxPlayers: 22, 
               numTeams: 2, 
               numSeasons: 1, 
               mergeSize: 11,
-              jurySize: 7, // NUOVO PARAMETRO
+              jurySize: 7, 
               redemption: { enabled: false, count: 1, episodes: "" } 
           });
           const [joinCode, setJoinCode] = useState('');
@@ -581,7 +613,6 @@
                   
                   <div className="space-y-6">
                     <div>
-                      {/* MODIFICATO IL LIMITE MAX A 100 */}
                       <label className="block text-slate-400 font-bold mb-2">Concorrenti (8 - 100)</label>
                       <div className="flex items-center gap-4">
                         <input type="range" min="8" max="100" value={config.maxPlayers} onChange={e => {
@@ -634,7 +665,6 @@
                       </div>
                     </div>
 
-                    {/* NUOVO: CONFIGURAZIONE GIURIA */}
                     <div>
                       <label className="block text-slate-400 font-bold mb-2">Numero Giurati (Finale)</label>
                       <div className="flex items-center gap-4">
@@ -642,7 +672,7 @@
                             type="range" 
                             min="3" 
                             max="15" 
-                            step="2" // Dispari per evitare pareggi facili
+                            step="2"
                             value={config.jurySize} 
                             onChange={e => setConfig({...config, jurySize: parseInt(e.target.value)})} 
                             className="flex-1 accent-purple-500" 
@@ -652,7 +682,6 @@
                       <p className="text-xs text-slate-500 mt-1">Gli ultimi {config.jurySize} eliminati voteranno il vincitore (50% Chance).</p>
                     </div>
 
-                    {/* SEZIONE REDEMPTION */}
                     <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
                         <div className="flex justify-between items-center mb-4">
                             <label className="text-white font-bold flex items-center gap-2">
@@ -697,7 +726,6 @@
                     <div className="flex gap-4 pt-4">
                       <button onClick={() => setShowConfig(false)} className="flex-1 bg-slate-700 py-3 rounded-xl font-bold text-white">Annulla</button>
                       <button onClick={() => {
-                          // Parse episodes string to array
                           const parsedEpisodes = config.redemption.enabled 
                               ? config.redemption.episodes.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n))
                               : [];
@@ -734,7 +762,6 @@
             currentPlayers = currentPlayers.map(p => {
               if (!p.character) {
                 const available = ROSTER.filter(r => !usedNames.has(r.name));
-                // Se non ci sono personaggi disponibili, prendine uno a caso dal mucchio
                 const random = available.length > 0 
                     ? available[Math.floor(Math.random() * available.length)]
                     : ROSTER[Math.floor(Math.random() * ROSTER.length)];
@@ -752,12 +779,10 @@
               let botName;
 
               if (available.length > 0) {
-                  // Caso normale: prendi dal roster univoco
                   randomChar = available[Math.floor(Math.random() * available.length)];
                   botName = randomChar.name;
                   usedNames.add(botName);
               } else {
-                  // Fallback: se il roster finisce (prima che tu lo aggiorni), crea cloni per arrivare a 100
                   randomChar = ROSTER[Math.floor(Math.random() * ROSTER.length)];
                   botName = `${randomChar.name} ${Math.floor(Math.random() * 999)}`;
               }
@@ -775,7 +800,7 @@
                 diceRoll: null,
                 immunityWins: 0,
                 totalVotesReceived: 0,
-                nextRollNerf: false // NEW field for sabotage
+                nextRollNerf: false 
               });
             }
 
@@ -793,16 +818,19 @@
             const totalCrates = currentPlayers.length;
             const luckyIndex = Math.floor(Math.random() * totalCrates);
             
-            // Genera indice per il Voto Extra (diverso dall'Idolo)
             let extraVoteIndex = Math.floor(Math.random() * totalCrates);
             while (extraVoteIndex === luckyIndex && totalCrates > 1) {
                  extraVoteIndex = Math.floor(Math.random() * totalCrates);
             }
             
-             // Genera indice per il Vantaggio Sfida (NUOVO)
             let advantageIndex = Math.floor(Math.random() * totalCrates);
             while ((advantageIndex === luckyIndex || advantageIndex === extraVoteIndex) && totalCrates > 2) {
                  advantageIndex = Math.floor(Math.random() * totalCrates);
+            }
+
+            let voteStealIndex = Math.floor(Math.random() * totalCrates);
+            while ((voteStealIndex === luckyIndex || voteStealIndex === extraVoteIndex || voteStealIndex === advantageIndex) && totalCrates > 3) {
+                 voteStealIndex = Math.floor(Math.random() * totalCrates);
             }
 
             const initialCrates = Array.from({length: totalCrates}, (_, i) => ({ id: i, owner: null }));
@@ -814,19 +842,24 @@
               idolData: {
                   active: true,
                   luckyIndex: luckyIndex,
-                  extraVoteIndex: extraVoteIndex, // INDICE VOTO EXTRA
-                  extraVoteHolder: null,          // CHI POSSIEDE IL VOTO EXTRA
-                  extraVoteConsumed: false,       // SE È GIÀ STATO USATO
-                  extraVoteUsedRound: null,       // IN CHE ROUND È STATO USATO
-                  advantageIndex: advantageIndex, // NUOVO
-                  advantageHolder: null,          // NUOVO
-                  advantageConsumed: false,       // NUOVO
+                  extraVoteIndex: extraVoteIndex, 
+                  extraVoteHolder: null,          
+                  extraVoteConsumed: false,       
+                  extraVoteUsedRound: null,       
+                  advantageIndex: advantageIndex, 
+                  advantageHolder: null,          
+                  advantageConsumed: false,     
+                  voteStealIndex: voteStealIndex, 
+                  voteStealHolder: null,          
+                  voteStealConsumed: false,       
+                  voteStealVictim: null,          
+                  voteStealUsedRound: null,       
                   crates: initialCrates,
                   stage: 'selection', 
                   holder: null
               },
               round: 0,
-              logs: arrayUnion(`--- CACCIA AI VANTAGGI (Idolo & Voto Extra & Bonus Sfida) ---`)
+              logs: arrayUnion(`--- CACCIA AI VANTAGGI (Idolo, Voto Extra, Bonus Sfida, Ruba-Voto) ---`)
             });
           };
 
@@ -905,9 +938,67 @@
           const [showRumorSelector, setShowRumorSelector] = useState(false); 
           const [showTrioSelector, setShowTrioSelector] = useState(false);
           
-          // NUOVO STATO: Per gestire l'attivazione del voto extra e del vantaggio sfida
           const [useExtraVote, setUseExtraVote] = useState(false);
-          const [useAdvantage, setUseAdvantage] = useState(false); // NUOVO STATO
+          const [useAdvantage, setUseAdvantage] = useState(false); 
+          
+          const [useVoteSteal, setUseVoteSteal] = useState(false);
+          const [voteStealVictim, setVoteStealVictim] = useState("");
+          
+          const [mySpeech, setMySpeech] = useState("");
+
+          const generateBotSocialUpdates = (currentPlayers, currentLogs) => {
+                 let updatedPlayers = [...currentPlayers];
+                 let newLogs = [...currentLogs];
+                 const activeBots = updatedPlayers.filter(p => p.status === 'active' && p.isBot);
+                 activeBots.sort(() => Math.random() - 0.5);
+                 const botsToAct = activeBots.slice(0, 4);
+
+                 botsToAct.forEach(bot => {
+                     const possibleTargets = updatedPlayers.filter(p => p.status === 'active' && p.uid !== bot.uid);
+                     if (possibleTargets.length === 0) return;
+                     const target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+                     const actions = ['friend', 'suckup', 'rumor'];
+                     const action = actions[Math.floor(Math.random() * actions.length)];
+
+                     const targetIdx = updatedPlayers.findIndex(p => p.uid === target.uid);
+
+                     if (action === 'friend' && Math.random() > 0.5) {
+                         const newVal = Math.min(5, (updatedPlayers[targetIdx].relationships[bot.uid] || 0) + 1);
+                         updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [bot.uid]: newVal };
+                         newLogs.push(`🤖 ${bot.name} ha stretto amicizia con ${target.name}.`);
+                     } else if (action === 'suckup' && Math.random() < 0.60) {
+                         const newVal = Math.min(10, (updatedPlayers[targetIdx].relationships[bot.uid] || 0) + 2);
+                         updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [bot.uid]: newVal };
+                         newLogs.push(`🤖 ${bot.name} ha fatto il leccapiedi con ${target.name}.`);
+                     } else if (action === 'rumor' && Math.random() > 0.5) {
+                          const victim = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+                          if(victim.uid !== target.uid) {
+                              const currentRel = updatedPlayers[targetIdx].relationships[victim.uid] || 0;
+                              updatedPlayers[targetIdx].relationships = {
+                                  ...updatedPlayers[targetIdx].relationships,
+                                  [victim.uid]: Math.max(-5, currentRel - 1)
+                              };
+                              newLogs.push(`🤖 ${bot.name} ha messo zizzania tra ${target.name} e ${victim.name}.`);
+                          }
+                     }
+                 });
+                 return { updatedPlayers, newLogs };
+          };
+
+          const submitJuryVote = async (finalistId) => {
+              if (lobby.phase !== 'jury_vote' || lobby.juryData?.stage !== 'voting') return;
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`juryData.votes.${user.uid}`]: finalistId
+              });
+          };
+
+          const submitFinalSpeech = async () => {
+              if (!mySpeech.trim() || lobby.phase !== 'jury_speeches') return;
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`juryData.speeches.${user.uid}`]: mySpeech.trim(),
+                  logs: arrayUnion(`🎤 ${myPlayer.name} ha fatto il suo discorso finale!`)
+              });
+          };
 
           useEffect(() => {
             setHasActed(false);
@@ -915,7 +1006,10 @@
             setShowRumorSelector(false);
             setShowTrioSelector(false);
             setUseExtraVote(false); 
-            setUseAdvantage(false); // Reset al cambio fase
+            setUseAdvantage(false);
+            setUseVoteSteal(false);
+            setVoteStealVictim("");
+            setMySpeech("");
           }, [lobby.phase, lobby.round]);
 
           useEffect(() => {
@@ -940,36 +1034,36 @@
                               c.id === randomCrate.id ? { ...c, owner: botToAct.uid } : c
                           );
 
-                          // Check if everyone has chosen
                           const allTaken = newCrates.every(c => c.owner !== null);
                           let updates = { [`idolData.crates`]: newCrates };
                           
                           if (allTaken) {
                               updates[`idolData.stage`] = 'reveal';
-                              // Assign holder internally
+                              
                               const winnerUid = newCrates.find(c => c.id === lobby.idolData.luckyIndex)?.owner;
                               updates[`idolData.holder`] = winnerUid;
                               
-                              // Assign Extra Vote
                               const extraWinnerUid = newCrates.find(c => c.id === lobby.idolData.extraVoteIndex)?.owner;
                               updates[`idolData.extraVoteHolder`] = extraWinnerUid;
 
-                               // Assegna Vantaggio Sfida (NUOVO)
                               const advWinnerUid = newCrates.find(c => c.id === lobby.idolData.advantageIndex)?.owner;
                               updates[`idolData.advantageHolder`] = advWinnerUid;
+                              
+                              const vsWinnerUid = newCrates.find(c => c.id === lobby.idolData.voteStealIndex)?.owner;
+                              updates[`idolData.voteStealHolder`] = vsWinnerUid;
 
                               updates[`logs`] = arrayUnion("Tutte le casse sono state assegnate! Apertura in corso...");
                           }
 
                           await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
                       }
-                  }, 500); // Fast selection
+                  }, 500); 
                   return () => clearTimeout(timer);
               }
           }, [lobby.idolData, isHost]);
 
 
-          // SEQUENTIAL DICE ANIMATION (HOST FOR BOTS ONLY)
+          // SEQUENTIAL DICE ANIMATION E RISOLUZIONE
           useEffect(() => {
             if (!isHost || lobby.phase !== 'challenge' || !lobby.challengeData || lobby.challengeData.stage !== 'rolling') return;
 
@@ -988,7 +1082,6 @@
                     });
 
                     if (losers.length > 1) {
-                         // Tie for loser
                          const loserNames = losers.map(w => lobby.players.find(p => p.uid === w)?.name).join(", ");
                          updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                              [`challengeData.players`]: losers,
@@ -997,7 +1090,6 @@
                              logs: arrayUnion(`PAREGGIO PER L'ELIMINAZIONE (${minRoll})! Spareggio tra: ${loserNames}`)
                          });
                     } else {
-                         // Eliminate loser
                          const victimId = losers[0];
                          const victim = lobby.players.find(p => p.uid === victimId);
                          
@@ -1012,7 +1104,6 @@
                               votes: victim.totalVotesReceived || 0
                          };
 
-                         // Verifica Redemption
                          const nextRound = lobby.round + 1;
                          const redemptionConfig = lobby.config.redemption;
                          let isRedemptionEpisode = false;
@@ -1045,7 +1136,7 @@
                          } else {
                               updates = {
                                   ...updates,
-                                  phase: 'episode_start', // Torna all'inizio episodio
+                                  phase: 'episode_start',
                                   round: nextRound,
                                   votes: {},
                                   immunity: [],
@@ -1061,7 +1152,7 @@
                     return;
                  }
 
-                 // --- LOGICA SFIDA A SQUADRE (NEW) ---
+                 // --- LOGICA SFIDA A SQUADRE ---
                  if (lobby.challengeData.type === 'team') {
                      const teamScores = { A: 0, B: 0 };
                      const teams = lobby.challengeData.teams;
@@ -1074,64 +1165,66 @@
                      let winnerTeam = null;
                      if (teamScores.A > teamScores.B) winnerTeam = 'A';
                      else if (teamScores.B > teamScores.A) winnerTeam = 'B';
-                     else winnerTeam = Math.random() > 0.5 ? 'A' : 'B'; // Coin flip on total tie (rare but possible)
+                     else winnerTeam = Math.random() > 0.5 ? 'A' : 'B';
 
                      const immunePlayers = Object.keys(teams).filter(uid => teams[uid] === winnerTeam);
                      
+                     const { updatedPlayers, newLogs } = generateBotSocialUpdates(lobby.players, [`La Squadra ${winnerTeam === 'A' ? 'ROSSA' : 'BLU'} vince la sfida a squadre! (${teamScores[winnerTeam]} vs ${teamScores[winnerTeam === 'A' ? 'B' : 'A']})`]);
+
                      updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                         players: updatedPlayers,
                          [`challengeData.stage`]: 'finished',
-                         [`challengeData.winner`]: immunePlayers, // Array di vincitori
+                         [`challengeData.winner`]: immunePlayers,
                          immunity: immunePlayers,
                          losingTeam: "MERGE",
                          readyPlayers: [], 
                          phase: 'social',
-                         logs: arrayUnion(`La Squadra ${winnerTeam === 'A' ? 'ROSSA' : 'BLU'} vince la sfida a squadre! (${teamScores[winnerTeam]} vs ${teamScores[winnerTeam === 'A' ? 'B' : 'A']})`)
+                         logs: arrayUnion(...newLogs)
                      });
                      return;
                  }
-
 
                  // --- LOGICA INDIVIDUALE STANDARD ---
                  let maxRoll = -1;
                  let winners = [];
                  Object.entries(rolls).forEach(([uid, r]) => {
                      if (r > maxRoll) { maxRoll = r; winners = [uid]; }
-                     else if (r === maxRoll) { winners.push(uid); } // FIXED HERE (was minRoll)
+                     else if (r === maxRoll) { winners.push(uid); }
                  });
 
-                 // FIX: LOGICA PAREGGIO (SPAREGGIO)
                  if (winners.length > 1) {
                      const winnerNames = winners.map(w => lobby.players.find(p => p.uid === w)?.name).join(", ");
                      
                      updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                         [`challengeData.players`]: winners, // Solo loro rilanciano
+                         [`challengeData.players`]: winners,
                          [`challengeData.rollingIndex`]: 0,
-                         [`challengeData.rolls`]: {}, // Reset dei tiri
+                         [`challengeData.rolls`]: {},
                          logs: arrayUnion(`PAREGGIO (${maxRoll})! Spareggio per l'immunità tra: ${winnerNames}`)
                      });
                      return;
                  }
 
-                 // AGGIORNAMENTO IMMUNITÀ (VINCITORE SINGOLO)
                  const winnerId = winners[0];
                  const winnerName = lobby.players.find(p => p.uid === winnerId)?.name;
 
-                 const updatedPlayers = lobby.players.map(p => {
+                 const updatedPlayersTemp = lobby.players.map(p => {
                      if (p.uid === winnerId) {
                          return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
                      }
                      return p;
                  });
                  
+                 const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [`${winnerName} VINCE L'IMMUNITÀ con ${maxRoll}!`]);
+
                  updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                      players: updatedPlayers,
                      [`challengeData.stage`]: 'finished',
                      [`challengeData.winner`]: winners,
                      immunity: winners,
                      losingTeam: "MERGE",
-                     readyPlayers: [], // Reset ready players for social
+                     readyPlayers: [], 
                      phase: 'social',
-                     logs: arrayUnion(`${winnerName} VINCE L'IMMUNITÀ con ${maxRoll}!`)
+                     logs: arrayUnion(...newLogs)
                  });
                  return;
             }
@@ -1141,15 +1234,13 @@
 
             if (playerObj?.isBot) {
                 const timer = setTimeout(async () => {
-                    // --- BOT ROLL LOGIC (INCL. SABOTAGE NERF) ---
                     let roll = Math.floor(Math.random() * 10) + 1;
                     if (playerObj.nextRollNerf) {
-                        roll = Math.floor(Math.random() * 4) + 1; // 1-4
+                        roll = Math.floor(Math.random() * 4) + 1; 
                     }
                     
                     const updatedRolls = { ...rolls, [currentPlayerId]: roll };
                     
-                    // Reset Nerf Flag
                     const updatedPlayers = lobby.players.map(p => 
                         p.uid === currentPlayerId ? { ...p, diceRoll: roll, nextRollNerf: false } : p
                     );
@@ -1164,7 +1255,57 @@
             }
           }, [lobby.challengeData, isHost]);
 
-          // --- BOT FINAL SHOWDOWN ROLLING ---
+          // --- BOT FINAL SPEECH LOGIC ---
+          useEffect(() => {
+              if (!isHost || lobby.phase !== 'jury_speeches' || !lobby.juryData) return;
+              const jd = lobby.juryData;
+              const finalists = [jd.finalist1, jd.finalist2];
+
+              finalists.forEach(fid => {
+                  const p = lobby.players.find(x => x.uid === fid);
+                  if (p && p.isBot && !jd.speeches?.[fid]) {
+                      const timer = setTimeout(async () => {
+                          const charSpeeches = p.character.speeches || DEFAULT_SPEECHES;
+                          const speech = charSpeeches[Math.floor(Math.random() * charSpeeches.length)];
+
+                          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                              [`juryData.speeches.${fid}`]: speech,
+                              logs: arrayUnion(`🎤 ${p.name} ha fatto il suo discorso finale!`)
+                          });
+                      }, 3000 + Math.random() * 3000); // 3-6 seconds delay for realism
+                      return () => clearTimeout(timer);
+                  }
+              });
+          }, [lobby.juryData, isHost, lobby.phase]);
+
+
+          // --- BOT JURY VOTE LOGIC ---
+          useEffect(() => {
+              if (!isHost || lobby.phase !== 'jury_vote' || lobby.juryData?.stage !== 'voting') return;
+              const jd = lobby.juryData;
+              const botsInJury = jd.jurors.filter(j => lobby.players.find(p => p.uid === j.uid)?.isBot);
+
+              botsInJury.forEach(botJuror => {
+                  if (!jd.votes || !jd.votes[botJuror.uid]) {
+                      const timer = setTimeout(async () => {
+                          const jurorFull = lobby.players.find(p => p.uid === botJuror.uid);
+                          const rel1 = jurorFull.relationships[jd.finalist1] || 0;
+                          const rel2 = jurorFull.relationships[jd.finalist2] || 0;
+
+                          let vote = null;
+                          if (rel1 > rel2) vote = jd.finalist1;
+                          else if (rel2 > rel1) vote = jd.finalist2;
+                          else vote = Math.random() > 0.5 ? jd.finalist1 : jd.finalist2;
+
+                          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                              [`juryData.votes.${botJuror.uid}`]: vote
+                          });
+                      }, 2000 + Math.random() * 3000);
+                      return () => clearTimeout(timer);
+                  }
+              });
+          }, [lobby.juryData, isHost, lobby.phase, lobby.players]);
+
           useEffect(() => {
               if (!isHost || lobby.phase !== 'final_showdown' || !lobby.finalData) return;
               
@@ -1185,7 +1326,6 @@
               });
           }, [lobby.finalData, isHost, lobby.phase]);
 
-          // --- REDEMPTION ROLLING FOR BOTS ---
           useEffect(() => {
               if (!isHost || lobby.phase !== 'redemption' || !lobby.redemptionData || lobby.redemptionData.stage !== 'rolling') return;
               
@@ -1226,18 +1366,16 @@
               let roll;
               const player = lobby.players.find(p => p.uid === user.uid);
               
-              // --- LOGICA SABOTAGGIO E BASE ROLL ---
               if (player.nextRollNerf) {
-                  roll = Math.floor(Math.random() * 4) + 1; // 1-4 NERF
+                  roll = Math.floor(Math.random() * 4) + 1; 
               } else {
-                  roll = Math.floor(Math.random() * 10) + 1; // 1-10 STANDARD
+                  roll = Math.floor(Math.random() * 10) + 1; 
               }
 
               let usedAdvantage = false;
 
-              // --- LOGICA VANTAGGIO SFIDA (+3) ---
               if (useAdvantage && lobby.idolData?.advantageHolder === user.uid && !lobby.idolData.advantageConsumed) {
-                  roll += 3; // BONUS +3
+                  roll += 3; 
                   usedAdvantage = true;
               }
 
@@ -1247,7 +1385,6 @@
               let updates = {
                   [`challengeData.rolls`]: updatedRolls,
                   [`challengeData.rollingIndex`]: rollingIndex + 1,
-                  // Reset nextRollNerf to false after rolling
                   [`players`]: lobby.players.map(p => p.uid === user.uid ? { ...p, diceRoll: roll, nextRollNerf: false } : p)
               };
 
@@ -1264,7 +1401,7 @@
               if (logsToAdd.length > 0) updates[`logs`] = arrayUnion(...logsToAdd);
 
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
-              setUseAdvantage(false); // Reset pulsante
+              setUseAdvantage(false); 
           };
 
           const handleTieBreakRoll = async () => {
@@ -1291,17 +1428,15 @@
              });
           };
 
-          // --- IDOL HUNT: CLAIM CRATE ---
           const claimCrate = async (crateId) => {
               if (lobby.phase !== 'idol_hunt' || lobby.idolData.stage !== 'selection') return;
-              if (lobby.idolData.crates.some(c => c.owner === user.uid)) return; // Already picked
-              if (lobby.idolData.crates.find(c => c.id === crateId).owner !== null) return; // Taken
+              if (lobby.idolData.crates.some(c => c.owner === user.uid)) return; 
+              if (lobby.idolData.crates.find(c => c.id === crateId).owner !== null) return; 
 
               const newCrates = lobby.idolData.crates.map(c => 
                    c.id === crateId ? { ...c, owner: user.uid } : c
               );
 
-              // Check if everyone has chosen
               const allTaken = newCrates.every(c => c.owner !== null);
               
               let updates = { [`idolData.crates`]: newCrates };
@@ -1309,16 +1444,17 @@
               if (allTaken) {
                   updates[`idolData.stage`] = 'reveal';
                   
-                  // Assign Holders
                   const winnerUid = newCrates.find(c => c.id === lobby.idolData.luckyIndex)?.owner;
                   updates[`idolData.holder`] = winnerUid;
                   
                   const extraUid = newCrates.find(c => c.id === lobby.idolData.extraVoteIndex)?.owner;
                   updates[`idolData.extraVoteHolder`] = extraUid;
 
-                   // Assegna Vantaggio Sfida (NUOVO)
                   const advWinnerUid = newCrates.find(c => c.id === lobby.idolData.advantageIndex)?.owner;
                   updates[`idolData.advantageHolder`] = advWinnerUid;
+
+                  const vsWinnerUid = newCrates.find(c => c.id === lobby.idolData.voteStealIndex)?.owner;
+                  updates[`idolData.voteStealHolder`] = vsWinnerUid;
 
                   updates[`logs`] = arrayUnion("Tutte le casse sono state assegnate! Apertura in corso...");
               }
@@ -1332,21 +1468,17 @@
               });
           };
 
-
           const startNextSeason = async (newConfig) => {
             if (!isHost) return;
             
             const nextIndex = lobby.currentSeasonIndex + 1;
             const allParticipants = lobby.players; 
             
-            // FILTER: Separate humans and bots
             const humans = allParticipants.filter(p => !p.isBot);
             const bots = allParticipants.filter(p => p.isBot);
 
-            // Shuffle only bots
             bots.sort(() => Math.random() - 0.5);
 
-            // LOGIC: Take all humans first, then fill with bots until returningCount
             let nextPlayersList = [...humans];
             const slotsForBots = Math.max(0, newConfig.returningCount - humans.length);
             
@@ -1404,7 +1536,6 @@
 
           const resolveRedemption = async () => {
              const { candidates, rolls } = lobby.redemptionData;
-             // Verifica se tutti hanno lanciato
              const allRolled = candidates.every(c => rolls[c]);
              if (!allRolled) return;
 
@@ -1422,8 +1553,6 @@
                  const activePlayers = lobby.players.filter(p => p.status === 'active');
                  let targetTeam = "Merge";
                  
-                 // FIX: Controllo se ci sono ancora squadre attive basandomi sui giocatori attivi
-                 // Se i giocatori hanno un team diverso da "Merge" o null, allora siamo ancora in fase a squadre
                  const activeTeamsList = [...new Set(activePlayers.map(p => p.team).filter(t => t && t !== "Merge"))];
                  
                  if (activeTeamsList.length > 0) {
@@ -1437,7 +1566,6 @@
                      });
                      
                      let minCount = 999;
-                     // Trova il team con meno giocatori
                      Object.entries(teamCounts).forEach(([t, count]) => {
                          if (count < minCount) { minCount = count; targetTeam = t; }
                          else if (count === minCount && Math.random() > 0.5) { targetTeam = t; } 
@@ -1451,14 +1579,13 @@
                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                     players: updatedPlayers,
                     phase: 'episode_start',
-                    round: lobby.round, // Non aumenta il round, riprende l'episodio
+                    round: lobby.round, 
                     redemptionData: null,
                     logs: arrayUnion(`${winner.name} VINCE IL RIENTRO e torna nel team ${targetTeam}!`)
                  });
                  setSelectedRedemptionCandidates([]);
 
              } else {
-                 // Pareggio, reset rolls
                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                     [`redemptionData.rolls`]: {},
                     logs: arrayUnion("Pareggio nel rientro! Si rilanciano i dadi.")
@@ -1466,14 +1593,12 @@
              }
           };
 
-
           const advanceGame = async () => {
             if (!isHost) return;
 
             let updates = {};
             let newLogs = [];
 
-            // --- ADVANCE FROM IDOL HUNT TO EPISODE 1 ---
             if (lobby.phase === 'idol_hunt') {
                 if (lobby.idolData.stage === 'reveal') {
                     updates = {
@@ -1488,9 +1613,7 @@
               const mergeSize = lobby.config.mergeSize || (lobby.config.maxPlayers / 2);
               
               if (activePlayers.length <= 2) {
-                  // --- FINAL SHOWDOWN DECISION (50/50) ---
                   if (Math.random() < 0.5) {
-                      // 50% JURY VOTE
                       const finalists = activePlayers;
                       const jurySize = lobby.config.jurySize || 7;
                       
@@ -1500,41 +1623,25 @@
                           return lobby.players.find(p => p.name === entry.name);
                       }).filter(p => p); 
 
-                      const juryVotes = {};
-                      let p1Votes = 0;
-                      let p2Votes = 0;
-
-                      jurors.forEach(juror => {
-                          const rel1 = juror.relationships[finalists[0].uid] || 0;
-                          const rel2 = juror.relationships[finalists[1].uid] || 0;
-                          
-                          let vote = null;
-                          if (rel1 > rel2) vote = finalists[0].uid;
-                          else if (rel2 > rel1) vote = finalists[1].uid;
-                          else vote = Math.random() > 0.5 ? finalists[0].uid : finalists[1].uid; // Pareggio relazione
-
-                          juryVotes[juror.uid] = vote;
-                          if (vote === finalists[0].uid) p1Votes++;
-                          else p2Votes++;
-                      });
-
+                      // NUOVA FASE JURY SPEECHES
                       updates = {
-                          phase: 'jury_vote',
+                          phase: 'jury_speeches',
                           juryData: {
                               jurors: jurors.map(j => ({ uid: j.uid, name: j.name, img: j.character.img })),
-                              votes: juryVotes,
+                              votes: {}, 
+                              speeches: {}, 
                               finalist1: finalists[0].uid,
                               finalist2: finalists[1].uid,
                               revealedCount: 0,
-                              winnerId: p1Votes > p2Votes ? finalists[0].uid : finalists[1].uid, // Gestire pareggi se giuria pari
-                              p1Votes,
-                              p2Votes
+                              winnerId: null, 
+                              p1Votes: 0,
+                              p2Votes: 0,
+                              stage: 'speeches'
                           },
-                          logs: arrayUnion(`--- GRAN FINALE: VOTO DELLA GIURIA! ---`, `I ${jurors.length} ex-concorrenti decideranno il vincitore.`)
+                          logs: arrayUnion(`--- GRAN FINALE: I DISCORSI! ---`, `I finalisti devono convincere la giuria.`)
                       };
 
                   } else {
-                      // 50% DICE CHALLENGE (OLD)
                       updates = { 
                           phase: 'final_showdown', 
                           finalData: { p1Score: 0, p2Score: 0, round: 1, history: [], currentRolls: {} },
@@ -1543,12 +1650,10 @@
                   }
               } else {
                   updates = { phase: 'challenge', logs: arrayUnion(`--- SFIDA EPISODIO ${lobby.round} ---`) };
-                  // ... existing challenge generation logic ...
                   if (isMerge) {
                       const rand = Math.random();
                       
                       if (rand < 0.06) {
-                           // --- SUDDEN DEATH (6%) ---
                            const rollers = activePlayers.map(p => p.uid);
                            updates.challengeData = {
                                type: 'sudden_death',
@@ -1562,7 +1667,6 @@
                            newLogs.push("Chi fa il numero più basso TORNA A CASA. Niente votazioni.");
                       
                       } else if (rand < 0.14) { 
-                          // --- TEAM CHALLENGE (8%) ---
                           const shuffled = [...activePlayers].sort(() => Math.random() - 0.5);
                           const mid = Math.ceil(shuffled.length / 2);
                           const teamA = shuffled.slice(0, mid).map(p => p.uid);
@@ -1585,7 +1689,6 @@
                           newLogs.push("La squadra che totalizza il punteggio più alto vince l'immunità!");
 
                       } else {
-                          // --- STANDARD INDIVIDUAL ---
                           const rollers = activePlayers.map(p => p.uid);
                           updates.challengeData = {
                               type: 'individual',
@@ -1597,12 +1700,8 @@
                           };
                       }
                   } else {
-                      // PRE-MERGE (Standard Teams)
-                      
-                      // --- 10% CHANCE TEAM SWAP (NEW) ---
                       if (Math.random() < 0.10) {
                           const teamsMap = {};
-                          // Raggruppa i giocatori attivi per team
                           activePlayers.forEach(p => {
                               if (!teamsMap[p.team]) teamsMap[p.team] = [];
                               teamsMap[p.team].push(p);
@@ -1610,17 +1709,14 @@
                           
                           const teamNames = Object.keys(teamsMap);
                           if (teamNames.length >= 2) {
-                              // Ordina team per dimensione (Decrescente)
                               teamNames.sort((a, b) => teamsMap[b].length - teamsMap[a].length);
                               
                               const bigTeam = teamNames[0];
                               const smallTeam = teamNames[teamNames.length - 1];
                               
-                              // Esegui lo swap solo se il team grande ha più membri del piccolo
                               if (teamsMap[bigTeam].length > teamsMap[smallTeam].length) {
                                   const victim = teamsMap[bigTeam][Math.floor(Math.random() * teamsMap[bigTeam].length)];
                                   
-                                  // Aggiorna la lista giocatori
                                   const updatedPlayers = lobby.players.map(p => 
                                       p.uid === victim.uid ? { ...p, team: smallTeam } : p
                                   );
@@ -1628,7 +1724,6 @@
                                   updates.players = updatedPlayers;
                                   newLogs.push(`COLPO DI SCENA! Chris: "${victim.name}, prendi le tue cose! Passi dai ${bigTeam} ai ${smallTeam}!"`);
                                   
-                                  // AGGIUNTA: Salva i dati del twist per mostrarli nella UI
                                   updates.twistData = { 
                                       type: 'team_swap', 
                                       victimName: victim.name, 
@@ -1641,62 +1736,11 @@
 
                       const rollers = activePlayers.map(p => p.uid);
                       updates.challengeData = {
-                         type: 'standard', // Pre-merge standard
+                         type: 'standard', 
                          players: rollers,
                       };
                   }
               }
-            }
-            
-            else if (lobby.phase === 'jury_vote') {
-                // AVANZA LA RIVELAZIONE VOTI GIURIA
-                const jd = lobby.juryData;
-                
-                if (jd.revealedCount < jd.jurors.length) {
-                    updates = { [`juryData.revealedCount`]: jd.revealedCount + 1 };
-                } else {
-                    // TUTTI I VOTI RIVELATI, DICHIARA VINCITORE
-                    const winner = lobby.players.find(p => p.uid === jd.winnerId);
-                    const loser = lobby.players.find(p => p.uid === (jd.winnerId === jd.finalist1 ? jd.finalist2 : jd.finalist1));
-                    
-                    const loserEntry = { 
-                      name: loser.name, 
-                      team: "FINALIST", 
-                      round: "FINALE", 
-                      season: currentSeason.name,
-                      immunities: loser.immunityWins || 0,
-                      votes: loser.totalVotesReceived || 0
-                    };
-
-                    const winnerEntry = { 
-                         name: winner.name, 
-                         team: "WINNER", 
-                         round: "WINNER", 
-                         season: currentSeason.name,
-                         immunities: winner.immunityWins || 0,
-                         votes: winner.totalVotesReceived || 0 
-                    };
-
-                    if (lobby.currentSeasonIndex < lobby.config.numSeasons - 1) {
-                         updates.phase = 'season_setup'; 
-                         updates.seasonWinners = arrayUnion(winner.name);
-                         updates.logs = arrayUnion(`${winner.name} VINCE LA STAGIONE (Voto Giuria)!`);
-                         updates.rankings = arrayUnion(loserEntry);
-                         
-                         const maxReturning = lobby.players.length;
-                         const humanCount = lobby.players.filter(p => !p.isBot).length;
-                         setNextSeasonConfig({
-                            returningCount: Math.min(maxReturning, Math.max(2, humanCount)), 
-                            numTeams: lobby.config.numTeams,
-                            mergeSize: lobby.config.mergeSize || Math.floor(lobby.config.maxPlayers / 2)
-                         });
-                    } else {
-                         updates.phase = 'game_over';
-                         updates.seasonWinners = arrayUnion(winner.name);
-                         updates.rankings = arrayUnion(loserEntry, winnerEntry); 
-                         updates.logs = arrayUnion(`GIOCO FINITO! ${winner.name} è il campione!`);
-                    }
-                }
             }
             
             else if (lobby.phase === 'challenge') {
@@ -1704,11 +1748,11 @@
                  const teams = [...new Set(activePlayers.map(p => p.team))];
                  const winningTeam = teams[Math.floor(Math.random() * teams.length)];
                  const losingTeams = teams.filter(t => t !== winningTeam);
-                 const losingTeam = losingTeams[0]; 
+                 
+                 const losingTeam = losingTeams[Math.floor(Math.random() * losingTeams.length)]; 
 
                  const immuneIds = lobby.players.filter(p => p.team === winningTeam && p.status === 'active').map(p => p.uid);
                  
-                 // --- 5% CHANCE JOINT CEREMONY ---
                  const isJointCeremony = Math.random() < 0.05;
                  
                  if (isJointCeremony) {
@@ -1720,56 +1764,56 @@
                      newLogs.push(`Il team ${losingTeam} DEVE VOTARE.`);
                  }
 
+                 const { updatedPlayers, newLogs: finalLogs } = generateBotSocialUpdates(lobby.players, newLogs);
+
                  updates = {
+                    players: updatedPlayers,
                     immunity: immuneIds,
                     losingTeam: losingTeam,
-                    readyPlayers: [], // Reset per social
+                    readyPlayers: [], 
                     phase: 'social',
-                    twistData: isJointCeremony ? { type: 'joint_ceremony' } : null, // Set twist
-                    logs: arrayUnion(...newLogs)
+                    twistData: isJointCeremony ? { type: 'joint_ceremony' } : null, 
+                    logs: arrayUnion(...finalLogs)
                  };
               }
-              // MERGE LOGIC IS HANDLED INSIDE useEffect (Rolling) -> Auto transitions
             }
 
             else if (lobby.phase === 'social') {
-                // --- KILLER TWIST CHECK ---
-                let twistData = lobby.twistData; // Mantieni dati esistenti (es. joint_ceremony)
-                const killerChance = Math.random() < 0.05; // 5% chance
+                let twistData = lobby.twistData; 
+                const killerChance = Math.random() < 0.05; 
                 
-                // Attiva solo se Merge e c'è un solo immune e non c'è già un twist attivo
                 if (isMerge && killerChance && lobby.immunity.length === 1 && !twistData) {
                     const killerId = lobby.immunity[0];
                     const killerName = lobby.players.find(p => p.uid === killerId)?.name;
                     twistData = { type: 'killer', killerId: killerId };
                     newLogs.push(`!!! COLPO DI SCENA !!! Chris: "Il vincitore dell'immunità ha il POTERE ASSOLUTO! Solo ${killerName} voterà stasera!"`);
                 }
-                // ---------------------------
 
-                // Passiamo lo stato futuro per calcolare correttamente i voti dei bot
                 const futureLobbyState = { ...lobby, twistData };
                 const botVotes = calculateBotVotes(futureLobbyState, isMerge);
                 
                 updates = {
                     phase: 'voting',
                     votes: botVotes,
-                    twistData: twistData, // Aggiunge i dati del twist
+                    twistData: twistData,
                     logs: arrayUnion(...newLogs, "È TEMPO DI VOTARE!")
                 };
             }
 
             else if (lobby.phase === 'voting') {
-                const isDoubleElimination = isMerge && Math.random() < 0.05; // 5% chance ONLY IF MERGE
-                const isOpenVote = Math.random() < 0.05; // 5% chance ALWAYS (Voti Palesi)
+                const isDoubleElimination = isMerge && Math.random() < 0.05; 
+                const isOpenVote = Math.random() < 0.05; 
                 
-                // Controllo se è stato usato il Voto Extra per il log drammatico
                 if (lobby.idolData?.extraVoteUsedRound === lobby.round) {
                     newLogs.push("Chris: 'Attenzione campeggiatori! Qualcuno ha usato un VOTO EXTRA segreto stasera! I conti potrebbero non tornare...'");
+                }
+                
+                if (lobby.idolData?.voteStealUsedRound === lobby.round) {
+                    newLogs.push("Chris: 'Incredibile! Qualcuno ha attivato il RUBA-VOTO! Un concorrente si è visto annullare il voto!'");
                 }
 
                 const { safe, bottomTwo, eliminated, voteCounts, tie } = calculateCeremonyResults(lobby, lobby.votes, isMerge, isDoubleElimination);
                 
-                // --- UPDATE TOTAL VOTES RECEIVED ---
                 const updatedPlayersWithVotes = lobby.players.map(p => {
                     const received = voteCounts[p.uid] || 0;
                     if (received > 0) {
@@ -1782,11 +1826,22 @@
                    newLogs.push("!!! COLPO DI SCENA !!! Chris: 'Questa sera, per la prima volta, abbiamo una DOPPIA ELIMINAZIONE!'");
                 }
 
-                // Generazione mappa votanti se i voti sono palesi
                 let votersMap = {};
                 if (isOpenVote) {
                      newLogs.push("!!! COLPO DI SCENA !!! Chris: 'Stasera i voti sono PALESI! Niente segreti!'");
+                     
+                     const voteStealUsed = lobby.idolData?.voteStealUsedRound === lobby.round;
+                     const voteStealVictim = lobby.idolData?.voteStealVictim;
+                     const voteStealHolder = lobby.idolData?.voteStealHolder;
+
                      Object.entries(lobby.votes).forEach(([voterId, targetId]) => {
+                        if (voteStealUsed && voterId === voteStealVictim) {
+                            if(!votersMap[targetId]) votersMap[targetId] = [];
+                            const victimVoter = lobby.players.find(p => p.uid === voterId);
+                            votersMap[targetId].push(`${victimVoter.name} (Annullato)`);
+                            return; 
+                        }
+
                         const voter = lobby.players.find(p => p.uid === voterId);
                         if(voter) {
                             if(!votersMap[targetId]) votersMap[targetId] = [];
@@ -1794,15 +1849,27 @@
                         }
                      });
                      
-                     // Mappa voti extra
-                     if (lobby.extraVotes) {
-                         Object.entries(lobby.extraVotes).forEach(([voterId, targetId]) => {
-                            const voter = lobby.players.find(p => p.uid === voterId);
-                            if(voter) {
-                                if(!votersMap[targetId]) votersMap[targetId] = [];
-                                votersMap[targetId].push(`${voter.name} (+1)`);
-                            }
-                         });
+                     if (lobby.idolData?.extraVoteUsedRound === lobby.round) {
+                         const extraHolder = lobby.idolData.extraVoteHolder;
+                         if (lobby.votes[extraHolder]) {
+                             const targetId = lobby.votes[extraHolder];
+                             const voter = lobby.players.find(p => p.uid === extraHolder);
+                             if(!votersMap[targetId]) votersMap[targetId] = [];
+                             votersMap[targetId].push(`${voter.name} (+1 Voto)`);
+                         }
+                     }
+
+                     if (voteStealUsed && lobby.votes[voteStealHolder]) {
+                         const stolenTarget = lobby.votes[voteStealHolder];
+                         const validTargetIds = isMerge 
+                            ? activePlayers.filter(p => !(lobby.immunity || []).includes(p.uid)).map(p => p.uid)
+                            : activePlayers.filter(p => p.team === lobby.losingTeam).map(p => p.uid);
+                            
+                         if (validTargetIds.includes(stolenTarget)) {
+                             const holder = lobby.players.find(p => p.uid === voteStealHolder);
+                             if (!votersMap[stolenTarget]) votersMap[stolenTarget] = [];
+                             votersMap[stolenTarget].push(`${holder.name} (Ruba-Voto)`);
+                         }
                      }
                 }
 
@@ -1871,12 +1938,9 @@
                   updates = { [`ceremonyData.finalReveal`]: true };
               } 
               else {
-                  // FINE CERIMONIA
-
                   let victimsIds = Array.isArray(data.eliminated) ? [...data.eliminated] : [data.eliminated].filter(Boolean);
                   const isDouble = data.isDoubleElimination;
                   
-                  // --- IDOL CHECK (First Victim) ---
                   let firstVictim = victimsIds[0];
                   if (firstVictim && lobby.idolData && lobby.idolData.holder === firstVictim && lobby.idolData.active) {
                       newLogs.push(`COLPO DI SCENA! ${lobby.players.find(p => p.uid === firstVictim).name} usa l'Idolo dell'Immunità!`);
@@ -1898,7 +1962,6 @@
                   if (firstVictim) {
                       finalVictims.push(firstVictim);
                       
-                      // --- IDOL CHECK (Second Victim - solo in doppia eliminazione) ---
                       if (isDouble && data.eliminatedSecond) {
                           let secondVictim = data.eliminatedSecond;
                           if (secondVictim === firstVictim) {
@@ -1907,7 +1970,7 @@
                              secondVictim = nextVictim;
 
                           } else if (secondVictim === lobby.idolData?.holder && lobby.idolData?.active) {
-                              newLogs.push(`COSA?! ${lobby.players.find(p => p.uid === secondVictim).name} usa il SECONDO Idolo dell'Immunità (non supportato per semplicità, ma il dramma è vero!)`);
+                              newLogs.push(`COSA?! ${lobby.players.find(p => p.uid === secondVictim).name} usa il SECONDO Idolo dell'Immunità!`);
                               updates[`idolData.active`] = false; 
                               updates[`idolData.holder`] = null;
                               secondVictim = null; 
@@ -1919,7 +1982,6 @@
                       }
                   }
 
-                  // Esecuzione eliminazioni
                   let updatedPlayers = lobby.players;
                   let rankingEntries = [];
                   
@@ -1939,9 +2001,6 @@
                       newLogs.push(`${victim.name} è stato eliminato!`);
                   });
 
-
-                  // Fine Logica
-                  
                   const nextRound = lobby.round + 1;
                   const redemptionConfig = lobby.config.redemption;
                   let isRedemptionEpisode = false;
@@ -1969,7 +2028,7 @@
                         losingTeam: null,
                         ceremonyData: null,
                         challengeData: null,
-                        twistData: null, // RESET TWIST DATA
+                        twistData: null, 
                         logs: arrayUnion(...newLogs, `--- EPISODIO SPECIALE: REDEMPTION! ---`)
                       };
                   } else {
@@ -1978,20 +2037,91 @@
                         phase: 'episode_start',
                         round: nextRound,
                         votes: {},
-                        extraVotes: {}, // Reset Extra Votes
+                        extraVotes: {}, 
                         immunity: [],
                         diceRoll: null,
                         losingTeam: null,
                         ceremonyData: null,
                         challengeData: null,
-                        twistData: null, // RESET TWIST DATA
+                        twistData: null, 
                         logs: arrayUnion(...newLogs)
                       };
                   }
                   
               }
             }
-            else if (lobby.phase === 'game_over') {
+            
+            else if (lobby.phase === 'jury_speeches') {
+                updates = {
+                    phase: 'jury_vote',
+                    [`juryData.stage`]: 'voting',
+                    logs: arrayUnion(`La Giuria si appresta a votare!`)
+                };
+            }
+
+            else if (lobby.phase === 'jury_vote') {
+                const jd = lobby.juryData;
+                
+                if (jd.stage === 'voting') {
+                    if (Object.keys(jd.votes || {}).length >= jd.jurors.length) {
+                        let p1Votes = 0;
+                        let p2Votes = 0;
+                        Object.values(jd.votes).forEach(v => {
+                            if (v === jd.finalist1) p1Votes++;
+                            else p2Votes++;
+                        });
+                        updates = { 
+                            [`juryData.stage`]: 'revealing',
+                            [`juryData.p1Votes`]: p1Votes,
+                            [`juryData.p2Votes`]: p2Votes,
+                            [`juryData.winnerId`]: p1Votes > p2Votes ? jd.finalist1 : jd.finalist2
+                        };
+                    }
+                }
+                else if (jd.revealedCount < jd.jurors.length) {
+                    updates = { [`juryData.revealedCount`]: jd.revealedCount + 1 };
+                } else {
+                    const winner = lobby.players.find(p => p.uid === jd.winnerId);
+                    const loser = lobby.players.find(p => p.uid === (jd.winnerId === jd.finalist1 ? jd.finalist2 : jd.finalist1));
+                    
+                    const loserEntry = { 
+                      name: loser.name, 
+                      team: "FINALIST", 
+                      round: "FINALE", 
+                      season: currentSeason.name,
+                      immunities: loser.immunityWins || 0,
+                      votes: loser.totalVotesReceived || 0
+                    };
+
+                    const winnerEntry = { 
+                         name: winner.name, 
+                         team: "WINNER", 
+                         round: "WINNER", 
+                         season: currentSeason.name,
+                         immunities: winner.immunityWins || 0,
+                         votes: winner.totalVotesReceived || 0 
+                    };
+
+                    if (lobby.currentSeasonIndex < lobby.config.numSeasons - 1) {
+                         updates.phase = 'season_setup'; 
+                         updates.seasonWinners = arrayUnion(winner.name);
+                         updates.logs = arrayUnion(`${winner.name} VINCE LA STAGIONE (Voto Giuria)!`);
+                         updates.rankings = arrayUnion(loserEntry);
+                         
+                         const maxReturning = lobby.players.length;
+                         const humanCount = lobby.players.filter(p => !p.isBot).length;
+                         setNextSeasonConfig({
+                            returningCount: Math.min(maxReturning, Math.max(2, humanCount)), 
+                            numTeams: lobby.config.numTeams,
+                            mergeSize: lobby.config.mergeSize || Math.floor(lobby.config.maxPlayers / 2)
+                         });
+                    } else {
+                         updates.phase = 'game_over';
+                         updates.seasonWinners = arrayUnion(winner.name);
+                         updates.rankings = arrayUnion(loserEntry, winnerEntry); 
+                         updates.logs = arrayUnion(`GIOCO FINITO! ${winner.name} è il campione!`);
+                    }
+                }
             }
 
             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
@@ -2067,7 +2197,6 @@
                          immunities: winner.immunityWins || 0,
                          votes: winner.totalVotesReceived || 0 
                      };
-                     // FIX: Add both entries to rankings
                      updates.rankings = arrayUnion(loserEntry, winnerEntry); 
                      updates.logs = arrayUnion(`GIOCO FINITO!`);
                   }
@@ -2080,18 +2209,16 @@
             const votes = {};
             let activeBots = lobbyState.players.filter(p => { 
                 if (!p.isBot || p.status !== 'active') return false;
-                if (isMerge || lobbyState.twistData?.type === 'joint_ceremony') return true; // Se joint ceremony, tutti i bot votano
+                if (isMerge || lobbyState.twistData?.type === 'joint_ceremony') return true; 
                 return p.team === lobbyState.losingTeam;
             });
 
-            // --- KILLER TWIST LOGIC ---
             if (lobbyState.twistData?.type === 'killer') {
                 const killerId = lobbyState.twistData.killerId;
                 const killerBot = activeBots.find(b => b.uid === killerId);
                 if (!killerBot) return {};
                 activeBots = [killerBot];
             }
-            // ---------------------------
 
             let candidates = [];
             
@@ -2103,6 +2230,8 @@
 
             activeBots.forEach(bot => {
                 let targets = candidates.filter(t => t.uid !== bot.uid);
+                
+                if (targets.length === 0 && candidates.length > 0) targets = [bot]; 
                 if (targets.length === 0) return;
 
                 targets.sort(() => Math.random() - 0.5);
@@ -2113,9 +2242,7 @@
                 }));
 
                 const minScore = Math.min(...targetsWithScore.map(t => t.score));
-
                 const potentialVictims = targetsWithScore.filter(t => t.score === minScore);
-
                 const victim = potentialVictims[Math.floor(Math.random() * potentialVictims.length)];
                 
                 votes[bot.uid] = victim.uid; 
@@ -2130,37 +2257,41 @@
                 ? activePlayers.filter(p => !(lobbyState.immunity || []).includes(p.uid)).map(p => p.uid)
                 : activePlayers.filter(p => p.team === lobbyState.losingTeam).map(p => p.uid);
 
+              const voteStealUsed = lobbyState.idolData?.voteStealUsedRound === lobbyState.round;
+              const voteStealHolder = lobbyState.idolData?.voteStealHolder;
+              const voteStealVictim = lobbyState.idolData?.voteStealVictim;
+
               Object.entries(currentVotes).forEach(([voterId, tId]) => {
+                  if (voteStealUsed && voterId === voteStealVictim) {
+                      return; 
+                  }
+
                   if (validTargetIds.includes(tId)) {
                       counts[tId] = (counts[tId] || 0) + 1;
 
-                      // --- EXTRA VOTE CALCULATION ---
-                      // Se il voto extra è stato usato in questo round da questo votante, aggiungi +1
-                      if (lobbyState.idolData?.extraVoteUsedRound === lobbyState.round && 
+                      if (lobbyState.idolData?.extraVoteUsedRound === lobbyState.round &&
                           lobbyState.idolData.extraVoteHolder === voterId) {
                               counts[tId] += 1;
-                              console.log("Conteggiato Voto Extra!");
+                      }
+
+                      if (voteStealUsed && voterId === voteStealHolder) {
+                          counts[tId] += 1;
                       }
                   }
               });
 
-              // Ordina per voti discendenti
               const sortedVictims = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
               
               if (sortedVictims.length === 0 && validTargetIds.length > 0) {
-                  // Voto nullo, eliminazione casuale (fall back)
                   const rnd = validTargetIds[Math.floor(Math.random() * validTargetIds.length)];
                   return { safe: validTargetIds.filter(id => id !== rnd), bottomTwo: [rnd], eliminated: [rnd], voteCounts: counts, tie: null };
               }
 
-              // Verifica i pareggi per il primo posto (o i primi due in caso di doppia)
               const maxVotes = counts[sortedVictims[0]];
               const ties = sortedVictims.filter(id => counts[id] === maxVotes);
               
               if (ties.length > 1) {
-                  // Pareggio per il primo posto. Serve spareggio (solo per singola eliminazione)
                   if (!isDoubleElimination || (isDoubleElimination && ties.length > 2)) { 
-                     // Se non è doppia O se c'è un pareggio a 3 o più per i posti in eliminazione
                      return { safe: validTargetIds.filter(id => !ties.includes(id)), bottomTwo: ties, eliminated: null, voteCounts: counts, tie: ties };
                   }
               }
@@ -2172,28 +2303,24 @@
                    const bottomTwo = sortedVictims.slice(0, 2);
                    const safe = validTargetIds.filter(id => id !== elim1 && id !== elim2);
 
-                   // Se c'è un pareggio perfetto per il primo e il secondo posto tra 4 persone (es. 10, 10, 5, 5)
                    if(ties.length === 2 && counts[sortedVictims[2]] < ties[0]) {
-                      // Pareggio a 2 per il primo posto, prendiamo entrambi
                       return { safe, bottomTwo: ties, eliminated: ties, voteCounts: counts, tie: null };
                    } else {
-                       // Elimina i primi due
                        return { safe, bottomTwo, eliminated: [elim1, elim2], voteCounts: counts, tie: null };
                    }
               }
 
-              // Eliminazione singola
               const elimId = sortedVictims[0];
               const bottomTwo = sortedVictims.slice(0, 2);
-              if (!bottomTwo.includes(elimId)) bottomTwo.push(elimId); // Assicurati che l'eliminato sia in bottomTwo
+              if (!bottomTwo.includes(elimId)) bottomTwo.push(elimId); 
               
               let safe = validTargetIds.filter(id => !bottomTwo.includes(id));
-              safe.sort((a, b) => (counts[a] || 0) - (counts[b] || 0)); // Ordina i salvi per voti crescenti
+              safe.sort((a, b) => (counts[a] || 0) - (counts[b] || 0)); 
               
               return { safe, bottomTwo, eliminated: [elimId], voteCounts: counts, tie: null };
           };
 
-          const handleInteraction = async (type, payload = null) => { // Aggiunto parametro payload
+          const handleInteraction = async (type, payload = null) => { 
               const targetId = selectedPlayer?.uid;
               if (!targetId || lobby.phase !== 'social' || hasActed || myPlayer.status === 'eliminated') return;
               
@@ -2212,7 +2339,6 @@
                   } else msg = `${updatedPlayers[targetIdx].name} ti ha ignorato.`;
               } 
               else if (type === 'rumor') {
-                  // Payload contiene l'ID della vittima scelta dall'utente
                   const victimId = payload;
                   const victim = updatedPlayers.find(p => p.uid === victimId);
                   
@@ -2220,7 +2346,6 @@
                        msg = "Errore: bersaglio non trovato.";
                   } else {
                       if (Math.random() > 0.5) {
-                          // SUCCESSO (50%)
                           const currentRel = updatedPlayers[targetIdx].relationships[victimId] || 0;
                           updatedPlayers[targetIdx].relationships = { 
                               ...updatedPlayers[targetIdx].relationships, 
@@ -2228,7 +2353,6 @@
                           };
                           msg = `🤫 Pssst! Hai messo zizzania con successo. ${targetName} ora guarda male ${victim.name} (-1).`;
                       } else {
-                          // FALLIMENTO (50%)
                           const currentRel = updatedPlayers[targetIdx].relationships[user.uid] || 0;
                           updatedPlayers[targetIdx].relationships = { 
                               ...updatedPlayers[targetIdx].relationships, 
@@ -2239,30 +2363,23 @@
                   }
               }
               else if (type === 'sabotage') {
-                  if (!isMerge) return; // Should be disabled in UI too
+                  if (!isMerge) return; 
 
                   if (Math.random() < 0.5) {
-                      // Success (50%)
                       updatedPlayers[targetIdx].nextRollNerf = true;
                       msg = `🔧 Hai sabotato l'attrezzatura di ${targetName}! Alla prossima sfida avrà difficoltà (Roll 1-4).`;
                   } else {
-                      // Fail (50%)
                       updatedPlayers[myIdx].nextRollNerf = true;
                       updatedPlayers[targetIdx].relationships[user.uid] = (updatedPlayers[targetIdx].relationships[user.uid] || 0) - 3;
                       msg = `💥 Disastro! ${targetName} ti ha beccato a sabotare! Per ritorsione ha rotto la TUA attrezzatura (Roll 1-4 per te).`;
                   }
               }
               else if (type === 'alliance_trio') {
-                  // Payload è l'ID del TERZO membro (il secondo amico)
                   const thirdId = payload;
                   const thirdIdx = updatedPlayers.findIndex(p => p.uid === thirdId);
                   const thirdName = updatedPlayers[thirdIdx].name;
 
-                  // 30% di Successo
                   if (Math.random() < 0.30) {
-                      // SUCCESSO: Tripla Alleanza e Boost Relazioni
-                      
-                      // 1. Aggiorna Alleanze (Tutti con Tutti)
                       const myAllies = [...(updatedPlayers[myIdx].alliances || []), targetId, thirdId];
                       const targetAllies = [...(updatedPlayers[targetIdx].alliances || []), user.uid, thirdId];
                       const thirdAllies = [...(updatedPlayers[thirdIdx].alliances || []), user.uid, targetId];
@@ -2271,36 +2388,25 @@
                       updatedPlayers[targetIdx].alliances = [...new Set(targetAllies)];
                       updatedPlayers[thirdIdx].alliances = [...new Set(thirdAllies)];
 
-                      // 2. Boost Relazioni (+3 tra tutti per solidificare)
-                      // Io con Target
                       updatedPlayers[myIdx].relationships[targetId] = (updatedPlayers[myIdx].relationships[targetId] || 0) + 3;
                       updatedPlayers[targetIdx].relationships[user.uid] = (updatedPlayers[targetIdx].relationships[user.uid] || 0) + 3;
                       
-                      // Io con Terzo
                       updatedPlayers[myIdx].relationships[thirdId] = (updatedPlayers[myIdx].relationships[thirdId] || 0) + 3;
                       updatedPlayers[thirdIdx].relationships[user.uid] = (updatedPlayers[thirdIdx].relationships[user.uid] || 0) + 3;
 
-                      // Target con Terzo (Si amano anche loro ora)
                       updatedPlayers[targetIdx].relationships[thirdId] = (updatedPlayers[targetIdx].relationships[thirdId] || 0) + 3;
                       updatedPlayers[thirdIdx].relationships[targetId] = (updatedPlayers[thirdIdx].relationships[targetId] || 0) + 3;
 
                       msg = `🤝 PATTO DI SANGUE! Hai formato una POTENTE Alleanza a 3 con ${targetName} e ${thirdName}! (Tutti +3 Relazione)`;
                   } else {
-                      // FALLIMENTO
-                      // Piccola penalità, sembri troppo ambizioso
-                      updatedPlayers[targetIdx].relationships[user.uid] = (updatedPlayers[targetIdx].relationships[user.uid] || 0) - 1; // MODIFICATO DA -2 A -1
-                      updatedPlayers[thirdIdx].relationships[user.uid] = (updatedPlayers[thirdIdx].relationships[user.uid] || 0) - 1; // MODIFICATO DA -2 A -1
+                      updatedPlayers[targetIdx].relationships[user.uid] = (updatedPlayers[targetIdx].relationships[user.uid] || 0) - 1; 
+                      updatedPlayers[thirdIdx].relationships[user.uid] = (updatedPlayers[thirdIdx].relationships[user.uid] || 0) - 1; 
                       
                       msg = `💔 Hai proposto un trio a ${targetName} e ${thirdName}, ma non si fidano abbastanza. È stato imbarazzante. (-1 Relazione)`;
                   }
               }
               else if (type === 'suckup') {
-                  // LECCAPIEDI
-                  // 60% Successo -> +2 Relazione con target
-                  // 40% Fallimento -> -1 Relazione con 2-3 testimoni casuali (e -1 con target)
-                  
                   if (Math.random() < 0.60) {
-                      // SUCCESSO
                       const currentRel = updatedPlayers[targetIdx].relationships[user.uid] || 0;
                       updatedPlayers[targetIdx].relationships = { 
                           ...updatedPlayers[targetIdx].relationships, 
@@ -2308,16 +2414,13 @@
                       };
                       msg = `👅 Hai fatto il leccapiedi con ${targetName}. I tuoi complimenti esagerati hanno funzionato! (+2 Relazione)`;
                   } else {
-                      // FALLIMENTO: FIGURACCIA PUBBLICA
-                      // Target si infastidisce
                       const tRel = updatedPlayers[targetIdx].relationships[user.uid] || 0;
                       updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [user.uid]: tRel - 1 };
 
-                      // Trova 2-3 testimoni (bot attivi diversi dal target)
                       let potentialWitnesses = updatedPlayers.filter(p => p.isBot && p.uid !== targetId && p.uid !== user.uid && p.status === 'active');
-                      potentialWitnesses.sort(() => Math.random() - 0.5); // Shuffle
+                      potentialWitnesses.sort(() => Math.random() - 0.5); 
                       
-                      const numWitnesses = Math.floor(Math.random() * 2) + 2; // 2 o 3
+                      const numWitnesses = Math.floor(Math.random() * 2) + 2; 
                       const witnesses = potentialWitnesses.slice(0, numWitnesses);
                       
                       const witnessNames = [];
@@ -2332,14 +2435,10 @@
                   }
               }
               else if (type === 'flirt') {
-                  // Rischio: 40% Successo, 60% Fallimento
                   if (Math.random() < 0.40) {
-                      // SUCCESSO: STATUS FIDANZATO
-                      // 1. Relazione alle stelle (15) - ORA È RECIPROCA!
                       updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [user.uid]: 15 };
                       updatedPlayers[myIdx].relationships = { ...updatedPlayers[myIdx].relationships, [targetId]: 15 };
                       
-                      // 2. Alleanza automatica reciproca
                       const p1Allies = [...(updatedPlayers[targetIdx].alliances || []), user.uid];
                       const p2Allies = [...(updatedPlayers[myIdx].alliances || []), targetId];
                       
@@ -2348,7 +2447,6 @@
 
                       msg = `😍 Incredibile! Hai flirtato con ${targetName} ed è andata alla grande! Ora siete FIDANZATI e Alleati! (Relazione +15)`;
                   } else {
-                      // FALLIMENTO
                       const currentRel = updatedPlayers[targetIdx].relationships[user.uid] || 0;
                       updatedPlayers[targetIdx].relationships = { 
                           ...updatedPlayers[targetIdx].relationships, 
@@ -2363,43 +2461,35 @@
                      if (randomOther) {
                          const rIdx = updatedPlayers.findIndex(p => p.uid === randomOther.uid);
                          updatedPlayers[rIdx].relationships = { ...updatedPlayers[rIdx].relationships, [targetId]: Math.max(-5, (updatedPlayers[rIdx].relationships[targetId] || 0) - 2) };
-                         // Messaggio esplicito di successo
                          msg = `📢 ${targetName}! ${actorName} ha fatto un Call Out contro di te (Riuscito)!`;
                      } else msg = `Call Out di ${actorName}: nessuno ha ascoltato.`;
                   } else { 
                      updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [user.uid]: Math.max(-5, (updatedPlayers[targetIdx].relationships[user.uid] || 0) - 2) };
-                     // Messaggio esplicito di fallimento
                      msg = `📢 ${targetName}! ${actorName} ha provato un Call Out contro di te (Fallito)!`;
                   }
               }
               else if (type === 'threaten') {
-                  // Recupera lista minacciati, inizializza se non esiste
                   const myThreats = updatedPlayers[myIdx].threatenedPlayers || [];
                   
                   if (myThreats.includes(targetId)) {
-                      return; // Già minacciato, blocco di sicurezza (anche se UI disabilita)
+                      return; 
                   }
 
-                  // Aggiungi target alla lista dei minacciati
                   updatedPlayers[myIdx] = {
                       ...updatedPlayers[myIdx],
                       threatenedPlayers: [...myThreats, targetId]
                   };
 
-                  // 30% di chance di successo (Math.random() < 0.30)
                   if (Math.random() < 0.30) {
-                      // SUCCESSO: Max Relazione (Paura/Lealtà forzata)
                       updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [user.uid]: 10 };
                       msg = `☠️ Hai minacciato ${targetName}! (SUCCESSO) Per paura, ti obbedirà ciecamente (Relazione +10).`;
                   } else {
-                      // FALLIMENTO (70%): Odio puro
                       updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [user.uid]: -10 };
                       msg = `💢 La minaccia è fallita! ${targetName} non ha paura di te e ora ti vuole fuori (Relazione -10).`;
                   }
               }
               else if (type === 'alliance') {
                  if ((updatedPlayers[targetIdx].relationships[user.uid] || 0) <= 0) {
-                     console.error("Devi essere amico per proporre un'alleanza!");
                      msg = `${updatedPlayers[targetIdx].name} ha rifiutato l'alleanza. (Devi essere amico!)`;
                  }
                  
@@ -2425,24 +2515,21 @@
               });
               setHasActed(true);
               setSelectedPlayer(null);
-              setShowRumorSelector(false); // Reset
-              setShowTrioSelector(false); // Reset
+              setShowRumorSelector(false); 
+              setShowTrioSelector(false); 
           };
 
           const submitVote = async (targetId) => {
               if (!targetId || lobby.phase !== 'voting') return;
               
-              // --- KILLER TWIST CHECK ---
               if (lobby.twistData?.type === 'killer' && user.uid !== lobby.twistData.killerId) {
                   return;
               }
 
               const myTeam = myPlayer.team;
               const losingTeam = lobby.losingTeam;
-              // --- JOINT CEREMONY CHECK ---
-              // Se siamo in joint ceremony, anche il team vincente può votare
+              
               if (!isMerge && myTeam !== losingTeam && lobby.twistData?.type !== 'joint_ceremony') {
-                  console.error("NON PUOI VOTARE! Il tuo team ha vinto l'immunità.");
                   return;
               }
 
@@ -2450,13 +2537,18 @@
                   [`votes.${user.uid}`]: targetId
               };
 
-              // --- UTILIZZO VOTO EXTRA ---
               if (useExtraVote && lobby.idolData?.extraVoteHolder === user.uid && !lobby.idolData.extraVoteConsumed) {
                   updates[`idolData.extraVoteConsumed`] = true;
                   updates[`idolData.extraVoteUsedRound`] = lobby.round;
               }
 
-              // --- LOGICA ALLEATI (40% Chance di seguire il voto) ---
+              if (useVoteSteal && lobby.idolData?.voteStealHolder === user.uid && !lobby.idolData.voteStealConsumed) {
+                  if (!voteStealVictim) return; 
+                  updates[`idolData.voteStealConsumed`] = true;
+                  updates[`idolData.voteStealUsedRound`] = lobby.round;
+                  updates[`idolData.voteStealVictim`] = voteStealVictim;
+              }
+
               if (lobby.twistData?.type !== 'killer') {
                   const myAllies = lobby.players.filter(p => 
                       p.isBot && 
@@ -2466,21 +2558,18 @@
                   );
 
                   myAllies.forEach(ally => {
-                      // Controlla se l'alleato può votare in questa fase
                       const canVote = isMerge || lobby.twistData?.type === 'joint_ceremony' || ally.team === losingTeam;
-                      
                       if (canVote) {
-                          // 40% di probabilità che l'alleato copi il tuo voto
                           if (Math.random() < 0.40) {
                               updates[`votes.${ally.uid}`] = targetId;
-                              console.log(`L'alleato ${ally.name} ti ha seguito nel voto!`);
                           }
                       }
                   });
               }
 
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
-              setIsUsingVotePlus(false); // Reset stato locale voto extra
+              setUseExtraVote(false);
+              setUseVoteSteal(false);
           };
 
           const teams = useMemo(() => {
@@ -2491,11 +2580,9 @@
              return groups;
           }, [activePlayers, isMerge, lobby.config.numTeams]);
 
-          // --- LOGICA ATTESA VOTI ---
           const pendingVotesCount = useMemo(() => {
               if (lobby.phase !== 'voting') return 0;
 
-              // --- KILLER TWIST LOGIC ---
               if (lobby.twistData?.type === 'killer') {
                   const killerId = lobby.twistData.killerId;
                   const killer = lobby.players.find(p => p.uid === killerId);
@@ -2505,7 +2592,6 @@
                   return 0;
               }
 
-              // --- JOINT CEREMONY LOGIC ---
               const isJoint = lobby.twistData?.type === 'joint_ceremony';
               
               const voters = (isMerge || isJoint)
@@ -2515,13 +2601,25 @@
               return voters.filter(p => !p.isBot && !lobby.votes?.[p.uid]).length;
           }, [lobby.phase, lobby.votes, isMerge, activePlayers, lobby.losingTeam, lobby.twistData]);
 
-          // --- LOGICA ATTESA SOCIAL ---
           const pendingReadyCount = useMemo(() => {
               if (lobby.phase !== 'social') return 0;
               const humans = activePlayers.filter(p => !p.isBot);
               const ready = lobby.readyPlayers || [];
               return humans.filter(h => !ready.includes(h.uid)).length;
           }, [lobby.phase, lobby.readyPlayers, activePlayers]);
+
+          const pendingJuryVotesCount = useMemo(() => {
+              if (lobby.phase !== 'jury_vote' || lobby.juryData?.stage !== 'voting') return 0;
+              return lobby.juryData.jurors.length - Object.keys(lobby.juryData.votes || {}).length;
+          }, [lobby.phase, lobby.juryData]);
+
+          const pendingSpeechesCount = useMemo(() => {
+              if (lobby.phase !== 'jury_speeches' || !lobby.juryData) return 0;
+              const f1HasSpeech = !!lobby.juryData.speeches?.[lobby.juryData.finalist1];
+              const f2HasSpeech = !!lobby.juryData.speeches?.[lobby.juryData.finalist2];
+              return (f1HasSpeech ? 0 : 1) + (f2HasSpeech ? 0 : 1);
+          }, [lobby.phase, lobby.juryData]);
+
 
           return (
             <div className="flex h-screen bg-cover bg-center text-white overflow-hidden font-sans" style={{ backgroundImage: `url('${currentSeason.bg}')` }}>
@@ -2537,7 +2635,6 @@
                                <div className="grid grid-cols-2 gap-4 mb-6">
                                    <div className="bg-slate-800 p-2 rounded">
                                        <div className="text-xs uppercase">Amicizia</div>
-                                       {/* MODIFICA: Colore Rosa se relazione == 15 (Fidanzati) */}
                                        <div className={`text-xl font-bold ${(selectedPlayer.relationships[user.uid] || 0) === 15 ? 'text-pink-500' : (selectedPlayer.relationships[user.uid] || 0) > 0 ? 'text-green-500' : 'text-red-500'}`}>
                                            {(selectedPlayer.relationships[user.uid] || 0) === 15 ? "❤️ 15" : (selectedPlayer.relationships[user.uid] || 0)}
                                        </div>
@@ -2551,15 +2648,10 @@
                                    !showRumorSelector && !showTrioSelector ? (
                                    <div className="space-y-2">
                                        <button onClick={() => handleInteraction('friend')} className="w-full bg-green-600 py-3 rounded font-bold flex justify-center gap-2"><Heart/> Amicizia</button>
-                                       
-                                       {/* NEW: LECCAPIEDI */}
                                        <button onClick={() => handleInteraction('suckup')} className="w-full bg-yellow-600 py-3 rounded font-bold flex justify-center gap-2 hover:bg-yellow-500"><Award/> Leccapiedi (60%)</button>
 
-                                       {/* ... Flirt button ... */}
                                        {(() => {
-                                           // Controlla se il giocatore ha già una relazione a 15 con QUALCUNO
                                            const isEngaged = Object.values(myPlayer.relationships || {}).some(v => v === 15);
-                                           
                                            return (
                                                <button 
                                                    onClick={() => handleInteraction('flirt')} 
@@ -2573,11 +2665,7 @@
 
                                        <button onClick={() => handleInteraction('alliance')} className="w-full bg-blue-600 py-3 rounded font-bold flex justify-center gap-2"><Swords/> Alleanza</button>
                                        
-                                       {/* NEW: ALLEANZA A 3 */}
                                        {(() => {
-                                           // Requisiti: 
-                                           // 1. SelectedPlayer deve essere amico (>0)
-                                           // 2. Deve esserci ALMENO un altro amico attivo nel gioco
                                            const isFriend = (selectedPlayer.relationships[user.uid] || 0) > 0;
                                            const otherFriends = lobby.players.filter(p => 
                                                 p.uid !== user.uid && 
@@ -2598,7 +2686,6 @@
                                            );
                                        })()}
 
-                                       {/* NEW: SABOTAGGIO (MERGE ONLY) */}
                                        {isMerge && (
                                             <button onClick={() => handleInteraction('sabotage')} className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 py-3 rounded font-bold flex justify-center gap-2"><Hammer className="text-orange-500"/> Sabotaggio (50%)</button>
                                        )}
@@ -2606,7 +2693,6 @@
                                        <button onClick={() => setShowRumorSelector(true)} className="w-full bg-purple-600 py-3 rounded font-bold flex justify-center gap-2"><MessageSquare/> Metti Zizzania (50%)</button>
                                        <button onClick={() => handleInteraction('callout')} className="w-full bg-orange-600 py-3 rounded font-bold flex justify-center gap-2"><AlertTriangle/> Call Out</button>
                                        
-                                       {/* ... Threaten button ... */}
                                        {(() => {
                                            const hasThreatened = (myPlayer.threatenedPlayers || []).includes(selectedPlayer.uid);
                                            return (
@@ -2640,7 +2726,6 @@
                                          <button onClick={() => setShowRumorSelector(false)} className="w-full bg-slate-700 hover:bg-slate-600 py-2 rounded text-xs font-bold flex items-center justify-center gap-1"><Undo2 size={14}/> Annulla</button>
                                      </div>
                                    ) : (
-                                     /* SELETTORE TERZO MEMBRO ALLEANZA */
                                      <div className="animate-in fade-in">
                                          <div className="text-sm font-bold text-indigo-300 mb-2">Chi è il 3° membro?</div>
                                          <div className="grid grid-cols-3 gap-2 mb-2 max-h-60 overflow-y-auto custom-scrollbar">
@@ -2649,7 +2734,7 @@
                                                      p.uid !== user.uid && 
                                                      p.uid !== selectedPlayer.uid && 
                                                      p.status === 'active' && 
-                                                     (p.relationships[user.uid] || 0) > 0 // Solo Amici
+                                                     (p.relationships[user.uid] || 0) > 0 
                                                  )
                                                  .map(p => (
                                                      <button key={p.uid} onClick={() => handleInteraction('alliance_trio', p.uid)} className="bg-slate-800 hover:bg-slate-700 p-2 rounded flex flex-col items-center border border-slate-700 hover:border-indigo-500 transition">
@@ -2687,11 +2772,13 @@
                <div className="flex-1 flex flex-col relative z-0 overflow-hidden">
                   <div className="h-14 bg-slate-800/90 flex items-center justify-between px-4 z-20 border-b border-white/10">
                      <div className="font-bold italic text-white flex items-center gap-2">
-                        {lobby.phase === 'idol_hunt' && "CACCIA ALL'IDOLO"}
+                        {lobby.phase === 'idol_hunt' && "CACCIA AL TESORO"}
                         {lobby.phase === 'challenge' && "SFIDA IN CORSO"}
                         {lobby.phase === 'social' && "SOCIALIZZAZIONE"}
                         {lobby.phase === 'voting' && "CABINA ELETTORALE"}
                         {lobby.phase === 'ceremony' && "CERIMONIA"}
+                        {lobby.phase === 'jury_speeches' && "DISCORSI FINALI"}
+                        {lobby.phase === 'jury_vote' && "VOTO DELLA GIURIA"}
                         {lobby.phase === 'final_showdown' && "GRAN FINALE"}
                         {lobby.phase === 'season_setup' && "SETUP STAGIONE"}
                         {lobby.phase === 'redemption' && "REDEMPTION TIME"}
@@ -2713,8 +2800,8 @@
                         {isHost && lobby.phase !== 'final_showdown' && lobby.phase !== 'season_setup' && lobby.phase !== 'redemption' && (
                             <button 
                                 onClick={advanceGame} 
-                                disabled={(lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection')}
-                                className={`${((lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection')) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-4 py-1 rounded shadow text-sm flex items-center gap-2 transition-all`}
+                                disabled={(lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0)}
+                                className={`${((lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0)) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-4 py-1 rounded shadow text-sm flex items-center gap-2 transition-all`}
                             >
                             {lobby.phase === 'voting' && pendingVotesCount > 0 
                                 ? `ATTESA VOTI (UMANI: ${pendingVotesCount})` 
@@ -2722,10 +2809,18 @@
                                     ? `ATTESA GIOCATORI (${pendingReadyCount})`
                                     : lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection'
                                         ? 'TUTTI DEVONO SCEGLIERE'
-                                        : lobby.phase === 'ceremony' 
-                                            ? (lobby.ceremonyData?.finalReveal && !lobby.ceremonyData?.tieMatch ? 'FINISCI' : lobby.ceremonyData?.tieMatch ? 'SPAREGGIO' : 'RIVELA') 
-                                            : 'AVANTI'} 
-                            {!(lobby.phase === 'voting' && pendingVotesCount > 0) && !(lobby.phase === 'social' && pendingReadyCount > 0) && !(lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') && <ArrowRight size={16} />}
+                                        : lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0
+                                            ? `ATTESA DISCORSI (${pendingSpeechesCount})`
+                                            : lobby.phase === 'jury_speeches' && pendingSpeechesCount === 0
+                                                ? `PROCEDI AL VOTO`
+                                                : lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0
+                                                    ? `ATTESA GIURATI (${pendingJuryVotesCount})`
+                                                    : lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting'
+                                                        ? 'INIZIA SPOGLIO'
+                                                        : lobby.phase === 'ceremony' || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'revealing')
+                                                            ? (lobby.ceremonyData?.finalReveal && !lobby.ceremonyData?.tieMatch ? 'FINISCI' : lobby.ceremonyData?.tieMatch ? 'SPAREGGIO' : 'RIVELA') 
+                                                            : 'AVANTI'} 
+                            {!(lobby.phase === 'voting' && pendingVotesCount > 0) && !(lobby.phase === 'social' && pendingReadyCount > 0) && !(lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') && !(lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) && !(lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) && <ArrowRight size={16} />}
                             </button>
                         )}
                      </div>
@@ -2733,12 +2828,11 @@
 
                   <div className="flex-1 overflow-y-auto p-4 relative">
                      
-                     {/* --- IDOL HUNT VIEW --- */}
                      {lobby.phase === 'idol_hunt' && lobby.idolData && (
                          <div className="flex flex-col items-center justify-center min-h-[80vh]">
                             <h2 className="text-4xl font-black text-yellow-400 mb-2 uppercase drop-shadow-lg">CACCIA AL TESORO</h2>
                             <p className="text-slate-300 mb-8 max-w-xl text-center">
-                                Una di queste casse contiene l'<strong>Idolo dell'Immunità</strong>. Se lo trovi, puoi usarlo per salvarti se vieni eliminato! Scegline una.
+                                Cerca vantaggi segreti come l'<strong>Idolo</strong> o il potente <strong>Ruba-Voto</strong>!
                             </p>
                             
                             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
@@ -2749,6 +2843,7 @@
                                     const hasIdol = c.id === lobby.idolData.luckyIndex;
                                     const hasExtraVote = c.id === lobby.idolData.extraVoteIndex;
                                     const hasAdvantage = c.id === lobby.idolData.advantageIndex;
+                                    const hasVoteSteal = c.id === lobby.idolData.voteStealIndex; 
                                     const ownerName = isTaken ? lobby.players.find(p => p.uid === c.owner)?.name : "";
 
                                     return (
@@ -2772,6 +2867,8 @@
                                                     <Vote size={40} className="text-green-400 animate-bounce drop-shadow-lg" />
                                                 ) : hasAdvantage ? (
                                                     <Zap size={40} className="text-yellow-400 animate-bounce drop-shadow-lg" />
+                                                ) : hasVoteSteal ? (
+                                                    <UserMinus size={40} className="text-cyan-400 animate-bounce drop-shadow-lg" />
                                                 ) : (
                                                     <Skull size={40} className="text-slate-500" />
                                                 )
@@ -2786,8 +2883,8 @@
                                             )}
                                             
                                             {isRevealed && isMine && (
-                                                <div className={`absolute -bottom-6 text-[10px] font-bold ${hasIdol ? 'text-purple-400' : hasExtraVote ? 'text-green-400' : hasAdvantage ? 'text-yellow-400' : 'text-slate-500'}`}>
-                                                    {hasIdol ? "IMMUNITÀ!" : hasExtraVote ? "VOTO EXTRA!" : hasAdvantage ? "BONUS +3!" : "VUOTO"}
+                                                <div className={`absolute -bottom-6 text-[10px] font-bold ${hasIdol ? 'text-purple-400' : hasExtraVote ? 'text-green-400' : hasAdvantage ? 'text-yellow-400' : hasVoteSteal ? 'text-cyan-400' : 'text-slate-500'}`}>
+                                                    {hasIdol ? "IMMUNITÀ!" : hasExtraVote ? "VOTO EXTRA!" : hasAdvantage ? "BONUS +3!" : hasVoteSteal ? "RUBA-VOTO!" : "VUOTO"}
                                                 </div>
                                             )}
                                             
@@ -2804,14 +2901,13 @@
                             {lobby.idolData.stage === 'reveal' && (
                                 <div className="mt-8 text-center animate-in slide-in-from-bottom">
                                     <div className="text-2xl font-bold mb-2">Tutte le casse sono state aperte!</div>
-                                    <p className="text-slate-400">Controlla la tua cassa. Se hai trovato l'idolo, è tuo segreto.</p>
+                                    <p className="text-slate-400">Controlla la tua cassa. I vantaggi sono segreti.</p>
                                     {isHost && <div className="mt-4 text-yellow-400 animate-pulse">Premi AVANTI per iniziare l'Episodio 1</div>}
                                 </div>
                             )}
                          </div>
                      )}
                      
-                     {/* ... (existing Redemtion view) ... */}
                      {lobby.phase === 'redemption' && lobby.redemptionData && (
                          <div className="flex flex-col items-center justify-center min-h-full">
                              <div className="text-center mb-8">
@@ -2862,15 +2958,12 @@
                                      <div className="flex flex-wrap gap-8 justify-center mb-12">
                                          {lobby.redemptionData.candidates.map(uid => {
                                              const p = lobby.players.find(x => x.uid === uid);
-                                             
-                                             // --- SAFETY CHECK AGGIUNTO ---
                                              if (!p) return null; 
                                              const rolls = lobby.redemptionData.rolls || {}; 
                                              const roll = rolls[uid];
 
                                              return (
                                                  <div key={uid} className="bg-slate-800 p-6 rounded-2xl flex flex-col items-center border-2 border-slate-600 w-48 relative">
-                                                     {/* --- FALLBACK IMG --- */}
                                                      {p.character && p.character.img ? (
                                                         <img src={p.character.img} className="w-32 h-32 rounded-full border-4 border-slate-500 object-cover mb-4"/>
                                                      ) : (
@@ -2885,7 +2978,6 @@
                                                          <div className="text-slate-500 italic animate-pulse py-4">Lancio...</div>
                                                      )}
 
-                                                     {/* Tasto per umani */}
                                                      {uid === user.uid && !roll && (
                                                          <button onClick={handleRedemptionRoll} className="absolute -bottom-4 bg-orange-600 px-6 py-2 rounded-full font-bold shadow-lg hover:scale-105 transition">LANCIA</button>
                                                      )}
@@ -2907,12 +2999,11 @@
                          </div>
                      )}
 
-                     {/* ... (existing Season Setup view) ... */}
                     {lobby.phase === 'season_setup' && isHost && nextSeasonConfig && (
                         <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
                             <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border-2 border-yellow-500 max-w-lg w-full">
                                 <h2 className="text-3xl font-black text-center mb-6 text-yellow-400">CONFIGURA STAGIONE {lobby.currentSeasonIndex + 2}</h2>
-                                <p className="text-slate-400 text-center mb-8">La stagione precedente si è conclusa. Decidi i parametri per la nuova stagione con i concorrenti che ritornano (Max: {lobby.players.length}).</p>
+                                <p className="text-slate-400 text-center mb-8">La stagione precedente si è conclusa. Decidi i parametri per la nuova stagione.</p>
 
                                 <div className="space-y-6">
                                     
@@ -2951,7 +3042,6 @@
                                     <div>
                                         <label className="block text-slate-400 font-bold mb-2 flex justify-between items-center">
                                             Dimensione della Fusione (Merge)
-                                            <span className="text-sm text-slate-500">(Max: {nextSeasonConfig.returningCount})</span>
                                         </label>
                                         <div className="flex items-center gap-4">
                                             <input 
@@ -2979,11 +3069,8 @@
                         </div>
                     )}
                      
-                     {/* ... (existing Challenge view) ... */}
                      {lobby.phase === 'challenge' && (
                         <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                            
-                            {/* NOTIFICA TEAM SWAP */}
                             {lobby.twistData?.type === 'team_swap' && (
                                  <div className="bg-orange-600/90 text-white p-8 rounded-2xl mb-8 text-center shadow-[0_0_30px_rgba(234,88,12,0.5)] border-4 border-orange-500 animate-bounce max-w-3xl z-50">
                                      <div className="flex items-center justify-center gap-4 mb-4">
@@ -3003,7 +3090,6 @@
                                  </div>
                             )}
 
-                            {/* LOGICA VISUALIZZAZIONE SFIDA ESISTENTE (MERGE) */}
                             {isMerge && lobby.challengeData && (
                                 lobby.challengeData.stage === 'rolling' ? (
                                 <div className="text-center animate-pulse w-full max-w-4xl">
@@ -3027,10 +3113,8 @@
                                         </button>
                                     )}
 
-                                    {/* VISUALIZZAZIONE DADI */}
                                     <div className="flex flex-wrap gap-4 justify-center">
                                         {lobby.challengeData.type === 'team' ? (
-                                            /* TEAM VIEW */
                                             <div className="flex w-full gap-8 justify-center">
                                                 {['A', 'B'].map(team => {
                                                     const teamMembers = Object.entries(lobby.challengeData.teams).filter(([u, t]) => t === team).map(([u]) => u);
@@ -3058,7 +3142,6 @@
                                                 })}
                                             </div>
                                         ) : (
-                                            /* INDIVIDUAL / SUDDEN DEATH VIEW */
                                             Object.entries(lobby.challengeData.rolls).map(([uid, val]) => {
                                                 const p = lobby.players.find(pl => pl.uid === uid);
                                                 return (
@@ -3087,7 +3170,6 @@
                             )
                            )}
                            
-                           {/* LOGICA VISUALIZZAZIONE SFIDA PRE-MERGE (SEMPLICE) */}
                            {!isMerge && !lobby.twistData && (
                                <div className="text-center animate-pulse">
                                    <Trophy size={64} className="text-slate-600 mx-auto mb-4"/>
@@ -3099,36 +3181,113 @@
                         </div>
                      )}
 
-                     {/* ... (existing Jury Vote and Voting logic) ... */}
-                     {/* --- NEW: JURY VOTE VISUALIZATION --- */}
+                     {/* SCHERMATA DISCORSI FINALI */}
+                     {lobby.phase === 'jury_speeches' && lobby.juryData && (
+                         <div className="flex flex-col items-center min-h-[80vh] justify-center">
+                             <h1 className="text-5xl font-black text-yellow-400 mb-2 uppercase tracking-widest drop-shadow-lg">DISCORSI FINALI</h1>
+                             <p className="text-slate-300 mb-8 text-center max-w-2xl">
+                                 La giuria ascolta. È il momento di spiegare perché meritate di vincere questo show!
+                             </p>
+
+                             <div className="flex gap-16 mb-12">
+                                 {[lobby.juryData.finalist1, lobby.juryData.finalist2].map(fid => {
+                                     const p = lobby.players.find(pl => pl.uid === fid);
+                                     const speechDone = lobby.juryData.speeches?.[fid];
+                                     const isMe = user.uid === fid;
+
+                                     return (
+                                         <div key={fid} className="flex flex-col items-center w-80">
+                                             <img src={p.character.img} className="w-40 h-40 rounded-full border-4 border-white shadow-2xl object-cover mb-4"/>
+                                             <div className="bg-slate-800 px-6 py-2 rounded-xl text-2xl font-black mb-4">{p.name}</div>
+                                             
+                                             {speechDone ? (
+                                                 <div className="speech-bubble animate-in zoom-in w-full">
+                                                     "{speechDone}"
+                                                 </div>
+                                             ) : isMe ? (
+                                                 <div className="w-full">
+                                                    <textarea 
+                                                        value={mySpeech}
+                                                        onChange={(e) => setMySpeech(e.target.value)}
+                                                        placeholder="Scrivi qui il tuo appello alla giuria..."
+                                                        className="w-full bg-slate-800 text-white p-3 rounded-xl border border-slate-500 focus:border-yellow-400 outline-none resize-none h-24 mb-2 text-sm"
+                                                    />
+                                                    <button onClick={submitFinalSpeech} disabled={!mySpeech.trim()} className="w-full bg-green-600 hover:bg-green-500 disabled:bg-slate-600 text-white font-bold py-2 rounded-xl flex items-center justify-center gap-2">
+                                                        <Mic size={18}/> PARLA ALLA GIURIA
+                                                    </button>
+                                                 </div>
+                                             ) : (
+                                                 <div className="text-slate-500 italic animate-pulse w-full text-center bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                                                     Sta preparando il discorso...
+                                                 </div>
+                                             )}
+                                         </div>
+                                     );
+                                 })}
+                             </div>
+                             
+                             <div className="mt-8 bg-slate-800 p-4 rounded-xl border border-slate-600 text-slate-400 flex items-center gap-4">
+                                <Users size={24}/> La Giuria ({lobby.juryData.jurors.length} membri) vi sta giudicando attentamente...
+                             </div>
+                         </div>
+                     )}
+
+                     {/* SCHERMATA VOTO GIURIA */}
                      {lobby.phase === 'jury_vote' && lobby.juryData && (
                          <div className="flex flex-col items-center min-h-[80vh] justify-center">
                              <h1 className="text-5xl font-black text-yellow-400 mb-2 uppercase tracking-widest drop-shadow-lg">GIURIA FINALE</h1>
                              <p className="text-slate-300 mb-8">Gli ex-concorrenti decidono il destino dei finalisti.</p>
 
-                             {/* FINALISTS */}
                              <div className="flex gap-16 mb-12">
                                  {[lobby.juryData.finalist1, lobby.juryData.finalist2].map(fid => {
                                      const p = lobby.players.find(pl => pl.uid === fid);
-                                     const votesReceived = Object.values(lobby.juryData.votes).slice(0, lobby.juryData.revealedCount).filter(v => v === fid).length;
                                      
+                                     const votesReceived = lobby.juryData.jurors
+                                        .slice(0, lobby.juryData.revealedCount)
+                                        .filter(j => lobby.juryData.votes && lobby.juryData.votes[j.uid] === fid)
+                                        .length;
+                                        
+                                     const isJuror = lobby.juryData.jurors.some(j => j.uid === user.uid);
+                                     const hasVoted = !!(lobby.juryData.votes && lobby.juryData.votes[user.uid]);
+                                     const speech = lobby.juryData.speeches?.[fid];
+
                                      return (
-                                         <div key={fid} className="flex flex-col items-center">
+                                         <div key={fid} className="flex flex-col items-center w-72">
+                                             {speech && (
+                                                <div className="speech-bubble w-full mb-4 opacity-80 text-xs">
+                                                    "{speech}"
+                                                </div>
+                                             )}
                                              <img src={p.character.img} className="w-40 h-40 rounded-full border-4 border-white shadow-2xl object-cover mb-4"/>
                                              <div className="bg-slate-800 px-6 py-2 rounded-xl text-2xl font-black mb-2">{p.name}</div>
-                                             <div className="text-6xl font-black text-yellow-400 bg-black/40 px-6 py-4 rounded-xl border-2 border-yellow-500/50">
-                                                 {votesReceived}
-                                             </div>
+                                             {lobby.juryData.stage === 'revealing' ? (
+                                                 <div className="text-6xl font-black text-yellow-400 bg-black/40 px-6 py-4 rounded-xl border-2 border-yellow-500/50">
+                                                     {votesReceived}
+                                                 </div>
+                                             ) : (
+                                                 isJuror && !hasVoted && (
+                                                     <button onClick={() => submitJuryVote(fid)} className="bg-green-600 hover:bg-green-500 px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 animate-bounce mt-2 text-white">
+                                                         <Vote /> VOTA {p.name}
+                                                     </button>
+                                                 )
+                                             )}
                                          </div>
                                      );
                                  })}
                              </div>
 
-                             {/* JURORS GRID */}
+                             {lobby.juryData.stage === 'voting' && (
+                                 <div className="mb-12 bg-slate-800 p-6 rounded-xl text-center border border-slate-600 max-w-xl w-full">
+                                     <h3 className="text-2xl font-bold mb-2">Votazioni in Corso...</h3>
+                                     <p className="text-slate-400">La giuria sta decidendo chi vincerà questa stagione.</p>
+                                     <div className="mt-4 font-mono text-yellow-400 text-xl font-black">Voti confermati: {Object.keys(lobby.juryData.votes || {}).length} / {lobby.juryData.jurors.length}</div>
+                                 </div>
+                             )}
+
                              <div className="flex flex-wrap justify-center gap-4 max-w-5xl">
                                  {lobby.juryData.jurors.map((juror, idx) => {
                                      const isRevealed = idx < lobby.juryData.revealedCount;
-                                     const voteForId = lobby.juryData.votes[juror.uid];
+                                     const voteForId = (lobby.juryData.votes || {})[juror.uid];
                                      const voteForName = lobby.players.find(p => p.uid === voteForId)?.name;
 
                                      return (
@@ -3145,7 +3304,7 @@
                                  })}
                              </div>
 
-                             {isHost && (
+                             {isHost && lobby.juryData.stage === 'revealing' && (
                                  <button 
                                     onClick={advanceGame} 
                                     className="mt-12 bg-yellow-500 hover:bg-yellow-400 text-black font-black text-2xl py-4 px-12 rounded-full shadow-[0_0_30px_rgba(234,179,8,0.5)] animate-pulse flex items-center gap-3"
@@ -3158,8 +3317,6 @@
 
                      {lobby.phase === 'voting' && (
                          <div className="flex flex-col items-center">
-                             {/* ... (existing voting UI) ... */}
-                             {/* --- KILLER TWIST HEADER --- */}
                              {lobby.twistData?.type === 'killer' ? (
                                  <div className="bg-red-600/90 text-white p-6 rounded-2xl mb-8 text-center shadow-[0_0_30px_rgba(220,38,38,0.5)] border-4 border-red-500 animate-bounce">
                                      <div className="flex items-center justify-center gap-4 mb-2">
@@ -3173,7 +3330,6 @@
                                  <h2 className="text-3xl font-black mb-2 flex items-center gap-2"><Vote /> CHI VUOI ELIMINARE?</h2>
                              )}
                              
-                             {/* --- JOINT CEREMONY HEADER (NEW) --- */}
                              {lobby.twistData?.type === 'joint_ceremony' && (
                                  <div className="bg-purple-900/80 border-2 border-purple-500 p-4 rounded-xl mb-6 text-center shadow-[0_0_20px_rgba(168,85,247,0.4)] animate-in slide-in-from-top duration-500">
                                      <h3 className="text-2xl font-black text-purple-300 uppercase flex items-center justify-center gap-2 mb-2">
@@ -3186,7 +3342,6 @@
                                  </div>
                              )}
                              
-                             {/* MODIFICA PER JOINT CEREMONY: Il team vincente può votare se joint ceremony è attivo */}
                              {!isMerge && myPlayer.team !== lobby.losingTeam && lobby.twistData?.type !== 'joint_ceremony' ? (
                                  <div className="mt-8 bg-green-600/20 border-2 border-green-500 p-8 rounded-2xl text-center animate-in zoom-in">
                                      <Coffee size={48} className="mx-auto mb-4 text-green-400" />
@@ -3199,17 +3354,17 @@
 
                                  {/* --- INTERFACCIA VOTO EXTRA --- */}
                                  {lobby.idolData?.extraVoteHolder === user.uid && !lobby.idolData.extraVoteConsumed && lobby.twistData?.type !== 'killer' && myPlayer.status !== 'eliminated' && (
-                                     <div className="mb-6 bg-slate-800 p-4 rounded-xl border border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)] animate-in slide-in-from-top">
+                                     <div className="mb-6 bg-slate-800 p-4 rounded-xl border border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)] animate-in slide-in-from-top w-full max-w-md">
                                          <div className="flex items-center justify-between">
                                              <div className="flex items-center gap-3">
                                                  <Vote className="text-green-400" size={32}/>
                                                  <div>
                                                      <h3 className="font-bold text-green-400 text-lg">HAI IL VOTO EXTRA</h3>
-                                                     <p className="text-xs text-slate-400">Puoi usarlo una sola volta. Il tuo voto varrà doppio.</p>
+                                                     <p className="text-xs text-slate-400">Puoi usarlo una sola volta (+1 Voto).</p>
                                                  </div>
                                              </div>
                                              <button 
-                                                onClick={() => setUseExtraVote(!useExtraVote)}
+                                                onClick={() => { setUseExtraVote(!useExtraVote); setUseVoteSteal(false); }}
                                                 className={`px-4 py-2 rounded-lg font-bold transition-all ${useExtraVote ? 'bg-green-500 text-black shadow-lg scale-105' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
                                              >
                                                  {useExtraVote ? "ATTIVO (+1)" : "NON USARE"}
@@ -3217,8 +3372,46 @@
                                          </div>
                                      </div>
                                  )}
+
+                                 {/* --- INTERFACCIA RUBA-VOTO --- */}
+                                 {lobby.idolData?.voteStealHolder === user.uid && !lobby.idolData.voteStealConsumed && lobby.twistData?.type !== 'killer' && myPlayer.status !== 'eliminated' && (
+                                     <div className="mb-6 bg-slate-800 p-4 rounded-xl border border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] animate-in slide-in-from-top w-full max-w-md">
+                                         <div className="flex flex-col gap-3">
+                                             <div className="flex items-center justify-between">
+                                                 <div className="flex items-center gap-3">
+                                                     <UserMinus className="text-cyan-400" size={32}/>
+                                                     <div>
+                                                         <h3 className="font-bold text-cyan-400 text-lg">HAI IL RUBA-VOTO</h3>
+                                                         <p className="text-xs text-slate-400">Annulla il voto di un avversario e usalo tu.</p>
+                                                     </div>
+                                                 </div>
+                                                 <button 
+                                                    onClick={() => { setUseVoteSteal(!useVoteSteal); setUseExtraVote(false); }}
+                                                    className={`px-4 py-2 rounded-lg font-bold transition-all ${useVoteSteal ? 'bg-cyan-500 text-black shadow-lg scale-105' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                                                 >
+                                                     {useVoteSteal ? "ATTIVO (+1)" : "NON USARE"}
+                                                 </button>
+                                             </div>
+                                             
+                                             {useVoteSteal && (
+                                                 <div className="mt-2">
+                                                     <label className="text-sm font-bold text-cyan-300">Chi vuoi derubare del voto?</label>
+                                                     <select 
+                                                         className="w-full mt-1 bg-slate-900 border border-cyan-500 text-white rounded p-2"
+                                                         value={voteStealVictim}
+                                                         onChange={(e) => setVoteStealVictim(e.target.value)}
+                                                     >
+                                                         <option value="">-- Seleziona un bersaglio --</option>
+                                                         {activePlayers.filter(p => p.uid !== user.uid && (isMerge || lobby.twistData?.type === 'joint_ceremony' || p.team === lobby.losingTeam)).map(p => (
+                                                             <option key={p.uid} value={p.uid}>{p.name}</option>
+                                                         ))}
+                                                     </select>
+                                                 </div>
+                                             )}
+                                         </div>
+                                     </div>
+                                 )}
                                  
-                                 {/* Check if user can vote in killer twist */}
                                  {lobby.twistData?.type === 'killer' && user.uid !== lobby.twistData.killerId ? (
                                      <div className="text-2xl text-red-500 font-black bg-black/50 px-8 py-4 rounded-xl animate-pulse">
                                          NON PUOI VOTARE. Il tuo destino è nelle mani del Killer.
@@ -3229,12 +3422,15 @@
                                      <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
                                          {activePlayers.map(p => {
                                              const canVoteFor = (!isMerge && p.team === lobby.losingTeam) || (isMerge && !(lobby.immunity || []).includes(p.uid));
-                                             if (!canVoteFor || p.uid === user.uid) return null;
+                                             
+                                             const myTeamActivePlayers = activePlayers.filter(ap => ap.team === myPlayer.team);
+                                             const isOnlyMember = !isMerge && myTeamActivePlayers.length === 1 && p.team === lobby.losingTeam;
+                                             
+                                             if (!canVoteFor || (p.uid === user.uid && !isOnlyMember)) return null;
                                              
                                              const iVotedFor = lobby.votes?.[user.uid] === p.uid;
                                              
-                                             // UI DIFFERENZIATA SE STO USANDO IL TOTEM
-                                             const ringClass = useExtraVote 
+                                             const ringClass = (useExtraVote || useVoteSteal)
                                                 ? 'hover:ring-4 hover:ring-green-500 cursor-crosshair' 
                                                 : iVotedFor ? 'ring-4 ring-red-600 scale-105' : 'hover:scale-105';
 
@@ -3247,11 +3443,11 @@
                                                  >
                                                      <img src={p.character.img} className="w-full h-full object-cover"/>
                                                      
-                                                     <div className={`absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-black text-xl tracking-widest bg-black/60 ${useExtraVote ? 'text-green-400' : 'text-red-500'}`}>
-                                                         {useExtraVote ? "+1 VOTO" : "VOTA"}
+                                                     <div className={`absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-black text-xl tracking-widest bg-black/60 ${(useExtraVote || useVoteSteal) ? 'text-green-400' : 'text-red-500'}`}>
+                                                         {(useExtraVote || useVoteSteal) ? "+1 VOTO" : "VOTA"}
                                                      </div>
                                                      
-                                                     {!useExtraVote && iVotedFor && <div className="absolute inset-0 flex items-center justify-center bg-red-600/50 font-black text-white">VOTATO</div>}
+                                                     {!(useExtraVote || useVoteSteal) && iVotedFor && <div className="absolute inset-0 flex items-center justify-center bg-red-600/50 font-black text-white">VOTATO</div>}
                                                  </button>
                                              )
                                          })}
@@ -3264,7 +3460,6 @@
                      )}
 
                      {lobby.phase === 'final_showdown' && lobby.finalData && (
-                        // ... (codice esistente)
                          <div className="flex flex-col items-center h-full">
                              <h1 className="text-4xl font-black text-yellow-400 mb-8 uppercase tracking-widest">GRAN FINALE</h1>
                              
@@ -3321,12 +3516,10 @@
                      )}
 
                      {lobby.phase === 'game_over' && (
-                        // ... (codice esistente)
                          <div className="flex flex-col items-center h-full justify-center">
                              <h1 className="text-5xl font-black text-yellow-400 mb-8">CLASSIFICA FINALE</h1>
                              
-                             <div className="flex flex-col md:flex-row gap-8 w-full max-w-5xl h-[70vh]">
-                                 {/* CLASSIFICA PIAZZAMENTI */}
+                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-7xl h-[70vh]">
                                  <div className="flex-1 bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
                                      <div className="bg-slate-700/50 p-4 border-b border-slate-600 text-center font-bold text-yellow-400 uppercase tracking-widest sticky top-0">
                                          Piazzamenti
@@ -3358,7 +3551,6 @@
                                      </div>
                                  </div>
 
-                                 {/* CLASSIFICA VOTI RICEVUTI (EXTRA) */}
                                  <div className="flex-1 bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
                                      <div className="bg-slate-700/50 p-4 border-b border-slate-600 text-center font-bold text-red-400 uppercase tracking-widest sticky top-0 flex items-center justify-center gap-2">
                                          <Target size={20}/> Classifica Bersagli (Voti)
@@ -3381,6 +3573,38 @@
                                                      <div className="flex items-center gap-2">
                                                          <div className="font-black text-xl text-red-500">{r.votes || 0}</div>
                                                          <span className="text-xs text-slate-500 uppercase">Voti</span>
+                                                     </div>
+                                                 </div>
+                                                );
+                                            });
+                                         })()}
+                                     </div>
+                                 </div>
+
+                                 <div className="flex-1 bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
+                                     <div className="bg-slate-700/50 p-4 border-b border-slate-600 text-center font-bold text-pink-400 uppercase tracking-widest sticky top-0 flex items-center justify-center gap-2">
+                                         <Heart size={20}/> I Più Amati (Top 5)
+                                     </div>
+                                     <div className="flex-1 overflow-y-auto no-scrollbar">
+                                         {(() => {
+                                            const sortedByFriends = [...lobby.players].map(p => {
+                                                const score = Object.values(p.relationships || {}).reduce((acc, val) => acc + (val > 0 ? val : 0), 0);
+                                                return { name: p.name, score, img: p.character?.img };
+                                            }).sort((a, b) => b.score - a.score).slice(0, 5);
+                                            
+                                            return sortedByFriends.map((r, i) => {
+                                                return (
+                                                 <div key={i} className="flex items-center justify-between p-4 border-b border-slate-700 hover:bg-slate-700/50">
+                                                     <div className="flex items-center gap-4">
+                                                         <div className="font-bold text-slate-500 w-6 text-center">{i+1}</div>
+                                                         <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-600 flex-shrink-0">
+                                                            {r.img && <img src={r.img} className="w-full h-full object-cover"/>}
+                                                         </div>
+                                                         <div className="font-bold text-white text-sm">{r.name}</div>
+                                                     </div>
+                                                     <div className="flex items-center gap-2">
+                                                         <div className="font-black text-xl text-pink-500">{r.score}</div>
+                                                         <Heart size={16} className="text-pink-500" fill="currentColor"/>
                                                      </div>
                                                  </div>
                                                 );
@@ -3476,7 +3700,6 @@
                                                         <div className="font-mono text-yellow-400 font-bold mt-1 text-lg">
                                                             {showVotes ? `${votes} voti` : "?"}
                                                         </div>
-                                                        {/* VISUALIZZAZIONE NOMI VOTANTI */}
                                                         {showVotes && lobby.ceremonyData.isOpenVote && lobby.ceremonyData.votersMap?.[uid] && (
                                                             <div className="text-[10px] text-slate-300 max-w-[120px] text-center mt-1 bg-black/50 p-1 rounded animate-in zoom-in">
                                                                 <span className="text-red-400 font-bold">Votato da:</span><br/>
@@ -3519,7 +3742,6 @@
                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                                                            {isImmune && <Shield size={16} className="absolute top-1 right-1 text-yellow-400 fill-yellow-400 drop-shadow-md" />}
                                                            
-                                                           {/* INDICATORE PRONTO */}
                                                            {lobby.phase === 'social' && !p.isBot && isReady && (
                                                                <div className="absolute top-1 left-1 bg-green-500 rounded-full p-0.5" title="Pronto">
                                                                     <CheckCircle size={14} className="text-white"/>
@@ -3529,7 +3751,6 @@
                                                            {!isMe && (
                                                                <div className="absolute top-1 left-1 flex flex-col gap-1">
                                                                    {rel !== 0 && (
-                                                                       // MODIFICA: Colore background Rosa se relazione == 15
                                                                        <div className={`text-[10px] font-black px-1 rounded flex items-center gap-0.5 ${rel === 15 ? 'bg-pink-600' : rel > 0 ? 'bg-green-600' : 'bg-red-600'}`}>
                                                                            <Heart size={8} fill="currentColor"/> {rel}
                                                                        </div>
