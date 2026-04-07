@@ -92,7 +92,7 @@
           Heart, Users, Play, LogOut, MessageSquare, Skull, 
           Trophy, Crown, UserPlus, Shield, Swords, Flame, 
           AlertTriangle, ArrowRight, Dices, Send, X, Vote, ListOrdered, Coffee, ChevronDown, Award, CheckCircle, Undo2,
-          Package, Gem, Lock, Unlock, Target, Users2, AlertOctagon, Shuffle, Gavel, Zap, Hammer, UserMinus, Mic
+          Package, Gem, Lock, Unlock, Target, Users2, AlertOctagon, Shuffle, Gavel, Zap, Hammer, UserMinus, Mic, Eye, RefreshCw
         } from 'lucide-react';
 
         // --- TUE CHIAVI FIREBASE INSERITE ---
@@ -816,22 +816,16 @@
 
             // --- IDOL & EXTRA VOTE SETUP ---
             const totalCrates = currentPlayers.length;
-            const luckyIndex = Math.floor(Math.random() * totalCrates);
             
-            let extraVoteIndex = Math.floor(Math.random() * totalCrates);
-            while (extraVoteIndex === luckyIndex && totalCrates > 1) {
-                 extraVoteIndex = Math.floor(Math.random() * totalCrates);
-            }
+            let availableIndices = Array.from({length: totalCrates}, (_, i) => i);
+            availableIndices.sort(() => Math.random() - 0.5);
             
-            let advantageIndex = Math.floor(Math.random() * totalCrates);
-            while ((advantageIndex === luckyIndex || advantageIndex === extraVoteIndex) && totalCrates > 2) {
-                 advantageIndex = Math.floor(Math.random() * totalCrates);
-            }
-
-            let voteStealIndex = Math.floor(Math.random() * totalCrates);
-            while ((voteStealIndex === luckyIndex || voteStealIndex === extraVoteIndex || voteStealIndex === advantageIndex) && totalCrates > 3) {
-                 voteStealIndex = Math.floor(Math.random() * totalCrates);
-            }
+            const luckyIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
+            const extraVoteIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
+            const advantageIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
+            const voteStealIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
+            const spyDroneIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
+            const mutinyIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
 
             const initialCrates = Array.from({length: totalCrates}, (_, i) => ({ id: i, owner: null }));
 
@@ -841,25 +835,18 @@
               phase: 'idol_hunt', 
               idolData: {
                   active: true,
-                  luckyIndex: luckyIndex,
-                  extraVoteIndex: extraVoteIndex, 
-                  extraVoteHolder: null,          
-                  extraVoteConsumed: false,       
-                  extraVoteUsedRound: null,       
-                  advantageIndex: advantageIndex, 
-                  advantageHolder: null,          
-                  advantageConsumed: false,     
-                  voteStealIndex: voteStealIndex, 
-                  voteStealHolder: null,          
-                  voteStealConsumed: false,       
-                  voteStealVictim: null,          
-                  voteStealUsedRound: null,       
+                  luckyIndex,
+                  extraVoteIndex, extraVoteHolder: null, extraVoteConsumed: false, extraVoteUsedRound: null,       
+                  advantageIndex, advantageHolder: null, advantageConsumed: false,     
+                  voteStealIndex, voteStealHolder: null, voteStealConsumed: false, voteStealVictim: null, voteStealUsedRound: null, 
+                  spyDroneIndex, spyDroneHolder: null, spyDroneUses: 3,
+                  mutinyIndex, mutinyHolder: null, mutinyConsumed: false,
                   crates: initialCrates,
                   stage: 'selection', 
                   holder: null
               },
               round: 0,
-              logs: arrayUnion(`--- CACCIA AI VANTAGGI (Idolo, Voto Extra, Bonus Sfida, Ruba-Voto) ---`)
+              logs: arrayUnion(`--- CACCIA AI VANTAGGI (Idolo, Voto Extra, Bonus Sfida, Ruba-Voto, Drone, Ammutinamento) ---`)
             });
           };
 
@@ -940,9 +927,16 @@
           
           const [useExtraVote, setUseExtraVote] = useState(false);
           const [useAdvantage, setUseAdvantage] = useState(false); 
-          
           const [useVoteSteal, setUseVoteSteal] = useState(false);
           const [voteStealVictim, setVoteStealVictim] = useState("");
+          
+          // NUOVI ITEM STATE
+          const [showSpyDroneModal, setShowSpyDroneModal] = useState(false);
+          const [spyDroneTarget, setSpyDroneTarget] = useState("");
+          const [spyDroneResult, setSpyDroneResult] = useState(null);
+          
+          const [showMutinyModal, setShowMutinyModal] = useState(false);
+          const [mutinyTarget, setMutinyTarget] = useState("");
           
           const [mySpeech, setMySpeech] = useState("");
 
@@ -985,6 +979,55 @@
                  return { updatedPlayers, newLogs };
           };
 
+          const handleUseSpyDrone = async () => {
+              if (!spyDroneTarget) return;
+              const target = lobby.players.find(p => p.uid === spyDroneTarget);
+              if (!target) return;
+              
+              let highest = -999;
+              let lowest = 999;
+              let bestFriend = "Nessuno";
+              let worstEnemy = "Nessuno";
+              
+              Object.entries(target.relationships || {}).forEach(([uid, val]) => {
+                  if (uid !== target.uid) { 
+                      if (val > highest) { highest = val; bestFriend = lobby.players.find(p=>p.uid===uid)?.name || "Sconosciuto"; }
+                      if (val < lowest) { lowest = val; worstEnemy = lobby.players.find(p=>p.uid===uid)?.name || "Sconosciuto"; }
+                  }
+              });
+              
+              const resultString = `🎯 DATI DRONE SU ${target.name.toUpperCase()}:\n\n❤️ Migliore Alleato:\n${highest > 0 ? bestFriend : 'Nessuno'}\n\n💔 Peggior Nemico:\n${lowest < 0 ? worstEnemy : 'Nessuno'}\n\n🤝 Alleanze segrete:\n${(target.alliances || []).length > 0 ? 'Sì' : 'No'}`;
+              
+              setSpyDroneResult(resultString);
+              
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`idolData.spyDroneUses`]: lobby.idolData.spyDroneUses - 1
+              });
+          };
+
+          const handleUseMutiny = async () => {
+              if (!mutinyTarget) return;
+              const target = lobby.players.find(p => p.uid === mutinyTarget);
+              if (!target) return;
+              
+              const myTeam = myPlayer.team;
+              const targetTeam = target.team;
+              
+              const updatedPlayers = lobby.players.map(p => {
+                  if (p.uid === user.uid) return { ...p, team: targetTeam };
+                  if (p.uid === target.uid) return { ...p, team: myTeam };
+                  return p;
+              });
+              
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  players: updatedPlayers,
+                  [`idolData.mutinyConsumed`]: true,
+                  logs: arrayUnion(`🔄 COLPO DI SCENA! ${myPlayer.name} ha usato l'Ammutinamento scambiando di squadra con ${target.name}!`)
+              });
+              
+              setShowMutinyModal(false);
+          };
+
           const submitJuryVote = async (finalistId) => {
               if (lobby.phase !== 'jury_vote' || lobby.juryData?.stage !== 'voting') return;
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
@@ -1010,6 +1053,11 @@
             setUseVoteSteal(false);
             setVoteStealVictim("");
             setMySpeech("");
+            setShowSpyDroneModal(false);
+            setSpyDroneTarget("");
+            setSpyDroneResult(null);
+            setShowMutinyModal(false);
+            setMutinyTarget("");
           }, [lobby.phase, lobby.round]);
 
           useEffect(() => {
@@ -1093,61 +1141,12 @@
                          const victimId = losers[0];
                          const victim = lobby.players.find(p => p.uid === victimId);
                          
-                         const updatedPlayers = lobby.players.map(p => p.uid === victimId ? { ...p, status: 'eliminated' } : p);
-                         
-                         const rankingEntry = { 
-                              name: victim.name, 
-                              team: victim.team || "Merge", 
-                              round: lobby.round, 
-                              season: currentSeason.name,
-                              immunities: victim.immunityWins || 0,
-                              votes: victim.totalVotesReceived || 0
-                         };
-
-                         const nextRound = lobby.round + 1;
-                         const redemptionConfig = lobby.config.redemption;
-                         let isRedemptionEpisode = false;
-                         if (redemptionConfig && redemptionConfig.enabled && redemptionConfig.episodes) {
-                              if (Array.isArray(redemptionConfig.episodes)) {
-                                   isRedemptionEpisode = redemptionConfig.episodes.includes(nextRound);
-                              }
-                         }
-
-                         let updates = {
-                             players: updatedPlayers,
-                             rankings: arrayUnion(rankingEntry),
-                             logs: arrayUnion(`${victim.name} ha fatto il punteggio più basso (${minRoll}) ed è ELIMINATO DIRETTAMENTE!`)
-                         };
-
-                         if (isRedemptionEpisode) {
-                              updates = {
-                                  ...updates,
-                                  phase: 'redemption',
-                                  redemptionData: { active: true, stage: 'selection', candidates: [], rolls: {} },
-                                  round: nextRound,
-                                  votes: {},
-                                  immunity: [],
-                                  diceRoll: null,
-                                  losingTeam: null,
-                                  ceremonyData: null,
-                                  challengeData: null,
-                                  logs: arrayUnion(`${victim.name} è stato eliminato!`, `--- EPISODIO SPECIALE: REDEMPTION! ---`)
-                              };
-                         } else {
-                              updates = {
-                                  ...updates,
-                                  phase: 'episode_start',
-                                  round: nextRound,
-                                  votes: {},
-                                  immunity: [],
-                                  diceRoll: null,
-                                  losingTeam: null,
-                                  ceremonyData: null,
-                                  challengeData: null
-                              };
-                         }
-
-                         updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
+                         // Modifica: Invece di eliminare subito, mostriamo a schermo la sconfitta
+                         updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                             [`challengeData.stage`]: 'finished',
+                             [`challengeData.loser`]: victimId,
+                             logs: arrayUnion(`Sfida Terminata! ${victim.name} ha fatto il punteggio più basso (${minRoll}) ed è a rischio eliminazione!`)
+                         });
                     }
                     return;
                  }
@@ -1456,6 +1455,12 @@
                   const vsWinnerUid = newCrates.find(c => c.id === lobby.idolData.voteStealIndex)?.owner;
                   updates[`idolData.voteStealHolder`] = vsWinnerUid;
 
+                  const spyWinnerUid = newCrates.find(c => c.id === lobby.idolData.spyDroneIndex)?.owner;
+                  updates[`idolData.spyDroneHolder`] = spyWinnerUid;
+                  
+                  const mutWinnerUid = newCrates.find(c => c.id === lobby.idolData.mutinyIndex)?.owner;
+                  updates[`idolData.mutinyHolder`] = mutWinnerUid;
+
                   updates[`logs`] = arrayUnion("Tutte le casse sono state assegnate! Apertura in corso...");
               }
 
@@ -1744,7 +1749,65 @@
             }
             
             else if (lobby.phase === 'challenge') {
-              if (!isMerge) {
+              if (lobby.challengeData.type === 'sudden_death') {
+                  const victimId = lobby.challengeData.loser;
+                  const victim = lobby.players.find(p => p.uid === victimId);
+                  
+                  const updatedPlayers = lobby.players.map(p => p.uid === victimId ? { ...p, status: 'eliminated' } : p);
+                  
+                  const rankingEntry = { 
+                       name: victim.name, 
+                       team: victim.team || "Merge", 
+                       round: lobby.round, 
+                       season: currentSeason.name,
+                       immunities: victim.immunityWins || 0,
+                       votes: victim.totalVotesReceived || 0
+                  };
+
+                  const nextRound = lobby.round + 1;
+                  const redemptionConfig = lobby.config.redemption;
+                  let isRedemptionEpisode = false;
+                  if (redemptionConfig && redemptionConfig.enabled && redemptionConfig.episodes) {
+                       if (Array.isArray(redemptionConfig.episodes)) {
+                            isRedemptionEpisode = redemptionConfig.episodes.includes(nextRound);
+                       }
+                  }
+
+                  updates = {
+                      players: updatedPlayers,
+                      rankings: arrayUnion(rankingEntry),
+                      logs: arrayUnion(`${victim.name} è ELIMINATO DIRETTAMENTE dallo show!`)
+                  };
+
+                  if (isRedemptionEpisode) {
+                       updates = {
+                           ...updates,
+                           phase: 'redemption',
+                           redemptionData: { active: true, stage: 'selection', candidates: [], rolls: {} },
+                           round: nextRound,
+                           votes: {},
+                           immunity: [],
+                           diceRoll: null,
+                           losingTeam: null,
+                           ceremonyData: null,
+                           challengeData: null,
+                           logs: arrayUnion(`${victim.name} è stato eliminato!`, `--- EPISODIO SPECIALE: REDEMPTION! ---`)
+                       };
+                  } else {
+                       updates = {
+                           ...updates,
+                           phase: 'episode_start',
+                           round: nextRound,
+                           votes: {},
+                           immunity: [],
+                           diceRoll: null,
+                           losingTeam: null,
+                           ceremonyData: null,
+                           challengeData: null
+                       };
+                  }
+              }
+              else if (!isMerge) {
                  const teams = [...new Set(activePlayers.map(p => p.team))];
                  const winningTeam = teams[Math.floor(Math.random() * teams.length)];
                  const losingTeams = teams.filter(t => t !== winningTeam);
@@ -1935,52 +1998,36 @@
                  updates = { [`ceremonyData.revealedCount`]: data.revealedCount + 1 };
               } 
               else if (!data.finalReveal) {
-                  updates = { [`ceremonyData.finalReveal`]: true };
-              } 
-              else {
+                  // MODIFICA: Calcolo visivo dell'Idolo durante la Rivelazione
                   let victimsIds = Array.isArray(data.eliminated) ? [...data.eliminated] : [data.eliminated].filter(Boolean);
-                  const isDouble = data.isDoubleElimination;
-                  
                   let firstVictim = victimsIds[0];
+
                   if (firstVictim && lobby.idolData && lobby.idolData.holder === firstVictim && lobby.idolData.active) {
-                      newLogs.push(`COLPO DI SCENA! ${lobby.players.find(p => p.uid === firstVictim).name} usa l'Idolo dell'Immunità!`);
                       updates[`idolData.active`] = false; 
                       updates[`idolData.holder`] = null;
+                      updates[`ceremonyData.idolPlayedBy`] = firstVictim;
+                      newLogs.push(`COLPO DI SCENA! ${lobby.players.find(p => p.uid === firstVictim).name} usa l'Idolo dell'Immunità!`);
 
                       const runnerUpId = data.bottomTwo.find(id => id !== firstVictim);
                       
                       if (runnerUpId) {
                          firstVictim = runnerUpId;
-                         newLogs.push(`Il secondo più votato, ${lobby.players.find(p => p.uid === firstVictim).name}, viene eliminato al suo posto!`);
+                         victimsIds[0] = runnerUpId;
+                         newLogs.push(`I voti sono annullati! Il secondo più votato, ${lobby.players.find(p => p.uid === firstVictim).name}, viene eliminato al suo posto!`);
                       } else {
                           newLogs.push("Nessun altro da eliminare! Eliminazione annullata.");
-                          firstVictim = null;
+                          victimsIds = [];
                       }
                   }
 
-                  let finalVictims = [];
-                  if (firstVictim) {
-                      finalVictims.push(firstVictim);
-                      
-                      if (isDouble && data.eliminatedSecond) {
-                          let secondVictim = data.eliminatedSecond;
-                          if (secondVictim === firstVictim) {
-                             const topTwoIds = Object.keys(data.voteCounts).sort((a, b) => data.voteCounts[b] - data.voteCounts[a]);
-                             let nextVictim = topTwoIds.find(id => !finalVictims.includes(id) && lobby.players.find(p => p.uid === id).status === 'active');
-                             secondVictim = nextVictim;
-
-                          } else if (secondVictim === lobby.idolData?.holder && lobby.idolData?.active) {
-                              newLogs.push(`COSA?! ${lobby.players.find(p => p.uid === secondVictim).name} usa il SECONDO Idolo dell'Immunità!`);
-                              updates[`idolData.active`] = false; 
-                              updates[`idolData.holder`] = null;
-                              secondVictim = null; 
-                          }
-
-                          if (secondVictim && secondVictim !== firstVictim) {
-                              finalVictims.push(secondVictim);
-                          }
-                      }
-                  }
+                  updates[`ceremonyData.eliminated`] = victimsIds;
+                  updates[`ceremonyData.finalReveal`] = true;
+                  if(newLogs.length > 0) updates.logs = arrayUnion(...newLogs);
+              } 
+              else {
+                  // Eliminazione effettiva dal database
+                  let finalVictims = Array.isArray(data.eliminated) ? [...data.eliminated] : [data.eliminated].filter(Boolean);
+                  const isDouble = data.isDoubleElimination;
 
                   let updatedPlayers = lobby.players;
                   let rankingEntries = [];
@@ -2280,11 +2327,25 @@
                   }
               });
 
-              const sortedVictims = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+              // MESCOLAMENTO INIZIALE: Rimuove l'"ordine di posizionamento" per chi ha gli stessi voti (es. 0 voti)
+              let shuffledTargets = [...validTargetIds];
+              for (let i = shuffledTargets.length - 1; i > 0; i--) {
+                  const j = Math.floor(Math.random() * (i + 1));
+                  [shuffledTargets[i], shuffledTargets[j]] = [shuffledTargets[j], shuffledTargets[i]];
+              }
+
+              let victims = Object.keys(counts);
+              for (let i = victims.length - 1; i > 0; i--) {
+                  const j = Math.floor(Math.random() * (i + 1));
+                  [victims[i], victims[j]] = [victims[j], victims[i]];
+              }
+              const sortedVictims = victims.sort((a, b) => counts[b] - counts[a]);
               
               if (sortedVictims.length === 0 && validTargetIds.length > 0) {
-                  const rnd = validTargetIds[Math.floor(Math.random() * validTargetIds.length)];
-                  return { safe: validTargetIds.filter(id => id !== rnd), bottomTwo: [rnd], eliminated: [rnd], voteCounts: counts, tie: null };
+                  const rnd = shuffledTargets[0];
+                  let bottomTwo = [rnd];
+                  if (shuffledTargets.length > 1) bottomTwo.push(shuffledTargets[1]);
+                  return { safe: shuffledTargets.filter(id => !bottomTwo.includes(id)), bottomTwo, eliminated: [rnd], voteCounts: counts, tie: null };
               }
 
               const maxVotes = counts[sortedVictims[0]];
@@ -2292,7 +2353,10 @@
               
               if (ties.length > 1) {
                   if (!isDoubleElimination || (isDoubleElimination && ties.length > 2)) { 
-                     return { safe: validTargetIds.filter(id => !ties.includes(id)), bottomTwo: ties, eliminated: null, voteCounts: counts, tie: ties };
+                     let tieBottom = [...ties];
+                     let safe = shuffledTargets.filter(id => !tieBottom.includes(id));
+                     safe.sort((a, b) => (counts[a] || 0) - (counts[b] || 0));
+                     return { safe, bottomTwo: tieBottom, eliminated: null, voteCounts: counts, tie: ties };
                   }
               }
 
@@ -2300,8 +2364,9 @@
                    const elim1 = sortedVictims[0];
                    const elim2 = sortedVictims[1];
                    
-                   const bottomTwo = sortedVictims.slice(0, 2);
-                   const safe = validTargetIds.filter(id => id !== elim1 && id !== elim2);
+                   let bottomTwo = sortedVictims.slice(0, 2);
+                   const safe = shuffledTargets.filter(id => !bottomTwo.includes(id));
+                   safe.sort((a, b) => (counts[a] || 0) - (counts[b] || 0));
 
                    if(ties.length === 2 && counts[sortedVictims[2]] < ties[0]) {
                       return { safe, bottomTwo: ties, eliminated: ties, voteCounts: counts, tie: null };
@@ -2311,11 +2376,24 @@
               }
 
               const elimId = sortedVictims[0];
-              const bottomTwo = sortedVictims.slice(0, 2);
-              if (!bottomTwo.includes(elimId)) bottomTwo.push(elimId); 
+              let bottomTwo = sortedVictims.slice(0, 2);
               
-              let safe = validTargetIds.filter(id => !bottomTwo.includes(id));
+              // SUSPENSE FINALE: Se il voto è unanime (solo 1 riceve voti), tiriamo dentro uno a caso nel "bottom due"
+              if (bottomTwo.length < 2 && shuffledTargets.length >= 2) {
+                  const zeroVotePerson = shuffledTargets.find(id => id !== elimId);
+                  if (zeroVotePerson) bottomTwo.push(zeroVotePerson);
+              } else if (!bottomTwo.includes(elimId)) {
+                  bottomTwo.push(elimId); 
+              }
+              
+              let safe = shuffledTargets.filter(id => !bottomTwo.includes(id));
               safe.sort((a, b) => (counts[a] || 0) - (counts[b] || 0)); 
+              
+              // Mescoliamo i bottom two per non svelare subito chi è l'eliminato (che finiva sempre a sinistra)
+              for (let i = bottomTwo.length - 1; i > 0; i--) {
+                  const j = Math.floor(Math.random() * (i + 1));
+                  [bottomTwo[i], bottomTwo[j]] = [bottomTwo[j], bottomTwo[i]];
+              }
               
               return { safe, bottomTwo, eliminated: [elimId], voteCounts: counts, tie: null };
           };
@@ -2625,6 +2703,72 @@
             <div className="flex h-screen bg-cover bg-center text-white overflow-hidden font-sans" style={{ backgroundImage: `url('${currentSeason.bg}')` }}>
                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
                
+               {/* MODALE DRONE SPIA */}
+               {showSpyDroneModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+                       <div className="bg-slate-900 rounded-2xl border-2 border-indigo-500 max-w-sm w-full relative p-6">
+                           <button onClick={() => { setShowSpyDroneModal(false); setSpyDroneResult(null); setSpyDroneTarget(""); }} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full"><X size={20}/></button>
+                           <h2 className="text-2xl font-black mb-4 text-indigo-400 flex items-center gap-2"><Eye/> DRONE SPIA</h2>
+                           
+                           {spyDroneResult ? (
+                               <div className="bg-slate-800 p-4 rounded-xl text-sm whitespace-pre-line text-slate-300 font-mono">
+                                   {spyDroneResult}
+                               </div>
+                           ) : (
+                               <>
+                               <p className="text-sm text-slate-400 mb-4">Scegli chi spiare per scoprire i suoi segreti.</p>
+                               <select 
+                                   className="w-full mb-4 bg-slate-800 border border-indigo-500 text-white rounded p-2"
+                                   value={spyDroneTarget}
+                                   onChange={(e) => setSpyDroneTarget(e.target.value)}
+                               >
+                                   <option value="">-- Seleziona bersaglio --</option>
+                                   {activePlayers.filter(p => p.uid !== user.uid).map(p => (
+                                       <option key={p.uid} value={p.uid}>{p.name}</option>
+                                   ))}
+                               </select>
+                               <button 
+                                   onClick={handleUseSpyDrone} 
+                                   disabled={!spyDroneTarget}
+                                   className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white font-bold py-2 rounded-xl transition"
+                               >
+                                   INVIA DRONE
+                               </button>
+                               </>
+                           )}
+                       </div>
+                    </div>
+                )}
+
+               {/* MODALE AMMUTINAMENTO */}
+               {showMutinyModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+                       <div className="bg-slate-900 rounded-2xl border-2 border-orange-500 max-w-sm w-full relative p-6">
+                           <button onClick={() => { setShowMutinyModal(false); setMutinyTarget(""); }} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full"><X size={20}/></button>
+                           <h2 className="text-2xl font-black mb-4 text-orange-400 flex items-center gap-2"><RefreshCw/> AMMUTINAMENTO</h2>
+                           
+                           <p className="text-sm text-slate-400 mb-4">Scambia la tua squadra con quella di un avversario.</p>
+                           <select 
+                               className="w-full mb-4 bg-slate-800 border border-orange-500 text-white rounded p-2"
+                               value={mutinyTarget}
+                               onChange={(e) => setMutinyTarget(e.target.value)}
+                           >
+                               <option value="">-- Seleziona bersaglio --</option>
+                               {activePlayers.filter(p => p.uid !== user.uid && p.team !== myPlayer.team).map(p => (
+                                   <option key={p.uid} value={p.uid}>{p.name} (Team: {p.team})</option>
+                               ))}
+                           </select>
+                           <button 
+                               onClick={handleUseMutiny} 
+                               disabled={!mutinyTarget}
+                               className="w-full bg-orange-600 hover:bg-orange-500 disabled:bg-slate-700 text-white font-bold py-2 rounded-xl transition"
+                           >
+                               SCAMBIA SQUADRA
+                           </button>
+                       </div>
+                    </div>
+                )}
+
                {selectedPlayer && lobby.phase === 'social' && (
                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
                        <div className="bg-slate-900 rounded-2xl border-2 border-yellow-500 max-w-sm w-full relative">
@@ -2844,6 +2988,9 @@
                                     const hasExtraVote = c.id === lobby.idolData.extraVoteIndex;
                                     const hasAdvantage = c.id === lobby.idolData.advantageIndex;
                                     const hasVoteSteal = c.id === lobby.idolData.voteStealIndex; 
+                                    const hasSpyDrone = c.id === lobby.idolData.spyDroneIndex;
+                                    const hasMutiny = c.id === lobby.idolData.mutinyIndex;
+
                                     const ownerName = isTaken ? lobby.players.find(p => p.uid === c.owner)?.name : "";
 
                                     return (
@@ -2869,6 +3016,10 @@
                                                     <Zap size={40} className="text-yellow-400 animate-bounce drop-shadow-lg" />
                                                 ) : hasVoteSteal ? (
                                                     <UserMinus size={40} className="text-cyan-400 animate-bounce drop-shadow-lg" />
+                                                ) : hasSpyDrone ? (
+                                                    <Eye size={40} className="text-indigo-400 animate-bounce drop-shadow-lg" />
+                                                ) : hasMutiny ? (
+                                                    <RefreshCw size={40} className="text-orange-400 animate-bounce drop-shadow-lg" />
                                                 ) : (
                                                     <Skull size={40} className="text-slate-500" />
                                                 )
@@ -2883,8 +3034,8 @@
                                             )}
                                             
                                             {isRevealed && isMine && (
-                                                <div className={`absolute -bottom-6 text-[10px] font-bold ${hasIdol ? 'text-purple-400' : hasExtraVote ? 'text-green-400' : hasAdvantage ? 'text-yellow-400' : hasVoteSteal ? 'text-cyan-400' : 'text-slate-500'}`}>
-                                                    {hasIdol ? "IMMUNITÀ!" : hasExtraVote ? "VOTO EXTRA!" : hasAdvantage ? "BONUS +3!" : hasVoteSteal ? "RUBA-VOTO!" : "VUOTO"}
+                                                <div className={`absolute -bottom-6 text-[10px] font-bold ${hasIdol ? 'text-purple-400' : hasExtraVote ? 'text-green-400' : hasAdvantage ? 'text-yellow-400' : hasVoteSteal ? 'text-cyan-400' : hasSpyDrone ? 'text-indigo-400' : hasMutiny ? 'text-orange-400' : 'text-slate-500'}`}>
+                                                    {hasIdol ? "IMMUNITÀ!" : hasExtraVote ? "VOTO EXTRA!" : hasAdvantage ? "BONUS +3!" : hasVoteSteal ? "RUBA-VOTO!" : hasSpyDrone ? "DRONE SPIA!" : hasMutiny ? "AMMUTINAMENTO!" : "VUOTO"}
                                                 </div>
                                             )}
                                             
@@ -3108,14 +3259,27 @@
                                     </div>
                                     
                                     {lobby.challengeData.players[lobby.challengeData.rollingIndex] === user.uid && (
-                                        <button onClick={handleUserRoll} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black text-2xl px-12 py-6 rounded-2xl shadow-xl hover:scale-105 transition animate-bounce mb-8">
-                                            <Dices size={32} className="inline mr-2"/> CLICCA PER LANCIARE
-                                        </button>
-                                    )}
+                                <button onClick={handleUserRoll} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black text-2xl px-12 py-6 rounded-2xl shadow-xl hover:scale-105 transition animate-bounce mb-8">
+                                    <Dices size={32} className="inline mr-2"/> CLICCA PER LANCIARE
+                                </button>
+                            )}
 
-                                    <div className="flex flex-wrap gap-4 justify-center">
-                                        {lobby.challengeData.type === 'team' ? (
-                                            <div className="flex w-full gap-8 justify-center">
+                            {/* MODIFICA: Schermata Eliminazione Diretta (Sudden Death) */}
+                            {lobby.challengeData.type === 'sudden_death' && lobby.challengeData.stage === 'finished' && (
+                                <div className="absolute inset-0 bg-red-950/95 z-50 flex flex-col items-center justify-center animate-in zoom-in duration-500 backdrop-blur-sm">
+                                    <Skull size={120} className="text-black mb-4 animate-pulse drop-shadow-[0_0_20px_rgba(255,0,0,0.8)]"/>
+                                    <h2 className="text-5xl md:text-7xl font-black text-black uppercase tracking-widest drop-shadow-[0_0_15px_rgba(255,0,0,0.8)] mb-6 text-center">ELIMINAZIONE<br/>DIRETTA</h2>
+                                    <img src={lobby.players.find(p => p.uid === lobby.challengeData.loser)?.character.img} className="w-56 h-56 rounded-full border-8 border-black grayscale object-cover mb-6 shadow-2xl"/>
+                                    <div className="text-3xl md:text-5xl font-black text-red-500 bg-black px-8 py-4 rounded-2xl uppercase border-4 border-red-900 shadow-2xl">
+                                        {lobby.players.find(p => p.uid === lobby.challengeData.loser)?.name} È FUORI!
+                                    </div>
+                                    {isHost && <p className="mt-8 text-white font-bold text-xl animate-pulse">Premi AVANTI per cacciarlo dall'isola</p>}
+                                </div>
+                            )}
+
+                            <div className="flex flex-wrap gap-4 justify-center">
+                                {lobby.challengeData.type === 'team' ? (
+                                    <div className="flex w-full gap-8 justify-center">
                                                 {['A', 'B'].map(team => {
                                                     const teamMembers = Object.entries(lobby.challengeData.teams).filter(([u, t]) => t === team).map(([u]) => u);
                                                     const teamScore = teamMembers.reduce((acc, uid) => acc + (lobby.challengeData.rolls[uid] || 0), 0);
@@ -3628,6 +3792,21 @@
                             </div>
                          )}
 
+                         {lobby.phase === 'social' && myPlayer.status === 'active' && (
+                             <div className="flex flex-wrap gap-4 mb-6 justify-center">
+                                 {lobby.idolData?.spyDroneHolder === user.uid && lobby.idolData?.spyDroneUses > 0 && (
+                                     <button onClick={() => setShowSpyDroneModal(true)} className="bg-indigo-600 p-4 rounded-xl font-bold flex items-center gap-2 shadow-[0_0_15px_rgba(79,70,229,0.4)] hover:scale-105 transition border-2 border-indigo-400">
+                                         <Eye /> Usa Drone Spia ({lobby.idolData.spyDroneUses} rimasti)
+                                     </button>
+                                 )}
+                                 {lobby.idolData?.mutinyHolder === user.uid && !lobby.idolData?.mutinyConsumed && !isMerge && (
+                                     <button onClick={() => setShowMutinyModal(true)} className="bg-orange-600 p-4 rounded-xl font-bold flex items-center gap-2 shadow-[0_0_15px_rgba(234,88,12,0.4)] hover:scale-105 transition border-2 border-orange-400">
+                                         <RefreshCw /> Usa Ammutinamento
+                                     </button>
+                                 )}
+                             </div>
+                         )}
+
                          {lobby.phase === 'ceremony' && lobby.ceremonyData ? (
                             <div className="flex flex-col items-center justify-center min-h-[50vh]">
                                 {lobby.ceremonyData.tieMatch ? (
@@ -3647,7 +3826,7 @@
                                                  const roll = lobby.ceremonyData.tieMatch.rolls[uid];
                                                  return (
                                                      <div key={uid} className="bg-slate-800 p-6 rounded-xl flex flex-col items-center border-2 border-slate-600">
-                                                         <img src={p.character.img} className="w-24 h-24 rounded-full mb-4 border-4 border-slate-500"/>
+                                                         <img src={p.character.img} className="w-24 h-24 rounded-full mb-4 border-4 border-slate-500 object-cover"/>
                                                          <div className="text-xl font-bold mb-2">{p.name}</div>
                                                          {roll ? (
                                                              <div className="text-4xl font-black text-yellow-400">{roll}</div>
@@ -3661,6 +3840,17 @@
                                      </div>
                                 ) : (
                                     <>
+                                    {/* MODIFICA: Popup Gigante Idolo Giocato */}
+                                    {lobby.ceremonyData.idolPlayedBy && lobby.ceremonyData.finalReveal && (
+                                        <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+                                            <div className="bg-gradient-to-b from-yellow-300 to-yellow-600 p-12 rounded-[3rem] border-8 border-white shadow-[0_0_100px_rgba(250,204,21,1)] text-center animate-[bounce_2s_infinite] transform scale-125">
+                                                <Gem size={100} className="text-white mx-auto mb-4 drop-shadow-md"/>
+                                                <h2 className="text-5xl font-black text-white uppercase drop-shadow-xl leading-tight" style={{ WebkitTextStroke: '2px #b45309' }}>IDOLO<br/>GIOCATO!</h2>
+                                                <p className="mt-4 text-yellow-900 font-bold text-xl uppercase bg-white/80 px-4 py-1 rounded-full">{lobby.players.find(p => p.uid === lobby.ceremonyData.idolPlayedBy)?.name} SI SALVA!</p>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <Flame size={64} className="text-orange-500 animate-pulse mb-4" />
                                     {lobby.ceremonyData.isDoubleElimination && <div className="text-3xl font-black text-red-500 mb-2">DOPPIA ELIMINAZIONE!</div>}
                                     {lobby.ceremonyData.isOpenVote && <div className="text-xl font-black text-red-400 mb-2 bg-black/40 px-4 rounded animate-pulse">VOTI PALESI</div>}
@@ -3689,15 +3879,16 @@
                                             {lobby.ceremonyData.bottomTwo.map(uid => {
                                                 const p = lobby.players.find(pl => pl.uid === uid);
                                                 const isEliminated = lobby.ceremonyData.finalReveal && ((Array.isArray(lobby.ceremonyData.eliminated) && lobby.ceremonyData.eliminated.includes(uid)) || (uid === lobby.ceremonyData.eliminated));
-                                                const isSafe = lobby.ceremonyData.finalReveal && !isEliminated;
+                                                const isSavedByIdol = lobby.ceremonyData.finalReveal && lobby.ceremonyData.idolPlayedBy === uid;
+                                                const isSafe = lobby.ceremonyData.finalReveal && !isEliminated && !isSavedByIdol;
                                                 const votes = lobby.ceremonyData.voteCounts?.[uid] || 0;
-                                                const showVotes = isEliminated || (isSafe && lobby.ceremonyData.finalReveal);
+                                                const showVotes = isEliminated || (isSafe && lobby.ceremonyData.finalReveal) || isSavedByIdol;
 
                                                 return (
-                                                    <div key={uid} className={`flex flex-col items-center transition-all duration-1000 ${isEliminated ? 'opacity-50 grayscale scale-90' : isSafe ? 'scale-110 ring-4 ring-green-500 rounded-xl' : ''}`}>
+                                                    <div key={uid} className={`flex flex-col items-center transition-all duration-1000 ${isEliminated ? 'opacity-50 grayscale scale-90' : isSavedByIdol ? 'scale-110 ring-8 ring-yellow-400 rounded-xl z-40' : isSafe ? 'scale-110 ring-4 ring-green-500 rounded-xl' : ''}`}>
                                                         <img src={p.character.img} className="w-32 h-32 object-cover rounded-xl border-4 border-white shadow-2xl"/>
                                                         <div className="font-black text-xl mt-2 bg-black/50 px-2 rounded">{p.name}</div>
-                                                        <div className="font-mono text-yellow-400 font-bold mt-1 text-lg">
+                                                        <div className={`font-mono font-bold mt-1 text-lg ${isSavedByIdol ? 'text-slate-500 line-through decoration-red-500 decoration-4' : 'text-yellow-400'}`}>
                                                             {showVotes ? `${votes} voti` : "?"}
                                                         </div>
                                                         {showVotes && lobby.ceremonyData.isOpenVote && lobby.ceremonyData.votersMap?.[uid] && (
