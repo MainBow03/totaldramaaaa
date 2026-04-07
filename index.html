@@ -846,7 +846,7 @@
                   holder: null
               },
               round: 0,
-              logs: arrayUnion(`--- CACCIA AI VANTAGGI (Idolo, Voto Extra, Bonus Sfida, Ruba-Voto, Drone, Ammutinamento) ---`)
+              logs: arrayUnion(`--- CACCIA AI VANTAGGI (Idolo, Voti Extra, Drone, Ammutinamento) ---`)
             });
           };
 
@@ -1099,6 +1099,12 @@
                               
                               const vsWinnerUid = newCrates.find(c => c.id === lobby.idolData.voteStealIndex)?.owner;
                               updates[`idolData.voteStealHolder`] = vsWinnerUid;
+
+                              const spyWinnerUid = newCrates.find(c => c.id === lobby.idolData.spyDroneIndex)?.owner;
+                              updates[`idolData.spyDroneHolder`] = spyWinnerUid;
+                              
+                              const mutWinnerUid = newCrates.find(c => c.id === lobby.idolData.mutinyIndex)?.owner;
+                              updates[`idolData.mutinyHolder`] = mutWinnerUid;
 
                               updates[`logs`] = arrayUnion("Tutte le casse sono state assegnate! Apertura in corso...");
                           }
