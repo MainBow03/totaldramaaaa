@@ -3154,8 +3154,8 @@
                                <div className="grid grid-cols-2 gap-4 mb-6">
                                    <div className="bg-slate-800 p-2 rounded">
                                        <div className="text-xs uppercase">Amicizia</div>
-                                       <div className={`text-xl font-bold ${(selectedPlayer.relationships[user.uid] || 0) === 15 ? 'text-pink-500' : (selectedPlayer.relationships[user.uid] || 0) > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                           {(selectedPlayer.relationships[user.uid] || 0) === 15 ? "❤️ 15" : (selectedPlayer.relationships[user.uid] || 0)}
+                                       <div className={`text-xl font-bold ${(selectedPlayer.relationships?.[user.uid] || 0) === 15 ? 'text-pink-500' : (selectedPlayer.relationships?.[user.uid] || 0) > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                           {(selectedPlayer.relationships?.[user.uid] || 0) === 15 ? "❤️ 15" : (selectedPlayer.relationships?.[user.uid] || 0)}
                                        </div>
                                    </div>
                                    <div className="bg-slate-800 p-2 rounded">
@@ -3399,6 +3399,16 @@
                                      <h3 className={`font-black text-2xl mb-4 uppercase tracking-widest flex items-center justify-center gap-2 ${colors.text} bg-black/40 py-2 rounded-xl border border-white/10 shadow-inner`}>
                                          <Users size={24} />
                                          {teamName === 'MERGE' ? 'Fusione' : teamName}
+                                         {!isMerge && lobby.phase === 'social' && lobby.losingTeam === teamName && (
+                                             <span className="bg-red-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-[0_0_10px_rgba(220,38,38,0.8)] animate-pulse ml-2">
+                                                 <Flame size={14}/> AL FALÒ
+                                             </span>
+                                         )}
+                                         {!isMerge && lobby.phase === 'social' && lobby.immunity?.length > 0 && teamPlayers.some(p => lobby.immunity.includes(p.uid)) && (
+                                             <span className="bg-green-600 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 shadow-[0_0_10px_rgba(22,163,74,0.8)] ml-2">
+                                                 <Shield size={14}/> IMMUNI
+                                             </span>
+                                         )}
                                      </h3>
                                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-4">
                                          {teamPlayers.map(p => (
@@ -3425,12 +3435,19 @@
                                                      {/* INDICATORE RELAZIONI (AMICIZIA/ODIO) */}
                                                      {p.uid !== user.uid && (p.relationships?.[user.uid] || 0) !== 0 && (
                                                          <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black shadow-lg backdrop-blur-md border ${
-                                                             (p.relationships[user.uid] || 0) === 15 ? 'bg-pink-900/90 border-pink-400 text-pink-300 shadow-[0_0_8px_rgba(236,72,153,0.8)]' :
-                                                             (p.relationships[user.uid] || 0) > 0 ? 'bg-green-900/90 border-green-400 text-green-300 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 
+                                                             (p.relationships?.[user.uid] || 0) === 15 ? 'bg-pink-900/90 border-pink-400 text-pink-300 shadow-[0_0_8px_rgba(236,72,153,0.8)]' :
+                                                             (p.relationships?.[user.uid] || 0) > 0 ? 'bg-green-900/90 border-green-400 text-green-300 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 
                                                              'bg-red-900/90 border-red-400 text-red-300 shadow-[0_0_8px_rgba(239,68,68,0.8)]'
                                                          }`}>
-                                                             <Heart size={12} fill={(p.relationships[user.uid] || 0) > 0 ? "currentColor" : "none"} className={ (p.relationships[user.uid] || 0) === 15 ? "animate-pulse" : "" } />
-                                                             {p.relationships[user.uid] > 0 ? '+' : ''}{p.relationships[user.uid]}
+                                                             <Heart size={12} fill={(p.relationships?.[user.uid] || 0) > 0 ? "currentColor" : "none"} className={ (p.relationships?.[user.uid] || 0) === 15 ? "animate-pulse" : "" } />
+                                                             {(p.relationships?.[user.uid] || 0) > 0 ? '+' : ''}{(p.relationships?.[user.uid] || 0)}
+                                                         </div>
+                                                     )}
+
+                                                     {/* NUOVO: INDICATORE ALLEANZA */}
+                                                     {p.uid !== user.uid && Array.isArray(p.alliances) && p.alliances.includes(user.uid) && (
+                                                         <div className="flex items-center justify-center px-2 py-1 rounded-full shadow-lg backdrop-blur-md border bg-blue-900/90 border-blue-400 text-blue-300 shadow-[0_0_8px_rgba(59,130,246,0.8)]" title="Siete Alleati!">
+                                                             <Swords size={12} />
                                                          </div>
                                                      )}
                                                  </div>
@@ -3810,7 +3827,15 @@
                                              </div>
                                          ))}
                                      </div>
-                                     {isHost && <div className="text-sm text-slate-400">Clicca Avanti per continuare</div>}
+                                     
+                                     {!isMerge && lobby.losingTeam && (
+                                         <div className="mt-6 p-6 bg-red-950/80 border-2 border-red-500 rounded-2xl inline-block shadow-[0_0_20px_rgba(220,38,38,0.4)] animate-in slide-in-from-bottom">
+                                             <h3 className="text-xl font-bold text-red-400 mb-1 flex items-center justify-center gap-2"><Flame size={24}/> SQUADRA AL FALÒ:</h3>
+                                             <span className="text-4xl font-black text-red-500 uppercase tracking-widest">{lobby.losingTeam}</span>
+                                         </div>
+                                     )}
+
+                                     {isHost && <div className="text-sm text-slate-400 mt-8">Clicca Avanti per continuare</div>}
                                 </div>
                             )
                            )}
@@ -3991,7 +4016,7 @@
                                  <div className="mt-8 bg-green-600/20 border-2 border-green-500 p-8 rounded-2xl text-center animate-in zoom-in">
                                      <Coffee size={48} className="mx-auto mb-4 text-green-400" />
                                      <h3 className="text-2xl font-black text-green-400 mb-2">SEI SALVO!</h3>
-                                     <p className="text-slate-300">Il tuo team ha vinto l'immunità. Rilassati e guarda il team <span className="font-bold text-red-400">{lobby.losingTeam}</span> scannarsi.</p>
+                                     <p className="text-slate-300">Non devi votare stasera. Rilassati e guarda il team <span className="font-bold text-red-400">{lobby.losingTeam}</span> scannarsi al falò.</p>
                                  </div>
                              ) : (
                                 <>
@@ -4409,7 +4434,7 @@
                         </div>
                      ))}
                   </div>
-                  {myPlayer.status === 'active' && (
+                  {myPlayer && (
                      <form onSubmit={sendChat} className="p-3 bg-slate-800/90 border-t border-slate-700 flex gap-2">
                         <input 
                             type="text" 
