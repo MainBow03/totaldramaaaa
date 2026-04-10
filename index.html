@@ -92,7 +92,7 @@
           Heart, Users, Play, LogOut, MessageSquare, Skull, 
           Trophy, Crown, UserPlus, Shield, Swords, Flame, 
           AlertTriangle, ArrowRight, Dices, Send, X, Vote, ListOrdered, Coffee, ChevronDown, Award, CheckCircle, Undo2,
-          Package, Gem, Lock, Unlock, Target, Users2, AlertOctagon, Shuffle, Gavel, Zap, Hammer, UserMinus, Mic, Eye, RefreshCw
+          Package, Gem, Lock, Unlock, Target, Users2, AlertOctagon, Shuffle, Gavel, Zap, Hammer, UserMinus, Mic, Eye, RefreshCw, DoorOpen, Link, Volume2, VolumeX
         } from 'lucide-react';
 
         // --- TUE CHIAVI FIREBASE INSERITE ---
@@ -114,6 +114,23 @@
         };
 
         const firebaseConfig = getFirebaseConfig();
+
+        // --- SISTEMA AUDIO ---
+        const SOUNDS = {
+            roll: new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_7314d6422b.mp3'),
+            elimination: new Audio('https://cdn.pixabay.com/audio/2021/08/04/audio_c6ccf3232f.mp3'),
+            idol: new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_c8c8a73467.mp3'),
+            victory: new Audio('https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c7443c.mp3'),
+            success: new Audio('https://cdn.pixabay.com/audio/2021/08/04/audio_0625c1539c.mp3')
+        };
+        let isGlobalMuted = false;
+        const playSound = (type) => {
+            if (isGlobalMuted || !SOUNDS[type]) return;
+            const s = SOUNDS[type];
+            s.currentTime = 0;
+            s.volume = 0.5;
+            s.play().catch(e => console.warn("Autoplay audio bloccato dal browser:", e));
+        };
 
         let app, auth, db;
         try {
@@ -138,28 +155,32 @@
 
         // AGGIUNTE LE FRASI (SPEECHES) AI PERSONAGGI PRINCIPALI
         const ROSTER = [
-          { name: "Lord Farquaad", img: "https://i.pinimg.com/736x/35/93/ac/3593acb0b8f9d75704f5a0778c693e73.jpg", speeches: ["La vittoria è mia per diritto divino. Gli orchi non meritano questi soldi!", "Alcuni di voi sono stati eliminati, ma è un sacrificio che sono stato disposto a fare per vincere."] },
+          { name: "Lord Farquaad", img: "https://i.pinimg.com/736x/35/93/ac/3593acb0b8f9d75704f5a0778c693e73.jpg", speeches: ["La vittoria è mia per diritto divino. Gli orchi non meritano questi soldi!", "Alcuni di voi sono stati eliminati, ma è un sacrificio che sono stato disposto a fare per vincere."], alignment: 'villain' },
           { name: "Marinette", img: "https://i.pinimg.com/736x/b8/74/55/b87455575cd069609007a639c9490293.jpg", speeches: ["Ho cercato di giocare in modo onesto e leale con tutti. Spero possiate riconoscerlo!", "Essere leader non è facile, ma ho sempre protetto il mio team. Votatemi!"] },
           { name: "Adrien", img: "https://i.pinimg.com/1200x/5c/2d/c7/5c2dc740ed2fe906b6afaf1320bf4273.jpg", speeches: ["Sono sempre stato prigioniero di mio padre, votatemi cosi posso dimostrargli di brillare anche da solo!", "Ho giocato in modo pulito e ottimale, spero lo possiate riconoscere, votate per me!"] },
 		  { name: "Alya", img: "https://i.pinimg.com/736x/3e/3b/99/3e3b99fc26e6b2cb8bf7359c53acca24.jpg", speeches: ["Grazie alle mie doti giornalistiche sono riuscita ad arrivare fin qui, votatemi e non ve ne pentirete!", "Miraggio! Guardate cosa so fare? Direi che mi merito il voto."] },
-          { name: "Heartfixer", img: "https://i.pinimg.com/736x/fe/82/7c/fe827caedc137c8832fd7b313209cc55.jpg", speeches: ["Ho riparato ogni cuore spezzato su quest'isola, ma il premio spetta solo a me! Votatemi!", "Non c'è bisogno di essere akumatizzati per capire che sono io la vera vincitrice. Datemi i vostri voti!"] },
-          { name: "Chrysalis", img: "https://i.pinimg.com/736x/c1/8e/6a/c18e6a45d98eee60c330d37bb2f4e562.jpg", speeches: ["Vi ho manipolati tutti dall'inizio alla fine con le mie bugie perfette. Sono io la regina dell'inganno e merito la corona.", "Un bravo prestigiatore non rivela mai i suoi trucchi... ma vi assicuro che la mia vittoria era scritta fin dal primo giorno."] },
+          { name: "Heartfixer", img: "https://i.pinimg.com/736x/fe/82/7c/fe827caedc137c8832fd7b313209cc55.jpg", speeches: ["Ho riparato ogni cuore spezzato su quest'isola, ma il premio spetta solo a me! Votatemi!", "Non c'è bisogno di essere akumatizzati per capire che sono io la vera vincitrice. Datemi i vostri voti!"], alignment: 'villain' },
+          { name: "Chrysalis", img: "https://i.pinimg.com/736x/c1/8e/6a/c18e6a45d98eee60c330d37bb2f4e562.jpg", speeches: ["Vi ho manipolati tutti dall'inizio alla fine con le mie bugie perfette. Sono io la regina dell'inganno e merito la corona.", "Un bravo prestigiatore non rivela mai i suoi trucchi... ma vi assicuro che la mia vittoria era scritta fin dal primo giorno."], alignment: 'villain' },
           { name: "Nathalie", img: "https://i.pinimg.com/736x/ad/8e/68/ad8e68f410c0379c3b5412b8afeef3dc.jpg", speeches: ["Ho sempre agito con fredda efficienza e logica impeccabile. I risultati parlano da soli, il vostro voto dovrebbe essere per me.", "Ho sacrificato molto per arrivare fin qui. Non siate irrazionali, sono l'unica che merita questo premio."] },
 		  { name: "Luka", img: "https://i.pinimg.com/736x/16/40/f3/1640f3c6c2b14e00c110316e02e86c7f.jpg", speeches: ["Ho giocato in modo pulito, chiaro e cristallino come il suono della mia musica. Votate per me :)", "*suona la chitarra* Spero che questa melodia possa convincervi."] },
 		  { name: "Kagami", img: "https://i.pinimg.com/736x/56/e2/ad/56e2adc6421c613a6d00b393abd1a6c1.jpg", speeches: ["Ho vinto molte sfide e non ho mai dato potere alle mie emozioni. Mi merito questo voto.", "Votatemi, grazie."] },
           { name: "Re Julien", img: "https://i.pinimg.com/736x/1e/17/19/1e17194ef5b383e4202fbb4875cfbd81.jpg", speeches: ["Votate per il vostro Re! Se vinco, faremo una festa indimenticabile!", "I piedi di Mortino non sono nulla in confronto a questi milioni di dollari!"] },
           { name: "Mortino", img: " https://i.pinimg.com/736x/b9/56/ec/b956ec4741a1ba90c7176478e203f78b.jpg" },
 		  { name: "Skipper", img: "https://i.pinimg.com/736x/e6/f0/5b/e6f05b20dda962344721db983c882679.jpg", speeches: ["Carini e coccolosi ragazzi, carini e coccolosi. Ora datemi quei soldi per finanziare le operazioni.", "Ho gestito questa isola come un'operazione militare tattica. Vittoria meritata."] },
+          { name: "Rico", img: "https://i.pinimg.com/736x/a8/fe/a5/a8fea5d9ce18a230a1ea6b996cef8bb8.jpg", speeches: ["Kaboom?! Kaboom!", "*Vomita un candelotto di dinamite* Ecco il mio discorso!"], alignment: 'villain' },
 		  { name: "Kowalski", img: "https://i.pinimg.com/736x/e7/bc/38/e7bc382c57bfb2f3de7f44a0cce39fcd.jpg" },
 		  { name: "Soldato", img: "https://i.pinimg.com/1200x/5e/3f/0d/5e3f0d06b262dc18869f550806d1bdb4.jpg" },
 		  { name: "Baby Soldato", img: "https://i.pinimg.com/736x/81/3c/57/813c57fcb969d58fac1672594da05532.jpg" },
           { name: "Gwen", img: "https://i.pinimg.com/1200x/59/d7/15/59d71578cd5f889ae898bbc83dda29dc.jpg", speeches: ["Non mi importa molto dei soldi, ma ho giocato pulito. A differenza di certa gente.", "Ho sopportato tutti voi per settimane, questo è il minimo premio che mi spetta."] },
-          { name: "Julia", img: "https://i.pinimg.com/736x/80/c2/83/80c283f82be806cdd40e71d303d09474.jpg", speeches: ["Guardatemi. Sono stupenda, intelligente e vi ho distrutti tutti. Votate per la regina.", "Non fatemi perdere tempo, sapete tutti che i soldi spettano a me. Ciao follower!"] },
-          { name: "Duncan", img: "https://i.pinimg.com/736x/3f/2d/e1/3f2de1cd71448e1413ab3ccafbed5b4d.jpg", speeches: ["Votate per me o vi farò pentire di essere nati, chiaro?", "Ho giocato duro e ho fregato chi dovevo fregare. Date a me i soldi o vi picchio."] },
-		  { name: "Heather", img: "https://i.pinimg.com/736x/81/5b/b6/815bb632721e7d38f26d35801466dd30.jpg", speeches: ["Io mi merito la vittoria poichè sono la villain migliore della stagione, ammettetelo.", "Se non votate per me non avete buon gusto, sappiatelo. Siete solo comparse nel mio show!"] },
-		  { name: "Courtney", img: "https://i.pinimg.com/736x/ad/94/34/ad9434468d4a502c89ea01c0249e8899.jpg", speeches: ["Sono l'unica qui con un vero piano d'investimento per questi soldi. Votatemi, è la scelta logica.", "Se non vinco io, chiamerò i miei avvocati e vi farò causa tutti quanti!"] },
+          { name: "Julia", img: "https://i.pinimg.com/736x/80/c2/83/80c283f82be806cdd40e71d303d09474.jpg", speeches: ["Guardatemi. Sono stupenda, intelligente e vi ho distrutti tutti. Votate per la regina.", "Non fatemi perdere tempo, sapete tutti che i soldi spettano a me. Ciao follower!"], alignment: 'villain' },
+          { name: "Duncan", img: "https://i.pinimg.com/736x/3f/2d/e1/3f2de1cd71448e1413ab3ccafbed5b4d.jpg", speeches: ["Votate per me o vi farò pentire di essere nati, chiaro?", "Ho giocato duro e ho fregato chi dovevo fregare. Date a me i soldi o vi picchio."], alignment: 'villain' },
+		  { name: "Heather", img: "https://i.pinimg.com/736x/81/5b/b6/815bb632721e7d38f26d35801466dd30.jpg", speeches: ["Io mi merito la vittoria poichè sono la villain migliore della stagione, ammettetelo.", "Se non votate per me non avete buon gusto, sappiatelo. Siete solo comparse nel mio show!"], alignment: 'villain' },
+          { name: "Alejandro", img: "https://i.pinimg.com/736x/42/68/90/42689043c52c2a7402ab46de85988ff1.jpg", speeches: ["Le mie abilità e il mio fascino mi hanno portato in cima. Votate per me, por favor.", "Ho giocato con tutti voi, e ora chiedo umilmente il vostro voto."], alignment: 'villain' },
+          { name: "Owen", img: "https://i.pinimg.com/1200x/d8/67/6b/d8676b6ca40fa5a14aabace2a6542a39.jpg", speeches: ["Amici! Se vinco questi soldi prometto una festa gigante con pizza e formaggio per tutti!", "Ahahahah! Non ci credo di essere in finale! Siete i migliori, votate per me!"] },
+          { name: "Lightning", img: "https://i.pinimg.com/736x/44/af/e7/44afe7a858a67cbd1458cebee28693aa.jpg", speeches: ["Sha-bam! Lightning colpisce ancora! Merito di vincere perché sono il più forte!", "Nessuno può fermare Lightning! Votate per il campione assoluto! Sha-vittoria!"], alignment: 'villain' },
+		  { name: "Courtney", img: "https://i.pinimg.com/736x/ad/94/34/ad9434468d4a502c89ea01c0249e8899.jpg", speeches: ["Sono l'unica qui con un vero piano d'investimento per questi soldi. Votatemi, è la scelta logica.", "Se non vinco io, chiamerò i miei avvocati e vi farò causa tutti quanti!"], alignment: 'villain' },
 		  { name: "Lindsay", img: "https://i.pinimg.com/1200x/ed/96/df/ed96df179eaa7030663473c575067cb4.jpg", speeches: ["Dovete votare per me perché i miei capelli sono stati perfetti per tutto il tempo! Grazie!", "Aspetta, ma se vinco io... divento la regina dell'isola? Siii, votatemi! Ciao Tyson!"] },
-		  { name: "Bowie", img: "https://i.pinimg.com/1200x/03/6c/0f/036c0ffe4fcd39d5840ed60a2fb104c3.jpg", speeches: ["Ammettetelo, senza di me questa stagione sarebbe stata noiosissima. Merito la corona.", "Ho manipolato le votazioni dal giorno uno. Sono il re strategico di questa edizione."] },
+		  { name: "Bowie", img: "https://i.pinimg.com/1200x/03/6c/0f/036c0ffe4fcd39d5840ed60a2fb104c3.jpg", speeches: ["Ammettetelo, senza di me questa stagione sarebbe stata noiosissima. Merito la corona.", "Ho manipolato le votazioni dal giorno uno. Sono il re strategico di questa edizione."], alignment: 'villain' },
 		  { name: "Raj", img: "https://i.pinimg.com/736x/05/b2/97/05b297c32cd4507adbd7b0c7ce84fb3a.jpg" },
           { name: "Conan", img: "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg" },
           { name: "Ran", img: "https://i.pinimg.com/1200x/46/ee/c7/46eec75f3a3eeb4846216dfdd7083ff4.jpg" },
@@ -168,10 +189,14 @@
           { name: "Yoshi", img: "https://i.pinimg.com/736x/f3/05/7f/f3057f14de68b0afe682ffe93dcc479b.jpg", speeches: ["Yoshi! Yoshi yoshi! (Traduzione: Se mi votate, vi farò fare un giro sulla mia schiena!)", "Yoooshiii! (Traduzione: Ho superato ogni ostacolo per arrivare fin qui, merito il premio!)"] },
           { name: "Rosalinda", img: "https://i.pinimg.com/736x/09/14/f0/0914f029e712e92de9d4f0081a5da032.jpg", speeches: ["Le stelle mi hanno guidato fino a questa finale. Spero che la vostra luce mi faccia vincere.", "Ho protetto il cosmo, posso sicuramente gestire questo show. Votatemi, mie piccole stelle."] },
 		  { name: "Peach", img: "https://i.pinimg.com/736x/c0/53/fb/c053fb4dd4f8c0dd9c277212490b1962.jpg", speeches: ["Grazie a tutti per avermi salvata... oh aspetta, stavolta ho fatto tutto da sola! Votate per me!", "Prometto di invitare tutti i miei elettori a mangiare una deliziosa torta al castello! Scegliete me!"] },
+          { name: "Luigi", img: "https://i.pinimg.com/1200x/21/30/94/213094c8273db9b3d9dcb4cb407d6d63.jpg", speeches: ["M-mamma mia! Sono in finale! Speriamo che Mario sia fiero di me, votatemi per favore!", "Okey dokey! Sono riuscito ad arrivare fin qui senza fantasmi, merito un premio!"] },
 		  { name: "Daisy", img: "https://i.pinimg.com/736x/e2/47/61/e2476198364b030d3a8f9a1f93becfb9.jpg", speeches: ["Hi I'm Daisy! Sono la più forte, la più determinata e vi ho stracciato tutti! Merito di vincere!", "Non ho bisogno di farmi rapire per avere attenzioni, ho dominato le sfide! Votatemi!"] },
 		  { name: "Pauline", img: "https://i.pinimg.com/736x/86/83/ee/8683ee7c89735311e61addebf517a3de.jpg", speeches: ["Ho cantato per voi, gestisco una città e ora ho dominato quest'isola. Sono la vostra superstar!", "Nessuno brilla più di me sotto i riflettori di questa finale. Votate per Pauline!"] },
-		  { name: "Wario", img: "https://i.pinimg.com/736x/2f/ea/be/2feabe47151fd436fbf358c299eb4870.jpg", speeches: ["WAAHAHA! Quei soldi sono MIEI! Li voglio tutti per me! Votatemi perdenti!", "Ho imbrogliato, ho rubato e ora sono qui. Date a Wario quello che è di Wario!"] },
-          { name: "Brago", img: "https://i.pinimg.com/736x/c6/75/2d/c6752dab1b78e4c4adc64b6ffd09b755.jpg", speeches: ["Che perdita di tempo. Votatemi e finiamola qui.", "Tsk, che fastidio. E sia, se io sono in finale e voi no un motivo c'è, datemi questa vittoria."] },
+		  { name: "Wario", img: "https://i.pinimg.com/736x/2f/ea/be/2feabe47151fd436fbf358c299eb4870.jpg", speeches: ["WAAHAHA! Quei soldi sono MIEI! Li voglio tutti per me! Votatemi perdenti!", "Ho imbrogliato, ho rubato e ora sono qui. Date a Wario quello che è di Wario!"], alignment: 'villain' },
+          { name: "Waluigi", img: "https://i.pinimg.com/736x/68/2b/61/682b611cb8b1b9eca045cc801e5ed25f.jpg", speeches: ["Wahahaha! Waluigi è il numero uno! Tutti voi siete dei perdenti in confronto a me!", "Nessuno tifa mai per Waluigi, ma stavolta ho vinto io! Votatemi, wah!"], alignment: 'villain' },
+          { name: "Bowser", img: "https://i.pinimg.com/1200x/cf/3f/ec/cf3fec1f6b9334e0255065f150fa97a9.jpg", speeches: ["Bwa ha ha! Il Re dei Koopa merita il primo premio! Scegliete me o vi bruciacchio tutti!", "Ho rapito regine e conquistato regni, vincere questo show è solo l'inizio!"], alignment: 'villain' },
+          { name: "Bowser Jr", img: "https://i.pinimg.com/736x/ad/0d/5b/ad0d5b353c121423ac8c5aa430112374.jpg", speeches: ["Mio papà sarà così fiero di me quando prenderò tutti questi soldi!", "Sono il più furbo e vi ho fregato tutti! Votatemi, razza di imbranati!"], alignment: 'villain' },
+          { name: "Brago", img: "https://i.pinimg.com/736x/c6/75/2d/c6752dab1b78e4c4adc64b6ffd09b755.jpg", speeches: ["Che perdita di tempo. Votatemi e finiamola qui.", "Tsk, che fastidio. E sia, se io sono in finale e voi no un motivo c'è, datemi questa vittoria."], alignment: 'villain' },
           { name: "Ponygon", img: "https://i.pinimg.com/736x/53/e4/fb/53e4fb1c1f8964ca949c4e72663edd8f.jpg", speeches: ["Meru meru me!! :D", "Meru.. merumeru mei, meru meru! :D"] },
 		  { name: "Zatch Bell", img: "https://i.pinimg.com/736x/9c/64/41/9c6441a65ad0c75dbf8eaee194659acf.jpg", speeches: ["La lealtà prima di tutto: votatemi, cosi potremmo avere un campione gentile.", "Wow sono in finale che bello!!!! Chissà quanti pinne gialle riuscirò a comprarmi con i soldi!"] },
 		  { name: "Tio", img: "https://i.pinimg.com/736x/ea/f3/30/eaf3305c1cb5b8d7475da20687b0ec40.jpg", speeches: ["Amici datemi il vostro voto perfavore ♥", "Un discorso? Beh... okay! Votatemi pe... Zatch, la smetti con quelle smorfie? È un momento serio!"] },
@@ -182,7 +207,7 @@
 		  { name: "Peridot", img: "https://i.pinimg.com/736x/d5/3e/f6/d53ef6f0ec684f7f0f888971dded59fb.jpg", speeches: ["Ovviamente dovreste votare per me, tonti! Sono chiaramente il concorrente intellettualmente superiore su quest'isola!", "Ho analizzato tutte le probabilità e i dati confermano che io, Peridot, sono la legittima vincitrice. Non discutete la scienza!"] },
 		  { name: "Lapis", img: "https://i.pinimg.com/736x/88/0f/a5/880fa555f1f954dbca08aded1be846d2.jpg", speeches: ["Ho sopportato abbastanza drammi in passato, non mi interessa molto, ma... visto che sono qui, tanto vale vincere.", "L'acqua ricorda tutto, e io ricordo chi mi ha tradito e chi no. Ma se mi votate... potrei essere indulgente."] },
           { name: "Ametista", img: "https://i.pinimg.com/736x/b4/e4/45/b4e445061d31ec75fa4ee63e20ebf87e.jpg", speeches: ["Ehi belli! Mi sono divertita un mondo a distruggere roba nelle sfide! Datemi i soldi così ci mangiamo una pizza gigante!", "Non ho seguito le regole, ma ehi, sono arrivata in finale lo stesso! Votatemi, sarà uno spasso!"] },
-          { name: "Nicole", img: "https://i.pinimg.com/736x/81/24/e4/8124e43da43da43e1d06dcdbca15f22a0cd9.jpg" },
+          { name: "Nicole", img: "https://i.pinimg.com/736x/4e/ac/70/4eac705ff7feba9202c200de511c8583.jpg" },
           { name: "Gumball", img: "https://i.pinimg.com/736x/ae/88/e3/ae88e329120b3edc196af1ebbfd8fe07.jpg" },
           { name: "Anais", img: "https://i.pinimg.com/736x/0a/8b/ab/0a8bab3e6151e894a2d9b96749d63e61.jpg" },
           { name: "Lisa", img: "https://i.pinimg.com/736x/e5/2d/fe/e52dfee5a58f5dad19f9e0592c63a7cd.jpg", speeches: ["Ho analizzato statisticamente le probabilità e votare per me è l'unica scelta razionale e moralmente corretta.", "Se vinco io, donerò una parte del premio in beneficenza... e il resto per andare al college. Siate ragionevoli, votatemi!"] },
@@ -191,7 +216,9 @@
           { name: "Ned", img: "https://i.pinimg.com/1200x/4e/12/0e/4e120eb01e572b2ad08af6552214ce82.jpg", speeches: ["Salve salvino vicini di reality! Sarebbe un vero miracolo ricevere il vostro voto, che il Signore vi benedica!", "Ho porto l'altra guancia per tutta la stagione! Spero che la mia onestà venga ripagata con una bella votatina-ina-ina!"] },
           { name: "Neera", img: "https://i.pinimg.com/736x/49/15/3c/49153c31d0b41814b3c862a98d848b40.jpg" },
           { name: "Perry", img: "https://i.pinimg.com/736x/3e/02/28/3e02284ed84c86d445b3bee5639c81f6.jpg", speeches: ["*Grrrrrrr* (Traduzione: Ho sventato i piani di Doofenshmirtz, vincere questo show era il mio incarico secondario).", "*Grrr grrr grrrrr* (Traduzione: Scegliete l'Agente P. L'O.W.C.A. vi ringrazia per la collaborazione)."] },
-		  { name: "Candace", img: "https://i.pinimg.com/originals/72/9c/70/729c70cbfd05dafa8f7cf9700f0284e3.gif", speeches: ["Se vinco questi soldi, comprerò un mega radar per beccare Phineas e Ferb una volta per tutte! Votatemi!!", "Oh mio Dio, sono in finale?! Jeremy mi sta guardando in TV?! Devo assolutamente vincere, vi prego è questione di vita o di morte!"] },
+		  { name: "Candace", img: "https://i.pinimg.com/originals/72/9c/70/729c70cbfd05dafa8f7cf9700f0284e3.gif", speeches: ["Se vinco questi soldi, comprerò un mega radar per beccare Phineas e Ferb una volta per tutte! Votatemi!!", "Oh mio Dio, sono in finale?! Jeremy mi sta guardando in TV?! Devo assolutamente vincere, vi prego è questione di vita o di morte!"], alignment: 'villain' },
+          { name: "Dr Doofenshmirtz", img: "https://i.pinimg.com/736x/02/94/b1/0294b1048776eeab29275eee328d3c3b.jpg", speeches: ["Con questi soldi finanzierò il mio nuovo Vincere-Questo-Show-Inator!", "Maledetto Perry l'Ornitorinco! Ma aspetta... ho vinto io stavolta?"], alignment: 'villain' },
+          { name: "Vanessa", img: "https://i.pinimg.com/1200x/43/4b/a6/434ba6e71259f8c6f7c53ea9e21747a9.jpg", speeches: ["Papà, per favore, non imbarazzarmi davanti alla giuria. Votatemi e basta.", "Ho sopportato abbastanza drammi oscuri nella mia vita, questa vittoria me la merito."] },
 		  { name: "Isabella", img: "https://i.pinimg.com/1200x/8f/b6/53/8fb6531754417925d60f7ba9276d824d.jpg", speeches: ["Che fate ragazzi? State per votare per me, vero? Questo mi farà guadagnare il distintivo 'Vincitrice di Reality'!", "Le Giovani Marmotte mi hanno insegnato a sopravvivere ovunque. Spero che Phineas sia fiero di me. Votatemi, vi prego!"] },
           { name: "Nonnina", img: "https://i.pinimg.com/736x/c0/82/61/c08261487f081ba5ed490c5dc317b112.jpg", speeches: ["Eh? Cosa? Ah, sono in finale! Datemi quei soldi, che devo comprare la pappa per il mio animaletto... su, votate per la nonnina!", "Ai miei tempi i reality show si facevano combattendo contro i dinosauri! Siete dei rammolliti, la nonnina merita di vincere!"] },
           { name: "Sid", img: "https://i.pinimg.com/1200x/69/4a/0e/694a0eeaf3c1182a15263d580cd0f7eb.jpg", speeches: ["Ehi, guardatemi! Il re dei bradipi è in finale! Se vinco io, apro un resort di lusso con fango caldo per tutti!", "Nessuno credeva in me, dicevano 'Sid, sei solo un bradipo imbranato'. E invece eccomi qui! Votate per me, vi voglio bene!"] },
@@ -213,7 +240,7 @@
           { name: "Francine", img: "https://i.pinimg.com/736x/b3/b5/f6/b3b5f6849a52b4daed92424650a98f7f.jpg" },
           { name: "Hayley", img: "https://i.pinimg.com/originals/9d/58/70/9d58707a635942c60ee7fd1afc8403bd.gif" },
           { name: "Stan", img: "https://i.pinimg.com/736x/cc/48/c0/cc48c09c661d4f9af432a37c6b908e41.jpg" },
-          { name: "Stewie", img: "https://i.pinimg.com/1200x/1e/a2/cc/1ea2cc7a197e3841086f4a1ce18b089c.jpg", speeches: ["Inchiniamoci tutti al mio genio superiore. Ho calcolato ogni vostra mossa.", "Votatemi, stolti! O la mia prossima invenzione vi disintegrerà uno per uno."] },
+          { name: "Stewie", img: "https://i.pinimg.com/1200x/1e/a2/cc/1ea2cc7a197e3841086f4a1ce18b089c.jpg", speeches: ["Inchiniamoci tutti al mio genio superiore. Ho calcolato ogni vostra mossa.", "Votatemi, stolti! O la mia prossima invenzione vi disintegrerà uno per uno."], alignment: 'villain' },
           { name: "Lois", img: "https://i.pinimg.com/736x/6e/f7/42/6ef74238d3938c8e02f62c54fa7fb4c5.jpg", speeches: ["Ho dovuto crescere tre figli, un cane parlante e Peter. Gestire voi sull'isola è stata una vacanza. Votatemi, me lo merito!", "Se non mi votate, scordatevi che vi inviti al prossimo barbecue in famiglia. Sono una madre disperata, datemi quei soldi!"] },
           { name: "Peter", img: "https://i.pinimg.com/736x/9e/40/74/9e4074bbe7890cd245b51b9ff5c0e33c.jpg", speeches: ["Eheheh, se mi votate vi prometto una birra alla Pawtucket Patriot per tutti! Ah, e non fate vincere il pollo gigante.", "Questo è ancora più assurdo di quella volta in cui sono arrivato in finale in un reality show... oh, aspetta."] },
           { name: "Fry", img: "https://i.pinimg.com/736x/d6/f4/ac/d6f4acc1bfae65c673b4b5e02a89ce71.jpg" },
@@ -224,19 +251,24 @@
 		  { name: "Jake DC", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg", speeches: ["Wow.. non mi sarei mai aspettato di arrivare in finale. Se volete votarmi siate liberissimi di farlo hahaha", "Marika so che credi in me cercherò di vincere per te e per Tom."] },
 		  { name: "Tom", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg", speeches: ["Jake, dedicherò questa vittoria per te", "Una spia come me sa di meritarsi questa vittoria, se mi votate farete la scelta giusta"] },
 		  { name: "Ashley", img: "https://i.pinimg.com/736x/d1/c5/5f/d1c55f57218baecf0c2e160155e80c61.jpg", speeches: ["Eccomi qui in finale! Sono molto emozionata e spero davvero di aggiudicarmi i vostri voti ♥", "Buona fortuna per la finale mio caro avversario ma non pensare che sia finita"] },
-		  { name: "Grett", img: "https://i.pinimg.com/736x/fa/fb/5d/fafb5de75578a12b0eb2eb5efb035d23.jpg", speeches: ["Non dirò molto, solo che ovviamente mi merito questa vittoria.", "Beh siate obiettivi, non sarò la piu simpatica, ma questa vittoria me la merito."] },
-		  { name: "Fiore", img: "https://i.pinimg.com/736x/78/79/43/787943ad5e0e1991f0a8f30189d0969f.jpg", speeches: ["Hey.. grazie a tutti per.. nah al diavolo. Votatemi bastardi.", "O mi votate o vi conviene dormire con un occhio aperto questa notte."] },
+		  { name: "Grett", img: "https://i.pinimg.com/736x/fa/fb/5d/fafb5de75578a12b0eb2eb5efb035d23.jpg", speeches: ["Non dirò molto, solo che ovviamente mi merito questa vittoria.", "Beh siate obiettivi, non sarò la piu simpatica, ma questa vittoria me la merito."], alignment: 'villain' },
+		  { name: "Fiore", img: "https://i.pinimg.com/736x/78/79/43/787943ad5e0e1991f0a8f30189d0969f.jpg", speeches: ["Hey.. grazie a tutti per.. nah al diavolo. Votatemi bastardi.", "O mi votate o vi conviene dormire con un occhio aperto questa notte."], alignment: 'villain' },
 		  { name: "Ally", img: "https://i.pinimg.com/736x/58/a8/e6/58a8e6232e4e38ca2a867f208c1b83fa.jpg", speeches: ["Ragazzi, questa stagione per me è stata come un roguelike: ogni giorno morivo dentro, ma respawnavo più forte, votate per la mia win!", "Ho affrontato più bug e glitch qui che in qualsiasi gioco indie, me lo merito questo voto dai haha!"] },
-		  { name: "Isabelle", img: "https://i.pinimg.com/736x/5e/1a/f6/5e1af69ac6196b02e015133b3de84fd3.jpg", speeches: ["Non sarò stata la piu onorevole, ma il signore sapra come perdonarmi, quindi votatemi. Ora.", "Dedicherò questa vittoria al nostro signore, votatemi."] },
-		  { name: "Anastasia", img: "https://i.pinimg.com/736x/56/e5/52/56e552315c56b809d3978914d294ad34.jpg", speeches: ["Beh, questo outcome di me in finale era scontato, ho giocato con eleganza, strategia e bravura. Sapete chi si merita la vittoria no?", "Che vinca il migliore, ma sappiamo che sono io"] },
+		  { name: "Isabelle", img: "https://i.pinimg.com/736x/5e/1a/f6/5e1af69ac6196b02e015133b3de84fd3.jpg", speeches: ["Non sarò stata la piu onorevole, ma il signore sapra come perdonarmi, quindi votatemi. Ora.", "Dedicherò questa vittoria al nostro signore, votatemi."], alignment: 'villain' },
+		  { name: "Anastasia", img: "https://i.pinimg.com/736x/56/e5/52/56e552315c56b809d3978914d294ad34.jpg", speeches: ["Beh, questo outcome di me in finale era scontato, ho giocato con eleganza, strategia e bravura. Sapete chi si merita la vittoria no?", "Che vinca il migliore, ma sappiamo che sono io"], alignment: 'villain' },
 		  { name: "Robot Boy", img: "https://i.pinimg.com/736x/91/d3/42/91d342072cae0214447bf8c362d9e02e.jpg" },
-		  { name: "Timmy", img: "https://i.pinimg.com/736x/91/de/1b/91de1b5b1897a71a36957191623af776.jpg" },
+		  { name: "Timmy", img: "https://i.pinimg.com/736x/91/de/1b/91de1b5b1897a71a36957191623af776.jpg", speeches: ["I miei fantagenitori non possono aiutarmi a vincere il milione, ma ci sono arrivato lo stesso! Votatemi!", "Desidero... no aspetta, non posso. Votate per me ragazzi!"] },
+          { name: "Cosmo", img: "https://i.pinimg.com/1200x/3e/66/72/3e667202130fb974cfecb27b3f46c64a.jpg", speeches: ["Ehi, se vinco io compriamo un milione di monetine luccicanti!", "Wanda dice che non posso trasformare i soldi in budino, ma io ci proverò lo stesso!"] },
+          { name: "Wanda", img: "https://i.pinimg.com/1200x/48/2e/c9/482ec974f07d0e9afdc462263f6235f9.jpg", speeches: ["Ho sempre tenuto la situazione sotto controllo, a differenza di certi miei colleghi... Votate per me!", "Siate responsabili con il vostro voto. Datelo a me e userò i soldi saggiamente!"] },
+          { name: "Pery", img: "https://i.pinimg.com/736x/94/4e/1b/944e1b48effe0ad848788a949aed13c5.jpg", speeches: ["Come fantagenitore ho delle regole, ma qui sull'isola ho giocato per vincere lealmente!", "Votatemi, vi prometto che non ci saranno disastri magici... spero."] },
+          { name: "Hazel", img: "https://i.pinimg.com/736x/9a/e2/34/9ae2349f370a6455bd694d5d160457d8.jpg", speeches: ["Wow, è stata un'avventura pazzesca! Spero che mi votiate, ho messo tutto il mio cuore in questo gioco!", "Votate per me! Insieme possiamo rendere questo posto migliore per tutti!"] },
 		  { name: "Trixie", img: "https://i.pinimg.com/736x/05/08/a7/0508a771507d83f2b52a97467f57d581.jpg" },
-		  { name: "Vicky", img: "https://i.pinimg.com/1200x/f5/1f/2e/f51f2e0bff74df3173b110f24943a6fc.jpg" },
+		  { name: "Vicky", img: "https://i.pinimg.com/1200x/f5/1f/2e/f51f2e0bff74df3173b110f24943a6fc.jpg", alignment: 'villain' },
 		  { name: "Finn", img: "https://i.pinimg.com/736x/7e/0b/c9/7e0bc9826a7652264f32a44bc8a40ede.jpg" },
 		  { name: "Fiona", img: "https://i.pinimg.com/1200x/0b/9d/85/0b9d85c6c70be88471ad753b014de88b.jpg" },
 		  { name: "Jake", img: "https://i.pinimg.com/1200x/cd/77/22/cd7722b2f98ffc75d1128913df6861d7.jpg" },
 		  { name: "Cake", img: "https://i.pinimg.com/736x/70/6c/08/706c08681ae007b24d103c44910431c1.jpg" },
+          { name: "Re Ghiaccio", img: "https://i.pinimg.com/736x/63/11/d2/6311d2bddf8b2672df70a957bea7a93d.jpg", speeches: ["Se mi votate, prometto di non rapire nessuna principessa per un'intera settimana! Forse...", "Oh Gunther, guarda! Il tuo padrone è in finale! Sono un vero re!"], alignment: 'villain' },
 		  { name: "Marceline", img: "https://i.pinimg.com/736x/3a/58/7d/3a587db4bdc947c7d3458dc9582af9cd.jpg" },
 		  { name: "Zoey", img: "https://i.pinimg.com/736x/48/53/3e/48533edc4b5054ec0a7bca17130f22af.jpg" },
 		  { name: "Rochelle", img: "https://i.pinimg.com/736x/bb/56/ed/bb56ed9fa63be897ba67032706d75cc7.jpg" },
@@ -248,6 +280,7 @@
 		  { name: "Shinobu", img: "https://i.pinimg.com/736x/8b/71/a5/8b71a53282f08aea93f83852a01e4e44.jpg" },
 		  { name: "Tengen", img: "https://i.pinimg.com/736x/33/ef/07/33ef07083eb82a6e314b32b2d6e72295.jpg" },
 		  { name: "Aang", img: "https://i.pinimg.com/736x/21/c6/02/21c60273e7409b871140d5cee2cace5b.jpg" },
+          { name: "Zuko", img: "https://i.pinimg.com/736x/1d/3f/9e/1d3f9e62fdc463541fb404840372c3a4.jpg", speeches: ["Vincere questo show è l'unico modo per ripristinare il mio onore!", "Ho trovato la mia strada, e il mio destino è vincere questa competizione."], alignment: 'villain' },
 		  { name: "Katara", img: "https://i.pinimg.com/736x/88/3b/a4/883ba48c5727d96962d2a93536f04c17.jpg" },
 		  { name: "Toph", img: "https://i.pinimg.com/736x/ac/0e/6c/ac0e6c1b3329b309d09cb44e968a41d7.jpg" },
 		  { name: "Sokka", img: "https://i.pinimg.com/736x/61/a7/91/61a7919a2c2df87b0106a425c031b9ca.jpg" },
@@ -259,35 +292,39 @@
 		  { name: "Draculaura", img: "https://i.pinimg.com/236x/49/d8/23/49d823b49c0621162712fb43dd5bf002.jpg" },
 		  { name: "Clawdeen", img: "https://i.pinimg.com/736x/fe/cb/1c/fecb1c67924cd56bb01e19deb12294f1.jpg" },
 		  { name: "Frankie", img: "https://i.pinimg.com/736x/c0/ae/bb/c0aebba7d0b329e4a8e26f92d36a857a.jpg" },
-		  { name: "Shego", img: "https://i.pinimg.com/736x/54/70/77/5470771ee32d3350ffa08f921bb3d1ad.jpg" },
+		  { name: "Shego", img: "https://i.pinimg.com/736x/54/70/77/5470771ee32d3350ffa08f921bb3d1ad.jpg", alignment: 'villain' },
 		  { name: "Ariana Grande", img: "https://media.tenor.com/1u94p6qR01gAAAAM/ariana-grande-eternal-sunshine.gif", speeches: ["Grazie a tutti i miei fan per avermi supportata fino a qui! Yuh! 🤍 Votatemi e il mio prossimo singolo sarà dedicato a voi!", "Sono passata dal pop al fango di quest'isola, e sono ancora flawless. Datemi la corona, thank you, next!"] },
 		  { name: "Will", img: "https://i.pinimg.com/originals/88/80/73/8880736b5695844044e0e38c8063a1ff.gif", speeches: ["Ho sempre guidato il mio gruppo con il Cuore. Se mi darete il vostro voto, dimostrerete che l'unione fa la forza!", "Abbiamo superato sfide magiche e ostacoli impossibili. Prometto di usare questa vittoria per fare del bene!"] },
 		  { name: "Carlos Oliveira", img: "https://i.pinimg.com/originals/32/0d/d1/320dd13031f1aba8a2d3d9b9837174f4.gif", speeches: ["In un mondo pieno di mostri, voi siete stati la mia squadra. Votate per me, vi ho guardato le spalle fin dall'inizio.", "Non lascio mai un civile indietro, figuriamoci una finale. Sono un sopravvissuto nato, merito il vostro voto."] },
 		  { name: "Leon", img: "https://i.pinimg.com/736x/db/ef/fc/dbeffc6e915a929f7dbe908390f5af42.jpg", speeches: ["Ho affrontato di peggio a Raccoon City. Ho mantenuto il sangue freddo e ho giocato pulito. Votatemi, missione compiuta.", "Scusate il ritardo, ma eccomi in finale. Se cercate un vero sopravvissuto, sapete a chi dare il vostro voto."] },
 		  { name: "Spongebob", img: "https://i.pinimg.com/originals/4c/74/21/4c742132b3f7018e49ae1901a2ab3e68.gif", speeches: ["Sono pronto! Sono pronto per vincere! Hahahaha!", "Ho sempre creduto nel potere dell'amicizia e del Krabby Patty. Votatemi!"] },
 		  { name: "Patrick", img: "https://i.pinimg.com/736x/cc/45/b5/cc45b504e5bba418a3621d894a7693d6.jpg", speeches: ["La maionese è uno strumento musicale? Votatemi, vi prego.", "Se vinco prometto di comprare... uhm... cosa stavo dicendo? Ah, i soldi!"] },
-		  { name: "Squiddi", img: "https://i.pinimg.com/originals/bb/9a/08/bb9a082dd1a1a8f49200b8f5e5392d23.gif" },
+		  { name: "Squiddi", img: "https://i.pinimg.com/originals/bb/9a/08/bb9a082dd1a1a8f49200b8f5e5392d23.gif", alignment: 'villain' },
 		  { name: "Mr Krab", img: "https://i.pinimg.com/1200x/74/9c/f5/749cf53dd48dbb440fcde8d958c7dbb1.jpg" },
-		  { name: "Plankton", img: "https://i.pinimg.com/736x/4c/27/4f/4c274f1e983ecd433672cfef1060872f.jpg" },
+		  { name: "Plankton", img: "https://i.pinimg.com/736x/4c/27/4f/4c274f1e983ecd433672cfef1060872f.jpg", alignment: 'villain' },
 		  { name: "Alvin", img: "https://i.pinimg.com/1200x/42/b1/da/42b1da0676938e04cfcd2d16ae13e067.jpg" },
-		  { name: "Poison Ivy", img: "https://i.pinimg.com/736x/72/f5/98/72f598d1ca69f3de7f38206b38d79066.jpg" },
+		  { name: "Poison Ivy", img: "https://i.pinimg.com/736x/72/f5/98/72f598d1ca69f3de7f38206b38d79066.jpg", alignment: 'villain' },
           { name: "Sonic", img: "https://i.pinimg.com/1200x/4f/22/d2/4f22d2cd449a419b3859197438300dd2.jpg", speeches: ["Sono stato il più veloce dall'inizio alla fine. Gotta go fast verso la vittoria!", "Nessuno di voi è riuscito a starmi dietro. Datemi quegli anelli d'oro!"] },
 		  { name: "Tails", img: "https://i.pinimg.com/736x/cb/f8/43/cbf84308cca2de1d9a776410716c6aee.jpg" },
-		  { name: "Dr Eggman", img: "https://i.pinimg.com/736x/ca/6a/ec/ca6aec757d82fbd5498fc2f5322ffc2c.jpg" },
-		  { name: "Scar", img: "https://i.pinimg.com/736x/4b/cc/0e/4bcc0e93c7086f7359c3e99fea022cd6.jpg" },
-		  { name: "Malefica", img: "https://i.pinimg.com/736x/2f/83/9a/2f839a9b9b03a70f4b9feb812e8cf03a.jpg" },
-		  { name: "Yzma", img: "https://i.pinimg.com/1200x/20/47/ae/2047ae86c81bd2b6e1ab00797a8584a8.jpg" },
+		  { name: "Dr Eggman", img: "https://i.pinimg.com/736x/ca/6a/ec/ca6aec757d82fbd5498fc2f5322ffc2c.jpg", alignment: 'villain' },
+		  { name: "Scar", img: "https://i.pinimg.com/736x/4b/cc/0e/4bcc0e93c7086f7359c3e99fea022cd6.jpg", alignment: 'villain' },
+		  { name: "Malefica", img: "https://i.pinimg.com/736x/2f/83/9a/2f839a9b9b03a70f4b9feb812e8cf03a.jpg", alignment: 'villain' },
+		  { name: "Yzma", img: "https://i.pinimg.com/1200x/20/47/ae/2047ae86c81bd2b6e1ab00797a8584a8.jpg", alignment: 'villain' },
 		  { name: "Simba", img: "https://i.pinimg.com/736x/b1/90/89/b19089d874786ae283c4ba7f9ebed795.jpg" },
 		  { name: "Aurora", img: "https://i.pinimg.com/736x/b1/75/fb/b175fbb3b147ea7a9f74ef16b7e4abd3.jpg" },
 		  { name: "Kuzco", img: "https://i.pinimg.com/736x/75/cf/32/75cf32d90c87209bcf2c3e77be26117b.jpg" },
 		  { name: "Kratos", img: "https://i.pinimg.com/1200x/c7/92/1e/c7921e20927ce5aea55d465a3685a055.jpg" },
-		  { name: "Ghostface", img: "https://i.pinimg.com/736x/a3/14/c4/a314c4596b6c929a375ff3355e2360ca.jpg" },
+		  { name: "Ghostface", img: "https://i.pinimg.com/736x/a3/14/c4/a314c4596b6c929a375ff3355e2360ca.jpg", alignment: 'villain' },
 		  { name: "Lloyd", img: "https://i.pinimg.com/736x/a9/75/93/a9759377f535489205ee8458a508db79.jpg" },
 		  { name: "Kai", img: "https://i.pinimg.com/1200x/ea/9d/97/ea9d97dd2a54c3d0aa13ca67e0b4864d.jpg" },
 		  { name: "Sensei WU", img: " https://i.pinimg.com/1200x/65/7e/86/657e8647544d634ac721a0ee06a55e6c.jpg" },
 		  { name: "Po", img: "https://i.pinimg.com/736x/fb/99/a5/fb99a5c7ce5b313ed1c4e71ee0260a9b.jpg" },
 		  { name: "Shifu", img: "https://i.pinimg.com/736x/c8/90/f3/c890f3dcf69372cd5ef3c68aad711bb9.jpg" },
-		  { name: "Mimikyu", img: "https://i.pinimg.com/1200x/7f/c3/98/7fc3984347358acee07cf91f2ed1d0ff.jpg" },
+		  { name: "Mimikyu", img: "https://i.pinimg.com/1200x/7f/c3/98/7fc3984347358acee07cf91f2ed1d0ff.jpg", speeches: ["Kyu... mi votate? Voglio solo essere amato...", "Se vinco, forse qualcuno mi vorrà bene quanto a Pikachu..."] },
+          { name: "Pikachu", img: "https://i.pinimg.com/736x/1f/4a/ef/1f4aef84e0e90b8dd059b9c17ab403cb.jpg", speeches: ["Pika pika! Pikachu!", "Pikaaa... CHU! (Traduzione: Scegliete me per una vittoria elettrizzante!)"] },
+          { name: "Gallade", img: "https://i.pinimg.com/736x/4e/17/22/4e17227014018602a4c61c3405ef2662.jpg", speeches: ["Ho combattuto con onore e lealtà fino alla fine. Il mio spirito guerriero merita questa vittoria.", "Come un vero cavaliere, ho protetto i miei alleati. Confido nel vostro supporto."] },
+          { name: "Gardevoir", img: "https://i.pinimg.com/736x/f9/36/ae/f936ae4bb983bc889f13d4d44344d2d4.jpg", speeches: ["Ho percepito i vostri sentimenti per tutta la stagione. Spero che i vostri cuori vi guidino a votarmi.", "La mia eleganza e il mio potere psichico mi hanno portata qui. Vi proteggerò sempre se mi sceglierete."] },
+          { name: "Roserade", img: "https://i.pinimg.com/736x/4a/89/38/4a893836de815c65b9c9926effed33a9.jpg", speeches: ["Ogni rosa ha le sue spine, e io ho dimostrato di saper pungere al momento giusto.", "Una performance elegante richiede un finale perfetto. Accordatemi questa vittoria."] },
 		  { name: "Clover", img: "https://i.pinimg.com/1200x/b3/77/09/b37709f9e5c1206630286eae9bbf748d.jpg" },
 		  { name: "Sam", img: "https://i.pinimg.com/736x/e4/2c/11/e42c119ef2567059407c05275aba27ca.jpg" },
 		  { name: "Alex TS", img: "https://i.pinimg.com/1200x/31/0a/1e/310a1ecf6798fecaec781fe314ace8c0.jpg" },
@@ -304,9 +341,14 @@
             "Abbiamo passato momenti stupendi, ma alla fine io ho giocato con più strategia. Scegliete me!"
         ];
 
-        const TEAM_NAMES = [
+        const DEFAULT_TEAM_NAMES = [
           "Marmotte Urlanti", "Carpe Assassine", "Criceti Radioattivi", "Avvoltoi Volanti",
           "Tigri Selvaggi", "Orsi Polari", "Lupi Mannari", "Serpenti A Sonagli"
+        ];
+
+        const VILLAIN_TEAM_NAMES = [
+          "Avvoltoi Malvagi", "Corvi Cruenti", "Draghi Diabolici", "Piedini Rosa",
+          "Vipere Velenose", "Iene Spietate", "Tarantole Tossiche", "Pipistrelli Predatori"
         ];
 
         const App = () => {
@@ -317,6 +359,12 @@
           const [currentLobbyId, setCurrentLobbyId] = useState(null);
           const [lobbyData, setLobbyData] = useState(null);
           const [errorMsg, setErrorMsg] = useState('');
+          const [muted, setMuted] = useState(false);
+
+          const toggleMute = () => {
+              isGlobalMuted = !isGlobalMuted;
+              setMuted(isGlobalMuted);
+          };
 
           // AUTH SETUP
           useEffect(() => {
@@ -413,7 +461,8 @@
               status: 'waiting',
               config: {
                 ...config,
-                redemption: config.redemption || { enabled: false, count: 0, episodes: [] }
+                redemption: config.redemption || { enabled: false, count: 0, episodes: [] },
+                theme: config.theme || 'Tutti'
               }, 
               currentSeasonIndex: 0,
               seasonWinners: [],
@@ -494,7 +543,10 @@
           }
 
           return (
-            <div className="min-h-screen bg-slate-900 text-slate-100 font-sans">
+            <div className="min-h-screen bg-slate-900 text-slate-100 font-sans relative">
+              <button onClick={toggleMute} className="fixed top-4 left-4 z-[9999] bg-black/70 p-3 rounded-full text-white hover:bg-black transition border border-white/20 shadow-lg" title={muted ? "Attiva Suoni" : "Disattiva Suoni"}>
+                  {muted ? <VolumeX size={20}/> : <Volume2 size={20}/>}
+              </button>
               {currentView === 'auth' && (
                 <AuthScreen nickname={nickname} setNickname={setNickname} onEnter={() => setCurrentView('browser')} />
               )}
@@ -554,7 +606,9 @@
               numSeasons: 1, 
               mergeSize: 11,
               jurySize: 7, 
-              redemption: { enabled: false, count: 1, episodes: "" } 
+              theme: 'Tutti',
+              redemption: { enabled: false, count: 1, episodes: "" },
+              advantages: { idol: 1, extraVote: 1, advantage: 1, voteSteal: 1, spyDrone: 1, mutiny: 1, safety: 1, immunitySteal: 1, legacy: 1 }
           });
           const [joinCode, setJoinCode] = useState('');
 
@@ -593,9 +647,9 @@
                            <div>
                              <span className="font-bold text-lg text-white">{l.hostName}'s Show</span>
                              <div className="flex gap-2 mt-1">
+                                <span className="text-xs bg-purple-900 text-purple-200 px-2 py-0.5 rounded font-mono">{l.config.theme || 'Tutti'}</span>
                                 <span className="text-xs bg-yellow-900 text-yellow-200 px-2 py-0.5 rounded font-mono">Stagioni: {l.config.numSeasons}</span>
                                 <span className="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded font-mono">Max: {l.config.maxPlayers}</span>
-                                <span className="text-xs bg-red-900 text-red-200 px-2 py-0.5 rounded font-mono">Merge: {l.config.mergeSize || Math.floor(l.config.maxPlayers/2)}</span>
                              </div>
                            </div>
                            <div className="flex items-center gap-4">
@@ -612,6 +666,18 @@
                   <h2 className="text-3xl font-black text-center mb-6 text-white">CONFIGURA SHOW</h2>
                   
                   <div className="space-y-6">
+                    <div>
+                      <label className="block text-slate-400 font-bold mb-2">Tema Stagione</label>
+                      <select 
+                          value={config.theme} 
+                          onChange={e => setConfig({...config, theme: e.target.value})}
+                          className="w-full bg-slate-900 border border-slate-600 text-white rounded-xl p-3 focus:border-yellow-500 outline-none font-bold"
+                      >
+                          <option value="Tutti">Tutti (Roster Completo)</option>
+                          <option value="Villain Edition">Villain Edition (Solo Cattivi)</option>
+                      </select>
+                    </div>
+
                     <div>
                       <label className="block text-slate-400 font-bold mb-2">Concorrenti (8 - 100)</label>
                       <div className="flex items-center gap-4">
@@ -723,6 +789,36 @@
                         )}
                     </div>
 
+                    <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-700 mt-4">
+                        <label className="text-white font-bold flex items-center gap-2 mb-4">
+                            <Package className="text-yellow-400"/> Vantaggi Nascosti
+                        </label>
+                        <div className="grid grid-cols-2 gap-4">
+                            {Object.entries({
+                                idol: "Idolo Immunità",
+                                extraVote: "Voto Extra",
+                                advantage: "Bonus (+3)",
+                                voteSteal: "Ruba-Voto",
+                                spyDrone: "Drone Spia (x3)",
+                                mutiny: "Ammutinamento",
+                                safety: "Salvacondotto",
+                                immunitySteal: "Ladro Collane",
+                                legacy: "Testamento"
+                            }).map(([key, label]) => (
+                                <div key={key} className="flex justify-between items-center bg-slate-800 p-2 rounded border border-slate-700">
+                                    <span className="text-xs text-slate-300 font-bold">{label}</span>
+                                    <input 
+                                        type="number" 
+                                        min="0" max="10" 
+                                        value={config.advantages[key]}
+                                        onChange={e => setConfig({...config, advantages: {...config.advantages, [key]: parseInt(e.target.value)}})}
+                                        className="w-12 bg-slate-900 text-white text-center rounded border border-slate-600 focus:border-yellow-500 outline-none"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
                     <div className="flex gap-4 pt-4">
                       <button onClick={() => setShowConfig(false)} className="flex-1 bg-slate-700 py-3 rounded-xl font-bold text-white">Annulla</button>
                       <button onClick={() => {
@@ -759,9 +855,16 @@
             let currentPlayers = [...lobby.players];
             const usedNames = new Set(currentPlayers.map(p => p.character?.name).filter(Boolean));
             
+            // FUNZIONE FILTRO TEMA STAGIONE
+            const themeFilter = (r) => {
+                if (lobby.config.theme === 'Villain Edition') return r.alignment === 'villain';
+                return true; 
+            };
+
             currentPlayers = currentPlayers.map(p => {
               if (!p.character) {
-                const available = ROSTER.filter(r => !usedNames.has(r.name));
+                const available = ROSTER.filter(r => !usedNames.has(r.name) && themeFilter(r));
+                // FALLBACK DI SICUREZZA: se la lista filtrata è vuota, pesca da tutti
                 const random = available.length > 0 
                     ? available[Math.floor(Math.random() * available.length)]
                     : ROSTER[Math.floor(Math.random() * ROSTER.length)];
@@ -773,7 +876,7 @@
             });
 
             while (currentPlayers.length < lobby.config.maxPlayers) {
-              const available = ROSTER.filter(r => !usedNames.has(r.name));
+              const available = ROSTER.filter(r => !usedNames.has(r.name) && themeFilter(r));
               
               let randomChar;
               let botName;
@@ -783,6 +886,7 @@
                   botName = randomChar.name;
                   usedNames.add(botName);
               } else {
+                  // FALLBACK DI SICUREZZA: cloni casuali se finiscono i personaggi
                   randomChar = ROSTER[Math.floor(Math.random() * ROSTER.length)];
                   botName = `${randomChar.name} ${Math.floor(Math.random() * 999)}`;
               }
@@ -805,27 +909,34 @@
             }
 
             const numTeams = lobby.config.numTeams;
+            const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : DEFAULT_TEAM_NAMES;
+
             for (let i = currentPlayers.length - 1; i > 0; i--) {
               const j = Math.floor(Math.random() * (i + 1));
               [currentPlayers[i], currentPlayers[j]] = [currentPlayers[j], currentPlayers[i]];
             }
             currentPlayers = currentPlayers.map((p, idx) => ({
               ...p,
-              team: TEAM_NAMES[idx % numTeams]
+              team: currentTeamNames[idx % numTeams]
             }));
 
-            // --- IDOL & EXTRA VOTE SETUP ---
+            // --- SISTEMA INVENTARIO MULTIPLO ---
+            const advantageConfig = lobby.config.advantages || { idol: 1, extraVote: 1, advantage: 1, voteSteal: 1, spyDrone: 1, mutiny: 1, safety: 1, immunitySteal: 1, legacy: 1 };
+            
+            let itemPool = [];
+            Object.entries(advantageConfig).forEach(([key, count]) => {
+                for(let i=0; i<count; i++) itemPool.push(key);
+            });
+            
+            itemPool.sort(() => Math.random() - 0.5);
+            
             const totalCrates = currentPlayers.length;
+            let availableIndices = Array.from({length: totalCrates}, (_, i) => i).sort(() => Math.random() - 0.5);
             
-            let availableIndices = Array.from({length: totalCrates}, (_, i) => i);
-            availableIndices.sort(() => Math.random() - 0.5);
-            
-            const luckyIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
-            const extraVoteIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
-            const advantageIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
-            const voteStealIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
-            const spyDroneIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
-            const mutinyIndex = availableIndices.length > 0 ? availableIndices.pop() : -1;
+            let itemDistribution = {};
+            for (let i=0; i<itemPool.length && availableIndices.length > 0; i++) {
+                itemDistribution[availableIndices.pop()] = itemPool[i];
+            }
 
             const initialCrates = Array.from({length: totalCrates}, (_, i) => ({ id: i, owner: null }));
 
@@ -835,24 +946,20 @@
               phase: 'idol_hunt', 
               idolData: {
                   active: true,
-                  luckyIndex,
-                  extraVoteIndex, extraVoteHolder: null, extraVoteConsumed: false, extraVoteUsedRound: null,       
-                  advantageIndex, advantageHolder: null, advantageConsumed: false,     
-                  voteStealIndex, voteStealHolder: null, voteStealConsumed: false, voteStealVictim: null, voteStealUsedRound: null, 
-                  spyDroneIndex, spyDroneHolder: null, spyDroneUses: 3,
-                  mutinyIndex, mutinyHolder: null, mutinyConsumed: false,
+                  itemDistribution,
+                  inventory: { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} },
+                  activeEffects: { legacyDesignations: {} },
                   crates: initialCrates,
-                  stage: 'selection', 
-                  holder: null
+                  stage: 'selection'
               },
               round: 0,
-              logs: arrayUnion(`--- CACCIA AI VANTAGGI (Idolo, Voti Extra, Drone, Ammutinamento) ---`)
+              logs: arrayUnion(`--- CACCIA AI VANTAGGI (Inizia la ricerca delle casse!) ---`)
             });
           };
 
           return (
             <div className="flex flex-col h-screen overflow-hidden">
-              <header className="bg-slate-800 p-4 border-b border-slate-700 flex justify-between items-center z-10">
+              <header className="bg-slate-800 p-4 border-b border-slate-700 flex justify-between items-center z-10 flex-shrink-0">
                 <div>
                   <h2 className="text-xl font-bold text-white">Lobby: {lobby.hostName}</h2>
                   <p className="text-slate-400 text-sm">Codice: {lobby.code} | Max: {lobby.config.maxPlayers} | Teams: {lobby.config.numTeams}</p>
@@ -861,7 +968,7 @@
               </header>
 
               <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-                <div className="w-full md:w-64 bg-slate-900 p-4 overflow-y-auto border-r border-slate-800">
+                <div className="w-full md:w-64 bg-slate-900 p-4 overflow-y-auto border-r border-slate-800 flex-shrink-0">
                   <h3 className="font-bold text-slate-300 mb-2 uppercase text-xs">Giocatori ({lobby.players.length}/{lobby.config.maxPlayers})</h3>
                   <div className="space-y-2">
                     {lobby.players.map(p => (
@@ -881,9 +988,9 @@
                 </div>
 
                 <div className="flex-1 p-4 overflow-y-auto bg-slate-900">
-                   <h3 className="text-xl font-bold mb-4 text-center text-yellow-400">SCEGLI IL TUO PERSONAGGIO</h3>
+                   <h3 className="text-xl font-bold mb-4 text-center text-yellow-400 flex-shrink-0">SCEGLI IL TUO PERSONAGGIO</h3>
                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                     {ROSTER.map(char => {
+                     {ROSTER.filter(char => lobby.config.theme === 'Villain Edition' ? char.alignment === 'villain' : true).map(char => {
                        const takenBy = lobby.players.find(p => p.character?.name === char.name);
                        const isMe = takenBy?.uid === user.uid;
                        return (
@@ -914,6 +1021,11 @@
           const currentSeason = SEASON_CONFIG[lobby.currentSeasonIndex] || SEASON_CONFIG[0];
           const isMerge = activePlayers.length <= (lobby.config.mergeSize || (lobby.config.maxPlayers / 2)); 
 
+          // --- SFONDO VILLAIN EDITION ---
+          // Immagine cupa e nebbiosa perfetta per il tema villain, presa dal web per funzionare in multiplayer!
+          const villainBgUrl = "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=2094&auto=format&fit=crop"; 
+          const currentBg = lobby.config.theme === 'Villain Edition' ? villainBgUrl : currentSeason.bg;
+
           const [hasActed, setHasActed] = useState(false);
           const [chatInput, setChatInput] = useState("");
           const chatRef = useRef(null);
@@ -930,13 +1042,20 @@
           const [useVoteSteal, setUseVoteSteal] = useState(false);
           const [voteStealVictim, setVoteStealVictim] = useState("");
           
-          // NUOVI ITEM STATE
           const [showSpyDroneModal, setShowSpyDroneModal] = useState(false);
           const [spyDroneTarget, setSpyDroneTarget] = useState("");
           const [spyDroneResult, setSpyDroneResult] = useState(null);
           
           const [showMutinyModal, setShowMutinyModal] = useState(false);
           const [mutinyTarget, setMutinyTarget] = useState("");
+
+          const [showSafetyModal, setShowSafetyModal] = useState(false);
+          
+          const [showImmunityStealModal, setShowImmunityStealModal] = useState(false);
+          const [immunityStealTarget, setImmunityStealTarget] = useState("");
+
+          const [showLegacyModal, setShowLegacyModal] = useState(false);
+          const [legacyTarget, setLegacyTarget] = useState("");
           
           const [mySpeech, setMySpeech] = useState("");
 
@@ -1001,7 +1120,7 @@
               setSpyDroneResult(resultString);
               
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                  [`idolData.spyDroneUses`]: lobby.idolData.spyDroneUses - 1
+                  [`idolData.inventory.spyDrones.${user.uid}`]: lobby.idolData.inventory.spyDrones[user.uid] - 1
               });
           };
 
@@ -1021,11 +1140,46 @@
               
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   players: updatedPlayers,
-                  [`idolData.mutinyConsumed`]: true,
+                  [`idolData.inventory.mutinies.${user.uid}`]: lobby.idolData.inventory.mutinies[user.uid] - 1,
                   logs: arrayUnion(`🔄 COLPO DI SCENA! ${myPlayer.name} ha usato l'Ammutinamento scambiando di squadra con ${target.name}!`)
               });
               
               setShowMutinyModal(false);
+          };
+
+          const handleUseSafety = async () => {
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`idolData.inventory.safeties.${user.uid}`]: lobby.idolData.inventory.safeties[user.uid] - 1,
+                  [`idolData.activeEffects.safetyUsedRound`]: lobby.round,
+                  [`idolData.activeEffects.safetyHolder`]: user.uid,
+                  logs: arrayUnion(`🚪 COLPO DI SCENA! ${myPlayer.name} ha usato il Salvacondotto! Abbandona la cerimonia di oggi e diventa intoccabile.`)
+              });
+              setShowSafetyModal(false);
+          };
+
+          const handleUseImmunitySteal = async () => {
+              if (!immunityStealTarget) return;
+              const target = lobby.players.find(p => p.uid === immunityStealTarget);
+              if (!target) return;
+
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`immunity`]: [user.uid],
+                  [`idolData.inventory.immunitySteals.${user.uid}`]: lobby.idolData.inventory.immunitySteals[user.uid] - 1,
+                  logs: arrayUnion(`📿 LADRO DI COLLANE! ${myPlayer.name} ha rubato l'immunità dal collo di ${target.name}!`)
+              });
+              setShowImmunityStealModal(false);
+          };
+
+          const handleUseLegacy = async () => {
+              if (!legacyTarget) return;
+              playSound('success');
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`idolData.inventory.legacies.${user.uid}`]: lobby.idolData.inventory.legacies[user.uid] - 1,
+                  [`idolData.activeEffects.legacyDesignations.${user.uid}`]: legacyTarget,
+                  logs: arrayUnion(`📜 ${myPlayer.name} ha compilato il suo Testamento in segreto...`)
+              });
+              setShowLegacyModal(false);
+              setLegacyTarget("");
           };
 
           const submitJuryVote = async (finalistId) => {
@@ -1058,6 +1212,11 @@
             setSpyDroneResult(null);
             setShowMutinyModal(false);
             setMutinyTarget("");
+            setShowSafetyModal(false);
+            setShowImmunityStealModal(false);
+            setImmunityStealTarget("");
+            setShowLegacyModal(false);
+            setLegacyTarget("");
           }, [lobby.phase, lobby.round]);
 
           useEffect(() => {
@@ -1088,24 +1247,28 @@
                           if (allTaken) {
                               updates[`idolData.stage`] = 'reveal';
                               
-                              const winnerUid = newCrates.find(c => c.id === lobby.idolData.luckyIndex)?.owner;
-                              updates[`idolData.holder`] = winnerUid;
+                              let inventory = { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} };
                               
-                              const extraWinnerUid = newCrates.find(c => c.id === lobby.idolData.extraVoteIndex)?.owner;
-                              updates[`idolData.extraVoteHolder`] = extraWinnerUid;
-
-                              const advWinnerUid = newCrates.find(c => c.id === lobby.idolData.advantageIndex)?.owner;
-                              updates[`idolData.advantageHolder`] = advWinnerUid;
+                              newCrates.forEach(c => {
+                                  const item = lobby.idolData.itemDistribution[c.id];
+                                  if (item && c.owner) {
+                                      if (item === 'spyDrone') {
+                                          inventory.spyDrones[c.owner] = (inventory.spyDrones[c.owner] || 0) + 3;
+                                      } else if (item === 'safety') {
+                                          inventory.safeties[c.owner] = (inventory.safeties[c.owner] || 0) + 1;
+                                      } else if (item === 'mutiny') {
+                                          inventory.mutinies[c.owner] = (inventory.mutinies[c.owner] || 0) + 1;
+                                      } else if (item === 'legacy') {
+                                          inventory.legacies[c.owner] = (inventory.legacies[c.owner] || 0) + 1;
+                                      } else {
+                                          const key = item + 's';
+                                          inventory[key][c.owner] = (inventory[key][c.owner] || 0) + 1;
+                                      }
+                                  }
+                              });
                               
-                              const vsWinnerUid = newCrates.find(c => c.id === lobby.idolData.voteStealIndex)?.owner;
-                              updates[`idolData.voteStealHolder`] = vsWinnerUid;
-
-                              const spyWinnerUid = newCrates.find(c => c.id === lobby.idolData.spyDroneIndex)?.owner;
-                              updates[`idolData.spyDroneHolder`] = spyWinnerUid;
-                              
-                              const mutWinnerUid = newCrates.find(c => c.id === lobby.idolData.mutinyIndex)?.owner;
-                              updates[`idolData.mutinyHolder`] = mutWinnerUid;
-
+                              updates[`idolData.inventory`] = inventory;
+                              if (!lobby.idolData.activeEffects) updates[`idolData.activeEffects`] = { legacyDesignations: {} };
                               updates[`logs`] = arrayUnion("Tutte le casse sono state assegnate! Apertura in corso...");
                           }
 
@@ -1239,6 +1402,7 @@
 
             if (playerObj?.isBot) {
                 const timer = setTimeout(async () => {
+                    playSound('roll');
                     let roll = Math.floor(Math.random() * 10) + 1;
                     if (playerObj.nextRollNerf) {
                         roll = Math.floor(Math.random() * 4) + 1; 
@@ -1277,7 +1441,7 @@
                               [`juryData.speeches.${fid}`]: speech,
                               logs: arrayUnion(`🎤 ${p.name} ha fatto il suo discorso finale!`)
                           });
-                      }, 3000 + Math.random() * 3000); // 3-6 seconds delay for realism
+                      }, 3000 + Math.random() * 3000); 
                       return () => clearTimeout(timer);
                   }
               });
@@ -1368,6 +1532,7 @@
           };
 
           const handleUserRoll = async () => {
+              playSound('roll');
               let roll;
               const player = lobby.players.find(p => p.uid === user.uid);
               
@@ -1379,7 +1544,7 @@
 
               let usedAdvantage = false;
 
-              if (useAdvantage && lobby.idolData?.advantageHolder === user.uid && !lobby.idolData.advantageConsumed) {
+              if (useAdvantage && lobby.idolData?.inventory?.advantages?.[user.uid] > 0) {
                   roll += 3; 
                   usedAdvantage = true;
               }
@@ -1399,7 +1564,7 @@
               }
 
               if (usedAdvantage) {
-                  updates[`idolData.advantageConsumed`] = true;
+                  updates[`idolData.inventory.advantages.${user.uid}`] = lobby.idolData.inventory.advantages[user.uid] - 1;
                   logsToAdd.push(`⚡ ${myPlayer.name} usa il VANTAGGIO SFIDA! +3 al lancio (Totale: ${roll})!`);
               }
               
@@ -1410,6 +1575,7 @@
           };
 
           const handleTieBreakRoll = async () => {
+              playSound('roll');
               const roll = Math.floor(Math.random() * 10) + 1;
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   [`ceremonyData.tieMatch.rolls.${user.uid}`]: roll
@@ -1418,6 +1584,7 @@
 
           const handleFinalRoll = async () => {
               if (lobby.phase !== 'final_showdown') return;
+              playSound('roll');
               const roll = Math.floor(Math.random() * 10) + 1;
               const currentRolls = lobby.finalData.currentRolls || {};
               
@@ -1427,6 +1594,7 @@
           };
 
           const handleRedemptionRoll = async () => {
+             playSound('roll');
              const roll = Math.floor(Math.random() * 10) + 1;
              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   [`redemptionData.rolls.${user.uid}`]: roll
@@ -1437,6 +1605,8 @@
               if (lobby.phase !== 'idol_hunt' || lobby.idolData.stage !== 'selection') return;
               if (lobby.idolData.crates.some(c => c.owner === user.uid)) return; 
               if (lobby.idolData.crates.find(c => c.id === crateId).owner !== null) return; 
+
+              playSound('success');
 
               const newCrates = lobby.idolData.crates.map(c => 
                    c.id === crateId ? { ...c, owner: user.uid } : c
@@ -1449,24 +1619,28 @@
               if (allTaken) {
                   updates[`idolData.stage`] = 'reveal';
                   
-                  const winnerUid = newCrates.find(c => c.id === lobby.idolData.luckyIndex)?.owner;
-                  updates[`idolData.holder`] = winnerUid;
+                  let inventory = { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} };
                   
-                  const extraUid = newCrates.find(c => c.id === lobby.idolData.extraVoteIndex)?.owner;
-                  updates[`idolData.extraVoteHolder`] = extraUid;
-
-                  const advWinnerUid = newCrates.find(c => c.id === lobby.idolData.advantageIndex)?.owner;
-                  updates[`idolData.advantageHolder`] = advWinnerUid;
-
-                  const vsWinnerUid = newCrates.find(c => c.id === lobby.idolData.voteStealIndex)?.owner;
-                  updates[`idolData.voteStealHolder`] = vsWinnerUid;
-
-                  const spyWinnerUid = newCrates.find(c => c.id === lobby.idolData.spyDroneIndex)?.owner;
-                  updates[`idolData.spyDroneHolder`] = spyWinnerUid;
+                  newCrates.forEach(c => {
+                      const item = lobby.idolData.itemDistribution[c.id];
+                      if (item && c.owner) {
+                          if (item === 'spyDrone') {
+                              inventory.spyDrones[c.owner] = (inventory.spyDrones[c.owner] || 0) + 3;
+                          } else if (item === 'safety') {
+                              inventory.safeties[c.owner] = (inventory.safeties[c.owner] || 0) + 1;
+                          } else if (item === 'mutiny') {
+                              inventory.mutinies[c.owner] = (inventory.mutinies[c.owner] || 0) + 1;
+                          } else if (item === 'legacy') {
+                              inventory.legacies[c.owner] = (inventory.legacies[c.owner] || 0) + 1;
+                          } else {
+                              const key = item + 's';
+                              inventory[key][c.owner] = (inventory[key][c.owner] || 0) + 1;
+                          }
+                      }
+                  });
                   
-                  const mutWinnerUid = newCrates.find(c => c.id === lobby.idolData.mutinyIndex)?.owner;
-                  updates[`idolData.mutinyHolder`] = mutWinnerUid;
-
+                  updates[`idolData.inventory`] = inventory;
+                  if (!lobby.idolData.activeEffects) updates[`idolData.activeEffects`] = { legacyDesignations: {} };
                   updates[`logs`] = arrayUnion("Tutte le casse sono state assegnate! Apertura in corso...");
               }
 
@@ -1509,14 +1683,18 @@
                 diceRoll: null,
                 immunityWins: 0,
                 totalVotesReceived: p.totalVotesReceived || 0,
-                nextRollNerf: false
+                nextRollNerf: false,
+                legacyImmunityActive: false,
+                legacyDoubleVoteActive: false
             }));
 
             const numTeams = newConfig.numTeams;
+            const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : DEFAULT_TEAM_NAMES;
+            
             nextPlayers.sort(() => Math.random() - 0.5);
             nextPlayers = nextPlayers.map((p, idx) => ({
               ...p,
-              team: TEAM_NAMES[idx % numTeams]
+              team: currentTeamNames[idx % numTeams]
             }));
 
             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
@@ -1634,7 +1812,6 @@
                           return lobby.players.find(p => p.name === entry.name);
                       }).filter(p => p); 
 
-                      // NUOVA FASE JURY SPEECHES
                       updates = {
                           phase: 'jury_speeches',
                           juryData: {
@@ -1759,7 +1936,28 @@
                   const victimId = lobby.challengeData.loser;
                   const victim = lobby.players.find(p => p.uid === victimId);
                   
-                  const updatedPlayers = lobby.players.map(p => p.uid === victimId ? { ...p, status: 'eliminated' } : p);
+                  let updatedPlayers = lobby.players.map(p => p.uid === victimId ? { ...p, status: 'eliminated' } : p);
+                  
+                  // TESTAMENTO: ELIMINAZIONE DIRETTA
+                  const activePlayersList = lobby.players.filter(p => p.status === 'active');
+                  let heirId = lobby.idolData?.activeEffects?.legacyDesignations?.[victimId];
+                  if (!heirId && lobby.idolData?.inventory?.legacies?.[victimId] > 0) {
+                      let bestScore = -999;
+                      activePlayersList.forEach(p => {
+                          if (p.uid !== victimId) {
+                              const score = victim.relationships[p.uid] || 0;
+                              if (score > bestScore) { bestScore = score; heirId = p.uid; }
+                          }
+                      });
+                  }
+                  if (heirId) {
+                      const heir = updatedPlayers.find(p => p.uid === heirId);
+                      if (heir && heir.status === 'active') {
+                          updatedPlayers = updatedPlayers.map(p => p.uid === heirId ? { ...p, legacyImmunityActive: true, legacyDoubleVoteActive: true } : p);
+                          newLogs.push(`📜 TESTAMENTO DI ${victim.name.toUpperCase()}! Lascia in eredità a ${heir.name} l'Immunità Assoluta e il Doppio Voto per il suo prossimo falò!`);
+                          playSound('success');
+                      }
+                  }
                   
                   const rankingEntry = { 
                        name: victim.name, 
@@ -1782,7 +1980,7 @@
                   updates = {
                       players: updatedPlayers,
                       rankings: arrayUnion(rankingEntry),
-                      logs: arrayUnion(`${victim.name} è ELIMINATO DIRETTAMENTE dallo show!`)
+                      logs: arrayUnion(`${victim.name} è ELIMINATO DIRETTAMENTE dallo show!`, ...newLogs)
                   };
 
                   if (isRedemptionEpisode) {
@@ -1873,11 +2071,11 @@
                 const isDoubleElimination = isMerge && Math.random() < 0.05; 
                 const isOpenVote = Math.random() < 0.05; 
                 
-                if (lobby.idolData?.extraVoteUsedRound === lobby.round) {
+                if (lobby.idolData?.activeEffects?.extraVoteUsedRound === lobby.round) {
                     newLogs.push("Chris: 'Attenzione campeggiatori! Qualcuno ha usato un VOTO EXTRA segreto stasera! I conti potrebbero non tornare...'");
                 }
                 
-                if (lobby.idolData?.voteStealUsedRound === lobby.round) {
+                if (lobby.idolData?.activeEffects?.voteStealUsedRound === lobby.round) {
                     newLogs.push("Chris: 'Incredibile! Qualcuno ha attivato il RUBA-VOTO! Un concorrente si è visto annullare il voto!'");
                 }
 
@@ -1899,9 +2097,9 @@
                 if (isOpenVote) {
                      newLogs.push("!!! COLPO DI SCENA !!! Chris: 'Stasera i voti sono PALESI! Niente segreti!'");
                      
-                     const voteStealUsed = lobby.idolData?.voteStealUsedRound === lobby.round;
-                     const voteStealVictim = lobby.idolData?.voteStealVictim;
-                     const voteStealHolder = lobby.idolData?.voteStealHolder;
+                     const voteStealUsed = lobby.idolData?.activeEffects?.voteStealUsedRound === lobby.round;
+                     const voteStealVictim = lobby.idolData?.activeEffects?.voteStealVictim;
+                     const voteStealHolder = lobby.idolData?.activeEffects?.voteStealHolder;
 
                      Object.entries(lobby.votes).forEach(([voterId, targetId]) => {
                         if (voteStealUsed && voterId === voteStealVictim) {
@@ -1914,25 +2112,34 @@
                         const voter = lobby.players.find(p => p.uid === voterId);
                         if(voter) {
                             if(!votersMap[targetId]) votersMap[targetId] = [];
-                            votersMap[targetId].push(voter.name);
+                            let label = voter.name;
+                            if (voter.legacyDoubleVoteActive) label += " (Eredità x2)";
+                            votersMap[targetId].push(label);
                         }
                      });
                      
-                     if (lobby.idolData?.extraVoteUsedRound === lobby.round) {
-                         const extraHolder = lobby.idolData.extraVoteHolder;
-                         if (lobby.votes[extraHolder]) {
-                             const targetId = lobby.votes[extraHolder];
-                             const voter = lobby.players.find(p => p.uid === extraHolder);
-                             if(!votersMap[targetId]) votersMap[targetId] = [];
-                             votersMap[targetId].push(`${voter.name} (+1 Voto)`);
-                         }
+                     if (lobby.idolData?.activeEffects?.extraVoteUsedRound === lobby.round) {
+                         (lobby.idolData.activeEffects.extraVoteUsers || []).forEach(extraHolder => {
+                             if (lobby.votes[extraHolder]) {
+                                 const targetId = lobby.votes[extraHolder];
+                                 const voter = lobby.players.find(p => p.uid === extraHolder);
+                                 if(!votersMap[targetId]) votersMap[targetId] = [];
+                                 votersMap[targetId].push(`${voter.name} (+1 Voto)`);
+                             }
+                         });
                      }
 
                      if (voteStealUsed && lobby.votes[voteStealHolder]) {
                          const stolenTarget = lobby.votes[voteStealHolder];
-                         const validTargetIds = isMerge 
+                         let validTargetIds = isMerge 
                             ? activePlayers.filter(p => !(lobby.immunity || []).includes(p.uid)).map(p => p.uid)
                             : activePlayers.filter(p => p.team === lobby.losingTeam).map(p => p.uid);
+                            
+                         validTargetIds = validTargetIds.filter(id => !lobby.players.find(p => p.uid === id)?.legacyImmunityActive);
+                            
+                         if (lobby.idolData?.activeEffects?.safetyUsedRound === lobby.round) {
+                             validTargetIds = validTargetIds.filter(id => id !== lobby.idolData.activeEffects.safetyHolder);
+                         }
                             
                          if (validTargetIds.includes(stolenTarget)) {
                              const holder = lobby.players.find(p => p.uid === voteStealHolder);
@@ -2004,45 +2211,88 @@
                  updates = { [`ceremonyData.revealedCount`]: data.revealedCount + 1 };
               } 
               else if (!data.finalReveal) {
-                  // MODIFICA: Calcolo visivo dell'Idolo durante la Rivelazione
                   let victimsIds = Array.isArray(data.eliminated) ? [...data.eliminated] : [data.eliminated].filter(Boolean);
-                  let firstVictim = victimsIds[0];
+                  let finalVictims = [];
+                  let savedBy = [];
+                  
+                  const activePlayersList = lobby.players.filter(p => p.status === 'active');
+                  const sortedByVotes = activePlayersList.sort((a, b) => (data.voteCounts[b.uid] || 0) - (data.voteCounts[a.uid] || 0)).map(p => p.uid);
 
-                  if (firstVictim && lobby.idolData && lobby.idolData.holder === firstVictim && lobby.idolData.active) {
-                      updates[`idolData.active`] = false; 
-                      updates[`idolData.holder`] = null;
-                      updates[`ceremonyData.idolPlayedBy`] = firstVictim;
-                      newLogs.push(`COLPO DI SCENA! ${lobby.players.find(p => p.uid === firstVictim).name} usa l'Idolo dell'Immunità!`);
-
-                      const runnerUpId = data.bottomTwo.find(id => id !== firstVictim);
+                  for (let i = 0; i < victimsIds.length; i++) {
+                      let currentVictim = victimsIds[i];
                       
-                      if (runnerUpId) {
-                         firstVictim = runnerUpId;
-                         victimsIds[0] = runnerUpId;
-                         newLogs.push(`I voti sono annullati! Il secondo più votato, ${lobby.players.find(p => p.uid === firstVictim).name}, viene eliminato al suo posto!`);
+                      if (currentVictim && lobby.idolData?.inventory?.idols?.[currentVictim] > 0) {
+                          updates[`idolData.inventory.idols.${currentVictim}`] = lobby.idolData.inventory.idols[currentVictim] - 1; 
+                          savedBy.push(currentVictim);
+                          newLogs.push(`COLPO DI SCENA! ${lobby.players.find(p => p.uid === currentVictim).name} usa un Idolo dell'Immunità!`);
+                          playSound('idol');
+
+                          let runnerUpId = sortedByVotes.find(id => 
+                              id !== currentVictim && 
+                              !finalVictims.includes(id) && 
+                              !savedBy.includes(id) &&
+                              (data.voteCounts[id] || 0) > 0
+                          );
+                          
+                          if (runnerUpId) {
+                             finalVictims.push(runnerUpId);
+                             newLogs.push(`I voti sono annullati! Il prossimo più votato, ${lobby.players.find(p => p.uid === runnerUpId).name}, prende il suo posto!`);
+                          } else {
+                              newLogs.push("Nessun altro concorrente ha ricevuto voti! Eliminazione annullata.");
+                          }
                       } else {
-                          newLogs.push("Nessun altro da eliminare! Eliminazione annullata.");
-                          victimsIds = [];
+                          finalVictims.push(currentVictim);
                       }
                   }
 
-                  updates[`ceremonyData.eliminated`] = victimsIds;
+                  if (savedBy.length > 0) {
+                      updates[`ceremonyData.idolPlayedBy`] = savedBy[0]; 
+                  }
+
+                  updates[`ceremonyData.eliminated`] = finalVictims;
                   updates[`ceremonyData.finalReveal`] = true;
                   if(newLogs.length > 0) updates.logs = arrayUnion(...newLogs);
+                  if(finalVictims.length > 0) setTimeout(() => playSound('elimination'), savedBy.length > 0 ? 1500 : 0);
               } 
               else {
-                  // Eliminazione effettiva dal database
                   let finalVictims = Array.isArray(data.eliminated) ? [...data.eliminated] : [data.eliminated].filter(Boolean);
                   const isDouble = data.isDoubleElimination;
 
-                  let updatedPlayers = lobby.players;
+                  let updatedPlayers = [...lobby.players];
                   let rankingEntries = [];
+                  let nextImmunities = []; // GESTIONE EREDITA' TESTAMENTO
                   
+                  const activePlayersList = lobby.players.filter(p => p.status === 'active');
+
                   finalVictims.forEach(vId => {
                       const victim = updatedPlayers.find(p => p.uid === vId);
                       if (!victim || victim.status !== 'active') return; 
 
                       updatedPlayers = updatedPlayers.map(p => p.uid === vId ? { ...p, status: 'eliminated' } : p);
+                      
+                      // LOGICA TESTAMENTO
+                      let heirId = lobby.idolData?.activeEffects?.legacyDesignations?.[vId];
+                      
+                      if (!heirId && lobby.idolData?.inventory?.legacies?.[vId] > 0) {
+                          let bestScore = -999;
+                          activePlayersList.forEach(p => {
+                              if (p.uid !== vId && !finalVictims.includes(p.uid)) {
+                                  const score = victim.relationships[p.uid] || 0;
+                                  if (score > bestScore) { bestScore = score; heirId = p.uid; }
+                              }
+                          });
+                      }
+
+                      if (heirId) {
+                          const heir = updatedPlayers.find(p => p.uid === heirId);
+                          if (heir && heir.status === 'active') {
+                              updatedPlayers = updatedPlayers.map(p => p.uid === heirId ? { ...p, legacyImmunityActive: true, legacyDoubleVoteActive: true } : p);
+                              nextImmunities.push(heirId);
+                              newLogs.push(`📜 TESTAMENTO DI ${victim.name.toUpperCase()}! Lascia in eredità a ${heir.name} l'Immunità Assoluta e il Doppio Voto per il suo prossimo falò!`);
+                              playSound('success');
+                          }
+                      }
+
                       rankingEntries.push({ 
                           name: victim.name, 
                           team: victim.team || "Merge", 
@@ -2052,6 +2302,15 @@
                           votes: victim.totalVotesReceived || 0
                       });
                       newLogs.push(`${victim.name} è stato eliminato!`);
+                  });
+
+                  // PULIZIA EFFETTI EREDITA' USATI IN QUESTA CERIMONIA
+                  updatedPlayers = updatedPlayers.map(p => {
+                      const participated = isMerge || lobby.twistData?.type === 'joint_ceremony' || p.team === lobby.losingTeam;
+                      if (participated && p.status === 'active' && p.legacyImmunityActive && !finalVictims.includes(p.uid)) {
+                          return { ...p, legacyImmunityActive: false, legacyDoubleVoteActive: false };
+                      }
+                      return p;
                   });
 
                   const nextRound = lobby.round + 1;
@@ -2076,7 +2335,7 @@
                         redemptionData: { active: true, stage: 'selection', candidates: [], rolls: {} },
                         round: nextRound,
                         votes: {},
-                        immunity: [],
+                        immunity: nextImmunities, // Mantiene l'immunità del testamento
                         diceRoll: null,
                         losingTeam: null,
                         ceremonyData: null,
@@ -2091,7 +2350,7 @@
                         round: nextRound,
                         votes: {},
                         extraVotes: {}, 
-                        immunity: [],
+                        immunity: nextImmunities, // Mantiene l'immunità del testamento
                         diceRoll: null,
                         losingTeam: null,
                         ceremonyData: null,
@@ -2160,6 +2419,7 @@
                          updates.seasonWinners = arrayUnion(winner.name);
                          updates.logs = arrayUnion(`${winner.name} VINCE LA STAGIONE (Voto Giuria)!`);
                          updates.rankings = arrayUnion(loserEntry);
+                         playSound('victory');
                          
                          const maxReturning = lobby.players.length;
                          const humanCount = lobby.players.filter(p => !p.isBot).length;
@@ -2173,6 +2433,7 @@
                          updates.seasonWinners = arrayUnion(winner.name);
                          updates.rankings = arrayUnion(loserEntry, winnerEntry); 
                          updates.logs = arrayUnion(`GIOCO FINITO! ${winner.name} è il campione!`);
+                         playSound('victory');
                     }
                 }
             }
@@ -2213,6 +2474,7 @@
               let updates = { finalData: fd, logs: arrayUnion(log) };
 
               if (fd.p1Score >= 3 || fd.p2Score >= 3) {
+                  playSound('victory');
                   winner = fd.p1Score >= 3 ? p1 : p2;
                   
                   const loser = fd.p1Score >= 3 ? p2 : p1;
@@ -2262,6 +2524,7 @@
             const votes = {};
             let activeBots = lobbyState.players.filter(p => { 
                 if (!p.isBot || p.status !== 'active') return false;
+                if (lobbyState.idolData?.activeEffects?.safetyUsedRound === lobbyState.round && lobbyState.idolData.activeEffects.safetyHolder === p.uid) return false;
                 if (isMerge || lobbyState.twistData?.type === 'joint_ceremony') return true; 
                 return p.team === lobbyState.losingTeam;
             });
@@ -2276,9 +2539,13 @@
             let candidates = [];
             
             if (isMerge) {
-                candidates = lobbyState.players.filter(p => p.status === 'active' && !(lobbyState.immunity || []).includes(p.uid));
+                candidates = lobbyState.players.filter(p => p.status === 'active' && !(lobbyState.immunity || []).includes(p.uid) && !p.legacyImmunityActive);
             } else {
-                candidates = lobbyState.players.filter(p => p.status === 'active' && p.team === lobbyState.losingTeam && !(lobbyState.immunity || []).includes(p.uid));
+                candidates = lobbyState.players.filter(p => p.status === 'active' && p.team === lobbyState.losingTeam && !(lobbyState.immunity || []).includes(p.uid) && !p.legacyImmunityActive);
+            }
+
+            if (lobbyState.idolData?.activeEffects?.safetyUsedRound === lobbyState.round) {
+                candidates = candidates.filter(p => p.uid !== lobbyState.idolData.activeEffects.safetyHolder);
             }
 
             activeBots.forEach(bot => {
@@ -2306,13 +2573,19 @@
           const calculateCeremonyResults = (lobbyState, currentVotes, isMerge, isDoubleElimination = false) => {
               const counts = {};
               const activePlayers = lobbyState.players.filter(p => p.status === 'active');
-              const validTargetIds = isMerge 
+              let validTargetIds = isMerge 
                 ? activePlayers.filter(p => !(lobbyState.immunity || []).includes(p.uid)).map(p => p.uid)
                 : activePlayers.filter(p => p.team === lobbyState.losingTeam).map(p => p.uid);
 
-              const voteStealUsed = lobbyState.idolData?.voteStealUsedRound === lobbyState.round;
-              const voteStealHolder = lobbyState.idolData?.voteStealHolder;
-              const voteStealVictim = lobbyState.idolData?.voteStealVictim;
+              validTargetIds = validTargetIds.filter(id => !lobbyState.players.find(p => p.uid === id)?.legacyImmunityActive);
+
+              if (lobbyState.idolData?.activeEffects?.safetyUsedRound === lobbyState.round) {
+                  validTargetIds = validTargetIds.filter(id => id !== lobbyState.idolData.activeEffects.safetyHolder);
+              }
+
+              const voteStealUsed = lobbyState.idolData?.activeEffects?.voteStealUsedRound === lobbyState.round;
+              const voteStealHolder = lobbyState.idolData?.activeEffects?.voteStealHolder;
+              const voteStealVictim = lobbyState.idolData?.activeEffects?.voteStealVictim;
 
               Object.entries(currentVotes).forEach(([voterId, tId]) => {
                   if (voteStealUsed && voterId === voteStealVictim) {
@@ -2322,8 +2595,13 @@
                   if (validTargetIds.includes(tId)) {
                       counts[tId] = (counts[tId] || 0) + 1;
 
-                      if (lobbyState.idolData?.extraVoteUsedRound === lobbyState.round &&
-                          lobbyState.idolData.extraVoteHolder === voterId) {
+                      const voterObj = lobbyState.players.find(p => p.uid === voterId);
+                      if (voterObj?.legacyDoubleVoteActive) {
+                          counts[tId] += 1;
+                      }
+
+                      if (lobbyState.idolData?.activeEffects?.extraVoteUsedRound === lobbyState.round &&
+                          (lobbyState.idolData?.activeEffects?.extraVoteUsers || []).includes(voterId)) {
                               counts[tId] += 1;
                       }
 
@@ -2333,7 +2611,6 @@
                   }
               });
 
-              // MESCOLAMENTO INIZIALE: Rimuove l'"ordine di posizionamento" per chi ha gli stessi voti (es. 0 voti)
               let shuffledTargets = [...validTargetIds];
               for (let i = shuffledTargets.length - 1; i > 0; i--) {
                   const j = Math.floor(Math.random() * (i + 1));
@@ -2384,7 +2661,6 @@
               const elimId = sortedVictims[0];
               let bottomTwo = sortedVictims.slice(0, 2);
               
-              // SUSPENSE FINALE: Se il voto è unanime (solo 1 riceve voti), tiriamo dentro uno a caso nel "bottom due"
               if (bottomTwo.length < 2 && shuffledTargets.length >= 2) {
                   const zeroVotePerson = shuffledTargets.find(id => id !== elimId);
                   if (zeroVotePerson) bottomTwo.push(zeroVotePerson);
@@ -2395,7 +2671,6 @@
               let safe = shuffledTargets.filter(id => !bottomTwo.includes(id));
               safe.sort((a, b) => (counts[a] || 0) - (counts[b] || 0)); 
               
-              // Mescoliamo i bottom two per non svelare subito chi è l'eliminato (che finiva sempre a sinistra)
               for (let i = bottomTwo.length - 1; i > 0; i--) {
                   const j = Math.floor(Math.random() * (i + 1));
                   [bottomTwo[i], bottomTwo[j]] = [bottomTwo[j], bottomTwo[i]];
@@ -2610,6 +2885,10 @@
                   return;
               }
 
+              if (lobby.idolData?.activeEffects?.safetyUsedRound === lobby.round && lobby.idolData?.activeEffects?.safetyHolder === user.uid) {
+                  return;
+              }
+
               const myTeam = myPlayer.team;
               const losingTeam = lobby.losingTeam;
               
@@ -2621,16 +2900,18 @@
                   [`votes.${user.uid}`]: targetId
               };
 
-              if (useExtraVote && lobby.idolData?.extraVoteHolder === user.uid && !lobby.idolData.extraVoteConsumed) {
-                  updates[`idolData.extraVoteConsumed`] = true;
-                  updates[`idolData.extraVoteUsedRound`] = lobby.round;
+              if (useExtraVote && lobby.idolData?.inventory?.extraVotes?.[user.uid] > 0) {
+                  updates[`idolData.inventory.extraVotes.${user.uid}`] = lobby.idolData.inventory.extraVotes[user.uid] - 1;
+                  updates[`idolData.activeEffects.extraVoteUsedRound`] = lobby.round;
+                  updates[`idolData.activeEffects.extraVoteUsers`] = arrayUnion(user.uid);
               }
 
-              if (useVoteSteal && lobby.idolData?.voteStealHolder === user.uid && !lobby.idolData.voteStealConsumed) {
+              if (useVoteSteal && lobby.idolData?.inventory?.voteSteals?.[user.uid] > 0) {
                   if (!voteStealVictim) return; 
-                  updates[`idolData.voteStealConsumed`] = true;
-                  updates[`idolData.voteStealUsedRound`] = lobby.round;
-                  updates[`idolData.voteStealVictim`] = voteStealVictim;
+                  updates[`idolData.inventory.voteSteals.${user.uid}`] = lobby.idolData.inventory.voteSteals[user.uid] - 1;
+                  updates[`idolData.activeEffects.voteStealUsedRound`] = lobby.round;
+                  updates[`idolData.activeEffects.voteStealVictim`] = voteStealVictim;
+                  updates[`idolData.activeEffects.voteStealHolder`] = user.uid;
               }
 
               if (lobby.twistData?.type !== 'killer') {
@@ -2658,11 +2939,17 @@
 
           const teams = useMemo(() => {
              const groups = {};
-             (lobby.config.numTeams > 0 ? TEAM_NAMES.slice(0, lobby.config.numTeams) : ["MERGE"]).forEach(t => groups[t] = []);
-             if (isMerge) groups["MERGE"] = activePlayers;
-             else activePlayers.forEach(p => { if (!groups[p.team]) groups[p.team] = []; groups[p.team].push(p); });
+             if (isMerge) {
+                 groups["MERGE"] = activePlayers;
+             } else {
+                 const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : DEFAULT_TEAM_NAMES;
+                 if (lobby.config.numTeams > 0) {
+                     currentTeamNames.slice(0, lobby.config.numTeams).forEach(t => groups[t] = []);
+                 }
+                 activePlayers.forEach(p => { if (!groups[p.team]) groups[p.team] = []; groups[p.team].push(p); });
+             }
              return groups;
-          }, [activePlayers, isMerge, lobby.config.numTeams]);
+          }, [activePlayers, isMerge, lobby.config.numTeams, lobby.config.theme]);
 
           const pendingVotesCount = useMemo(() => {
               if (lobby.phase !== 'voting') return 0;
@@ -2682,8 +2969,12 @@
                   ? activePlayers 
                   : activePlayers.filter(p => p.team === lobby.losingTeam);
                   
-              return voters.filter(p => !p.isBot && !lobby.votes?.[p.uid]).length;
-          }, [lobby.phase, lobby.votes, isMerge, activePlayers, lobby.losingTeam, lobby.twistData]);
+              return voters.filter(p => {
+                   if (p.isBot || lobby.votes?.[p.uid]) return false;
+                   if (lobby.idolData?.activeEffects?.safetyUsedRound === lobby.round && lobby.idolData.activeEffects.safetyHolder === p.uid) return false;
+                   return true;
+              }).length;
+          }, [lobby.phase, lobby.votes, isMerge, activePlayers, lobby.losingTeam, lobby.twistData, lobby.idolData, lobby.round]);
 
           const pendingReadyCount = useMemo(() => {
               if (lobby.phase !== 'social') return 0;
@@ -2706,7 +2997,7 @@
 
 
           return (
-            <div className="flex h-screen bg-cover bg-center text-white overflow-hidden font-sans" style={{ backgroundImage: `url('${currentSeason.bg}')` }}>
+            <div className="flex h-screen bg-cover bg-center text-white overflow-hidden font-sans" style={{ backgroundImage: `url('${currentBg}')` }}>
                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
                
                {/* MODALE DRONE SPIA */}
@@ -2770,6 +3061,84 @@
                                className="w-full bg-orange-600 hover:bg-orange-500 disabled:bg-slate-700 text-white font-bold py-2 rounded-xl transition"
                            >
                                SCAMBIA SQUADRA
+                           </button>
+                       </div>
+                    </div>
+                )}
+
+                {/* MODALE TESTAMENTO */}
+                {showLegacyModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+                       <div className="bg-slate-900 rounded-2xl border-2 border-amber-600 max-w-sm w-full relative p-6">
+                           <button onClick={() => { setShowLegacyModal(false); setLegacyTarget(""); }} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full"><X size={20}/></button>
+                           <h2 className="text-2xl font-black mb-4 text-amber-500 flex items-center gap-2"><Scroll/> SCRIVI TESTAMENTO</h2>
+                           
+                           <p className="text-sm text-slate-300 mb-4">Scegli il tuo Erede in segreto. Se verrai eliminato stasera, riceverà l'<strong className="text-green-400">Immunità</strong> e il <strong className="text-yellow-400">Doppio Voto</strong> per il suo prossimo falò!</p>
+                           <select 
+                               className="w-full mb-4 bg-slate-800 border border-amber-600 text-white rounded p-2 font-bold"
+                               value={legacyTarget}
+                               onChange={(e) => setLegacyTarget(e.target.value)}
+                           >
+                               <option value="">-- Scegli il tuo Erede --</option>
+                               {activePlayers.filter(p => p.uid !== user.uid).map(p => (
+                                   <option key={p.uid} value={p.uid}>{p.name}</option>
+                               ))}
+                           </select>
+                           <button 
+                               onClick={handleUseLegacy} 
+                               disabled={!legacyTarget}
+                               className="w-full bg-amber-700 hover:bg-amber-600 disabled:bg-slate-700 text-white font-bold py-3 rounded-xl transition shadow-[0_0_15px_rgba(217,119,6,0.4)]"
+                           >
+                               CONFERMA TESTAMENTO
+                           </button>
+                       </div>
+                    </div>
+                )}
+
+                {/* MODALE SALVACONDOTTO */}
+               {showSafetyModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+                       <div className="bg-slate-900 rounded-2xl border-2 border-teal-500 max-w-sm w-full relative p-6">
+                           <button onClick={() => setShowSafetyModal(false)} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full"><X size={20}/></button>
+                           <h2 className="text-2xl font-black mb-4 text-teal-400 flex items-center gap-2"><DoorOpen/> SALVACONDOTTO</h2>
+                           
+                           <p className="text-sm text-slate-300 mb-6">Se usi questo vantaggio abbandonerai la cerimonia. Sarai immune ai voti e ti salverai di sicuro, ma **non potrai votare** stasera.</p>
+                           
+                           <button 
+                               onClick={handleUseSafety} 
+                               className="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 rounded-xl transition shadow-[0_0_15px_rgba(20,184,166,0.4)]"
+                           >
+                               USA SALVACONDOTTO ORA
+                           </button>
+                       </div>
+                    </div>
+                )}
+
+               {/* MODALE LADRO DI COLLANE */}
+               {showImmunityStealModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+                       <div className="bg-slate-900 rounded-2xl border-2 border-rose-500 max-w-sm w-full relative p-6">
+                           <button onClick={() => { setShowImmunityStealModal(false); setImmunityStealTarget(""); }} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full"><X size={20}/></button>
+                           <h2 className="text-2xl font-black mb-4 text-rose-400 flex items-center gap-2"><Link/> LADRO DI COLLANE</h2>
+                           
+                           <p className="text-sm text-slate-300 mb-4">Ruba l'immunità a chi ha vinto la sfida e salva te stesso al suo posto!</p>
+                           <select 
+                               className="w-full mb-6 bg-slate-800 border border-rose-500 text-white rounded p-3 font-bold"
+                               value={immunityStealTarget}
+                               onChange={(e) => setImmunityStealTarget(e.target.value)}
+                           >
+                               <option value="">-- Seleziona un immune --</option>
+                               {lobby.immunity.filter(id => id !== user.uid).map(id => {
+                                   const p = lobby.players.find(pl => pl.uid === id);
+                                   return <option key={id} value={id}>{p?.name}</option>
+                               })}
+                           </select>
+                           <button 
+                               onClick={handleUseImmunitySteal} 
+                               disabled={!immunityStealTarget}
+                               className="w-full bg-rose-600 hover:bg-rose-500 disabled:bg-slate-700 text-white font-black py-3 rounded-xl transition shadow-[0_0_15px_rgba(225,29,72,0.4)]"
+                           >
+                               RUBA L'IMMUNITÀ
                            </button>
                        </div>
                     </div>
@@ -2920,7 +3289,7 @@
                </div>
 
                <div className="flex-1 flex flex-col relative z-0 overflow-hidden">
-                  <div className="h-14 bg-slate-800/90 flex items-center justify-between px-4 z-20 border-b border-white/10">
+                  <div className="h-14 bg-slate-800/90 flex items-center justify-between px-4 z-20 border-b border-white/10 flex-shrink-0">
                      <div className="font-bold italic text-white flex items-center gap-2">
                         {lobby.phase === 'idol_hunt' && "CACCIA AL TESORO"}
                         {lobby.phase === 'challenge' && "SFIDA IN CORSO"}
@@ -2977,6 +3346,101 @@
                   </div>
 
                   <div className="flex-1 overflow-y-auto p-4 relative">
+
+                     {(lobby.phase === 'social' || lobby.phase === 'episode_start') && (
+                         <div className="flex flex-col gap-6">
+                             {/* --- PANNELLO VANTAGGI PERSONALI (SOCIAL) --- */}
+                             {lobby.phase === 'social' && myPlayer?.status === 'active' && (
+                                 <div className="flex flex-wrap justify-center gap-4 mb-2">
+                                     {(lobby.idolData?.inventory?.spyDrones?.[user.uid] || 0) > 0 && (
+                                         <button onClick={() => setShowSpyDroneModal(true)} className="bg-indigo-900/80 hover:bg-indigo-800 text-indigo-300 font-bold py-2 px-4 rounded-xl shadow-lg flex items-center gap-2 border border-indigo-500 transition-all hover:scale-105">
+                                             <Eye size={18}/> Usa Drone Spia ({lobby.idolData.inventory.spyDrones[user.uid]})
+                                         </button>
+                                     )}
+                                     {(lobby.idolData?.inventory?.mutinies?.[user.uid] || 0) > 0 && (
+                                         <button onClick={() => setShowMutinyModal(true)} className="bg-orange-900/80 hover:bg-orange-800 text-orange-300 font-bold py-2 px-4 rounded-xl shadow-lg flex items-center gap-2 border border-orange-500 transition-all hover:scale-105">
+                                             <RefreshCw size={18}/> Usa Ammutinamento ({lobby.idolData.inventory.mutinies[user.uid]})
+                                         </button>
+                                     )}
+                                     {(lobby.idolData?.inventory?.immunitySteals?.[user.uid] || 0) > 0 && lobby.immunity?.length > 0 && !lobby.immunity.includes(user.uid) && (
+                                         <button onClick={() => setShowImmunityStealModal(true)} className="bg-rose-900/80 hover:bg-rose-800 text-rose-300 font-bold py-2 px-4 rounded-xl shadow-lg flex items-center gap-2 border border-rose-500 transition-all hover:scale-105">
+                                             <Link size={18}/> Usa Ladro di Collane ({lobby.idolData.inventory.immunitySteals[user.uid]})
+                                         </button>
+                                     )}
+                                 </div>
+                             )}
+
+                             {Object.entries(teams).map(([teamName, teamPlayers]) => {
+                                 const teamColors = {
+                                    'Marmotte Urlanti': { bg: 'bg-green-900/40', border: 'border-green-500', text: 'text-green-400' },
+                                    'Carpe Assassine': { bg: 'bg-red-900/40', border: 'border-red-500', text: 'text-red-400' },
+                                    'Criceti Radioattivi': { bg: 'bg-yellow-900/40', border: 'border-yellow-500', text: 'text-yellow-400' },
+                                    'Avvoltoi Volanti': { bg: 'bg-purple-900/40', border: 'border-purple-500', text: 'text-purple-400' },
+                                    'Tigri Selvaggi': { bg: 'bg-orange-900/40', border: 'border-orange-500', text: 'text-orange-400' },
+                                    'Orsi Polari': { bg: 'bg-cyan-900/40', border: 'border-cyan-500', text: 'text-cyan-400' },
+                                    'Lupi Mannari': { bg: 'bg-indigo-900/40', border: 'border-indigo-500', text: 'text-indigo-400' },
+                                    'Serpenti A Sonagli': { bg: 'bg-emerald-900/40', border: 'border-emerald-500', text: 'text-emerald-400' },
+
+                                    'Avvoltoi Malvagi': { bg: 'bg-zinc-900/80', border: 'border-purple-800', text: 'text-purple-500' },
+                                    'Corvi Cruenti': { bg: 'bg-black/80', border: 'border-red-900', text: 'text-red-700' },
+                                    'Draghi Diabolici': { bg: 'bg-stone-900/80', border: 'border-orange-900', text: 'text-orange-700' },
+                                    'Piedini Rosa': { bg: 'bg-pink-900/40', border: 'border-pink-500', text: 'text-pink-400' },
+                                    'Vipere Velenose': { bg: 'bg-green-950/80', border: 'border-emerald-800', text: 'text-emerald-600' },
+                                    'Iene Spietate': { bg: 'bg-yellow-950/80', border: 'border-yellow-800', text: 'text-yellow-600' },
+                                    'Tarantole Tossiche': { bg: 'bg-indigo-950/80', border: 'border-indigo-800', text: 'text-indigo-600' },
+                                    'Pipistrelli Predatori': { bg: 'bg-gray-900/80', border: 'border-gray-600', text: 'text-gray-400' },
+
+                                    'MERGE': { bg: 'bg-yellow-600/30', border: 'border-yellow-400', text: 'text-yellow-300' }
+                                 };
+                                 const colors = teamColors[teamName] || { bg: 'bg-slate-800/80', border: 'border-slate-700', text: 'text-white' };
+
+                                 return (
+                                 <div key={teamName} className={`${colors.bg} p-5 rounded-2xl border-2 ${colors.border} shadow-xl backdrop-blur-sm`}>
+                                     <h3 className={`font-black text-2xl mb-4 uppercase tracking-widest flex items-center justify-center gap-2 ${colors.text} bg-black/40 py-2 rounded-xl border border-white/10 shadow-inner`}>
+                                         <Users size={24} />
+                                         {teamName === 'MERGE' ? 'Fusione' : teamName}
+                                     </h3>
+                                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-4">
+                                         {teamPlayers.map(p => (
+                                             <button 
+                                                 key={p.uid} 
+                                                 onClick={() => {
+                                                     if (p.uid !== user.uid) setSelectedPlayer(p);
+                                                 }}
+                                                 disabled={p.status === 'eliminated'}
+                                                 className={`relative rounded-lg overflow-hidden border-2 aspect-[3/4] transition-all ${p.status === 'eliminated' ? 'opacity-30 grayscale cursor-not-allowed border-slate-800' : `${colors.border} hover:border-yellow-400 hover:scale-105 hover:shadow-xl hover:z-10`}`}
+                                             >
+                                                 <img src={p.character.img} className="w-full h-full object-cover"/>
+                                                 <div className={`absolute bottom-0 w-full bg-black/80 text-[10px] sm:text-xs font-bold py-1.5 truncate px-1 text-center text-white`}>
+                                                     {p.name}
+                                                 </div>
+                                                 
+                                                 <div className="absolute top-1 right-1 flex flex-col gap-1 items-end z-10">
+                                                     {lobby.immunity?.includes(p.uid) && (
+                                                         <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full p-1.5 shadow-[0_0_10px_rgba(234,179,8,0.8)] border border-yellow-200">
+                                                             <Trophy size={14} className="text-black drop-shadow-md"/>
+                                                         </div>
+                                                     )}
+                                                     
+                                                     {/* INDICATORE RELAZIONI (AMICIZIA/ODIO) */}
+                                                     {p.uid !== user.uid && (p.relationships?.[user.uid] || 0) !== 0 && (
+                                                         <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-black shadow-lg backdrop-blur-md border ${
+                                                             (p.relationships[user.uid] || 0) === 15 ? 'bg-pink-900/90 border-pink-400 text-pink-300 shadow-[0_0_8px_rgba(236,72,153,0.8)]' :
+                                                             (p.relationships[user.uid] || 0) > 0 ? 'bg-green-900/90 border-green-400 text-green-300 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 
+                                                             'bg-red-900/90 border-red-400 text-red-300 shadow-[0_0_8px_rgba(239,68,68,0.8)]'
+                                                         }`}>
+                                                             <Heart size={12} fill={(p.relationships[user.uid] || 0) > 0 ? "currentColor" : "none"} className={ (p.relationships[user.uid] || 0) === 15 ? "animate-pulse" : "" } />
+                                                             {p.relationships[user.uid] > 0 ? '+' : ''}{p.relationships[user.uid]}
+                                                         </div>
+                                                     )}
+                                                 </div>
+                                             </button>
+                                         ))}
+                                     </div>
+                                 </div>
+                             )})}
+                         </div>
+                     )}
                      
                      {lobby.phase === 'idol_hunt' && lobby.idolData && (
                          <div className="flex flex-col items-center justify-center min-h-[80vh]">
@@ -2990,12 +3454,17 @@
                                     const isMine = c.owner === user.uid;
                                     const isTaken = c.owner !== null;
                                     const isRevealed = lobby.idolData.stage === 'reveal';
-                                    const hasIdol = c.id === lobby.idolData.luckyIndex;
-                                    const hasExtraVote = c.id === lobby.idolData.extraVoteIndex;
-                                    const hasAdvantage = c.id === lobby.idolData.advantageIndex;
-                                    const hasVoteSteal = c.id === lobby.idolData.voteStealIndex; 
-                                    const hasSpyDrone = c.id === lobby.idolData.spyDroneIndex;
-                                    const hasMutiny = c.id === lobby.idolData.mutinyIndex;
+                                    
+                                    const itemType = lobby.idolData.itemDistribution?.[c.id];
+                                    const hasIdol = itemType === 'idol';
+                                    const hasExtraVote = itemType === 'extraVote';
+                                    const hasAdvantage = itemType === 'advantage';
+                                    const hasVoteSteal = itemType === 'voteSteal'; 
+                                    const hasSpyDrone = itemType === 'spyDrone';
+                                    const hasMutiny = itemType === 'mutiny';
+                                    const hasSafety = itemType === 'safety';
+                                    const hasImmunitySteal = itemType === 'immunitySteal';
+                                    const hasLegacy = itemType === 'legacy';
 
                                     const ownerName = isTaken ? lobby.players.find(p => p.uid === c.owner)?.name : "";
 
@@ -3026,6 +3495,12 @@
                                                     <Eye size={40} className="text-indigo-400 animate-bounce drop-shadow-lg" />
                                                 ) : hasMutiny ? (
                                                     <RefreshCw size={40} className="text-orange-400 animate-bounce drop-shadow-lg" />
+                                                ) : hasSafety ? (
+                                                    <DoorOpen size={40} className="text-teal-400 animate-bounce drop-shadow-lg" />
+                                                ) : hasImmunitySteal ? (
+                                                    <Link size={40} className="text-rose-400 animate-bounce drop-shadow-lg" />
+                                                ) : hasLegacy ? (
+                                                    <Scroll size={40} className="text-amber-500 animate-bounce drop-shadow-lg" />
                                                 ) : (
                                                     <Skull size={40} className="text-slate-500" />
                                                 )
@@ -3040,8 +3515,8 @@
                                             )}
                                             
                                             {isRevealed && isMine && (
-                                                <div className={`absolute -bottom-6 text-[10px] font-bold ${hasIdol ? 'text-purple-400' : hasExtraVote ? 'text-green-400' : hasAdvantage ? 'text-yellow-400' : hasVoteSteal ? 'text-cyan-400' : hasSpyDrone ? 'text-indigo-400' : hasMutiny ? 'text-orange-400' : 'text-slate-500'}`}>
-                                                    {hasIdol ? "IMMUNITÀ!" : hasExtraVote ? "VOTO EXTRA!" : hasAdvantage ? "BONUS +3!" : hasVoteSteal ? "RUBA-VOTO!" : hasSpyDrone ? "DRONE SPIA!" : hasMutiny ? "AMMUTINAMENTO!" : "VUOTO"}
+                                                <div className={`absolute -bottom-6 text-[10px] font-bold ${hasIdol ? 'text-purple-400' : hasExtraVote ? 'text-green-400' : hasAdvantage ? 'text-yellow-400' : hasVoteSteal ? 'text-cyan-400' : hasSpyDrone ? 'text-indigo-400' : hasMutiny ? 'text-orange-400' : hasSafety ? 'text-teal-400' : hasImmunitySteal ? 'text-rose-400' : hasLegacy ? 'text-amber-500' : 'text-slate-500'}`}>
+                                                    {hasIdol ? "IMMUNITÀ!" : hasExtraVote ? "VOTO EXTRA!" : hasAdvantage ? "BONUS +3!" : hasVoteSteal ? "RUBA-VOTO!" : hasSpyDrone ? "DRONE SPIA!" : hasMutiny ? "AMMUTINAMENTO!" : hasSafety ? "SALVACONDOTTO!" : hasImmunitySteal ? "LADRO COLLANE!" : hasLegacy ? "TESTAMENTO!" : "VUOTO"}
                                                 </div>
                                             )}
                                             
@@ -3058,7 +3533,7 @@
                             {lobby.idolData.stage === 'reveal' && (
                                 <div className="mt-8 text-center animate-in slide-in-from-bottom">
                                     <div className="text-2xl font-bold mb-2">Tutte le casse sono state aperte!</div>
-                                    <p className="text-slate-400">Controlla la tua cassa. I vantaggi sono segreti.</p>
+                                    <p className="text-slate-400">Controlla la tua cassa. I vantaggi sono segreti e ne potresti avere più di uno!</p>
                                     {isHost && <div className="mt-4 text-yellow-400 animate-pulse">Premi AVANTI per iniziare l'Episodio 1</div>}
                                 </div>
                             )}
@@ -3265,27 +3740,27 @@
                                     </div>
                                     
                                     {lobby.challengeData.players[lobby.challengeData.rollingIndex] === user.uid && (
-                                <button onClick={handleUserRoll} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black text-2xl px-12 py-6 rounded-2xl shadow-xl hover:scale-105 transition animate-bounce mb-8">
-                                    <Dices size={32} className="inline mr-2"/> CLICCA PER LANCIARE
-                                </button>
-                            )}
+                                        <button onClick={handleUserRoll} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black text-2xl px-12 py-6 rounded-2xl shadow-xl hover:scale-105 transition animate-bounce mb-8">
+                                            <Dices size={32} className="inline mr-2"/> CLICCA PER LANCIARE
+                                        </button>
+                                    )}
 
-                            {/* MODIFICA: Schermata Eliminazione Diretta (Sudden Death) */}
-                            {lobby.challengeData.type === 'sudden_death' && lobby.challengeData.stage === 'finished' && (
-                                <div className="absolute inset-0 bg-red-950/95 z-50 flex flex-col items-center justify-center animate-in zoom-in duration-500 backdrop-blur-sm">
-                                    <Skull size={120} className="text-black mb-4 animate-pulse drop-shadow-[0_0_20px_rgba(255,0,0,0.8)]"/>
-                                    <h2 className="text-5xl md:text-7xl font-black text-black uppercase tracking-widest drop-shadow-[0_0_15px_rgba(255,0,0,0.8)] mb-6 text-center">ELIMINAZIONE<br/>DIRETTA</h2>
-                                    <img src={lobby.players.find(p => p.uid === lobby.challengeData.loser)?.character.img} className="w-56 h-56 rounded-full border-8 border-black grayscale object-cover mb-6 shadow-2xl"/>
-                                    <div className="text-3xl md:text-5xl font-black text-red-500 bg-black px-8 py-4 rounded-2xl uppercase border-4 border-red-900 shadow-2xl">
-                                        {lobby.players.find(p => p.uid === lobby.challengeData.loser)?.name} È FUORI!
-                                    </div>
-                                    {isHost && <p className="mt-8 text-white font-bold text-xl animate-pulse">Premi AVANTI per cacciarlo dall'isola</p>}
-                                </div>
-                            )}
+                                    {/* MODIFICA: Schermata Eliminazione Diretta (Sudden Death) */}
+                                    {lobby.challengeData.type === 'sudden_death' && lobby.challengeData.stage === 'finished' && (
+                                        <div className="absolute inset-0 bg-red-950/95 z-50 flex flex-col items-center justify-center animate-in zoom-in duration-500 backdrop-blur-sm">
+                                            <Skull size={120} className="text-black mb-4 animate-pulse drop-shadow-[0_0_20px_rgba(255,0,0,0.8)]"/>
+                                            <h2 className="text-5xl md:text-7xl font-black text-black uppercase tracking-widest drop-shadow-[0_0_15px_rgba(255,0,0,0.8)] mb-6 text-center">ELIMINAZIONE<br/>DIRETTA</h2>
+                                            <img src={lobby.players.find(p => p.uid === lobby.challengeData.loser)?.character.img} className="w-56 h-56 rounded-full border-8 border-black grayscale object-cover mb-6 shadow-2xl"/>
+                                            <div className="text-3xl md:text-5xl font-black text-red-500 bg-black px-8 py-4 rounded-2xl uppercase border-4 border-red-900 shadow-2xl">
+                                                {lobby.players.find(p => p.uid === lobby.challengeData.loser)?.name} È FUORI!
+                                            </div>
+                                            {isHost && <p className="mt-8 text-white font-bold text-xl animate-pulse">Premi AVANTI per cacciarlo dall'isola</p>}
+                                        </div>
+                                    )}
 
-                            <div className="flex flex-wrap gap-4 justify-center">
-                                {lobby.challengeData.type === 'team' ? (
-                                    <div className="flex w-full gap-8 justify-center">
+                                    <div className="flex flex-wrap gap-4 justify-center">
+                                        {lobby.challengeData.type === 'team' ? (
+                                            <div className="flex w-full gap-8 justify-center">
                                                 {['A', 'B'].map(team => {
                                                     const teamMembers = Object.entries(lobby.challengeData.teams).filter(([u, t]) => t === team).map(([u]) => u);
                                                     const teamScore = teamMembers.reduce((acc, uid) => acc + (lobby.challengeData.rolls[uid] || 0), 0);
@@ -3523,14 +3998,14 @@
                                  {lobby.twistData?.type !== 'killer' && <p className="mb-4 text-slate-400">Clicca sul concorrente per votarlo. Il voto è segreto.</p>}
 
                                  {/* --- INTERFACCIA VOTO EXTRA --- */}
-                                 {lobby.idolData?.extraVoteHolder === user.uid && !lobby.idolData.extraVoteConsumed && lobby.twistData?.type !== 'killer' && myPlayer.status !== 'eliminated' && (
+                                 {lobby.idolData?.inventory?.extraVotes?.[user.uid] > 0 && lobby.twistData?.type !== 'killer' && myPlayer.status !== 'eliminated' && (
                                      <div className="mb-6 bg-slate-800 p-4 rounded-xl border border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)] animate-in slide-in-from-top w-full max-w-md">
                                          <div className="flex items-center justify-between">
                                              <div className="flex items-center gap-3">
                                                  <Vote className="text-green-400" size={32}/>
                                                  <div>
                                                      <h3 className="font-bold text-green-400 text-lg">HAI IL VOTO EXTRA</h3>
-                                                     <p className="text-xs text-slate-400">Puoi usarlo una sola volta (+1 Voto).</p>
+                                                     <p className="text-xs text-slate-400">Ne hai {lobby.idolData.inventory.extraVotes[user.uid]}. Usane uno (+1 Voto).</p>
                                                  </div>
                                              </div>
                                              <button 
@@ -3544,7 +4019,7 @@
                                  )}
 
                                  {/* --- INTERFACCIA RUBA-VOTO --- */}
-                                 {lobby.idolData?.voteStealHolder === user.uid && !lobby.idolData.voteStealConsumed && lobby.twistData?.type !== 'killer' && myPlayer.status !== 'eliminated' && (
+                                 {lobby.idolData?.inventory?.voteSteals?.[user.uid] > 0 && lobby.twistData?.type !== 'killer' && myPlayer.status !== 'eliminated' && (
                                      <div className="mb-6 bg-slate-800 p-4 rounded-xl border border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] animate-in slide-in-from-top w-full max-w-md">
                                          <div className="flex flex-col gap-3">
                                              <div className="flex items-center justify-between">
@@ -3552,7 +4027,7 @@
                                                      <UserMinus className="text-cyan-400" size={32}/>
                                                      <div>
                                                          <h3 className="font-bold text-cyan-400 text-lg">HAI IL RUBA-VOTO</h3>
-                                                         <p className="text-xs text-slate-400">Annulla il voto di un avversario e usalo tu.</p>
+                                                         <p className="text-xs text-slate-400">Ne hai {lobby.idolData.inventory.voteSteals[user.uid]}. Annulla un voto nemico.</p>
                                                      </div>
                                                  </div>
                                                  <button 
@@ -3581,6 +4056,27 @@
                                          </div>
                                      </div>
                                  )}
+
+                                 {/* --- INTERFACCIA SALVACONDOTTO --- */}
+                                 {lobby.idolData?.inventory?.safeties?.[user.uid] > 0 && lobby.twistData?.type !== 'killer' && myPlayer.status !== 'eliminated' && (
+                                     <div className="mb-6 bg-slate-800 p-4 rounded-xl border border-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.3)] animate-in slide-in-from-top w-full max-w-md">
+                                         <div className="flex items-center justify-between">
+                                             <div className="flex items-center gap-3">
+                                                 <DoorOpen className="text-teal-400" size={32}/>
+                                                 <div>
+                                                     <h3 className="font-bold text-teal-400 text-lg">HAI IL SALVACONDOTTO</h3>
+                                                     <p className="text-xs text-slate-400">Ne hai {lobby.idolData.inventory.safeties[user.uid]}. Salta il falò e salvati.</p>
+                                                 </div>
+                                             </div>
+                                             <button 
+                                                onClick={() => setShowSafetyModal(true)}
+                                                className="px-4 py-2 rounded-lg font-bold transition-all bg-teal-600 hover:bg-teal-500 text-white shadow-lg hover:scale-105"
+                                             >
+                                                 USA ORA
+                                             </button>
+                                         </div>
+                                     </div>
+                                 )}
                                  
                                  {lobby.twistData?.type === 'killer' && user.uid !== lobby.twistData.killerId ? (
                                      <div className="text-2xl text-red-500 font-black bg-black/50 px-8 py-4 rounded-xl animate-pulse">
@@ -3588,8 +4084,10 @@
                                      </div>
                                  ) : myPlayer.status === 'eliminated' ? (
                                      <div className="text-xl text-red-500 font-bold">SEI STATO ELIMINATO, NON PUOI VOTARE.</div>
+                                 ) : lobby.idolData?.activeEffects?.safetyUsedRound === lobby.round && lobby.idolData?.activeEffects?.safetyHolder === user.uid ? (
+                                     <div className="text-xl text-teal-400 font-bold bg-teal-900/40 p-4 rounded-xl border border-teal-500">HAI USATO IL SALVACONDOTTO E ABBANDONATO LA CERIMONIA. SEI SALVO MA NON PUOI VOTARE.</div>
                                  ) : (
-                                     <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
+                                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-5">
                                          {activePlayers.map(p => {
                                              const canVoteFor = (!isMerge && p.team === lobby.losingTeam) || (isMerge && !(lobby.immunity || []).includes(p.uid));
                                              
@@ -3597,6 +4095,7 @@
                                              const isOnlyMember = !isMerge && myTeamActivePlayers.length === 1 && p.team === lobby.losingTeam;
                                              
                                              if (!canVoteFor || (p.uid === user.uid && !isOnlyMember)) return null;
+                                             if (lobby.idolData?.activeEffects?.safetyUsedRound === lobby.round && lobby.idolData?.activeEffects?.safetyHolder === p.uid) return null;
                                              
                                              const iVotedFor = lobby.votes?.[user.uid] === p.uid;
                                              
@@ -3625,6 +4124,114 @@
                                  )}
                                  <div className="mt-8 text-slate-500 italic">Attendi che l'host chiuda le votazioni...</div>
                                </>
+                             )}
+                         </div>
+                     )}
+
+                     {lobby.phase === 'ceremony' && lobby.ceremonyData && (
+                         <div className="flex flex-col items-center justify-center min-h-[50vh]">
+                             {lobby.ceremonyData.tieMatch ? (
+                                 <div className="text-center">
+                                     <h2 className="text-3xl font-black text-red-500 mb-4 animate-bounce">PAREGGIO!</h2>
+                                     <p className="mb-6">Spareggio dadi: Chi fa il numero più basso ESCE.</p>
+                                     
+                                     {(lobby.ceremonyData.tieMatch.candidates || []).includes(user.uid) && !lobby.ceremonyData.tieMatch.rolls[user.uid] && (
+                                         <button onClick={handleTieBreakRoll} className="bg-red-600 text-white px-8 py-4 rounded-xl font-black text-xl mb-8 animate-pulse shadow-xl">
+                                             LANCIA DADO SALVEZZA
+                                         </button>
+                                     )}
+
+                                     <div className="flex gap-8 justify-center">
+                                         {lobby.ceremonyData.tieMatch.candidates.map(uid => {
+                                             const p = lobby.players.find(pl => pl.uid === uid);
+                                             const roll = lobby.ceremonyData.tieMatch.rolls[uid];
+                                             return (
+                                                 <div key={uid} className="bg-slate-800 p-6 rounded-xl flex flex-col items-center border-2 border-slate-600">
+                                                     <img src={p.character.img} className="w-24 h-24 rounded-full mb-4 border-4 border-slate-500 object-cover"/>
+                                                     <div className="text-xl font-bold mb-2">{p.name}</div>
+                                                     {roll ? (
+                                                         <div className="text-4xl font-black text-yellow-400">{roll}</div>
+                                                     ) : (
+                                                         <div className="text-slate-500 italic animate-pulse">Sta lanciando...</div>
+                                                     )}
+                                                 </div>
+                                             )
+                                         })}
+                                     </div>
+                                 </div>
+                             ) : (
+                                 <>
+                                 {/* POPUP IDOLO GIGANTE */}
+                                 {lobby.ceremonyData.idolPlayedBy && lobby.ceremonyData.finalReveal && (
+                                     <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+                                         <div className="bg-gradient-to-b from-yellow-300 to-yellow-600 p-12 rounded-[3rem] border-8 border-white shadow-[0_0_100px_rgba(250,204,21,1)] text-center animate-[bounce_2s_infinite] transform scale-125">
+                                             <Gem size={100} className="text-white mx-auto mb-4 drop-shadow-md"/>
+                                             <h2 className="text-5xl font-black text-white uppercase drop-shadow-xl leading-tight" style={{ WebkitTextStroke: '2px #b45309' }}>IDOLO<br/>GIOCATO!</h2>
+                                             <p className="mt-4 text-yellow-900 font-bold text-xl uppercase bg-white/80 px-4 py-1 rounded-full">I VOTI SONO ANNULLATI!</p>
+                                         </div>
+                                     </div>
+                                 )}
+
+                                 <Flame size={64} className="text-orange-500 animate-pulse mb-4" />
+                                 {lobby.ceremonyData.isDoubleElimination && <div className="text-3xl font-black text-red-500 mb-2">DOPPIA ELIMINAZIONE!</div>}
+                                 {lobby.ceremonyData.isOpenVote && <div className="text-xl font-black text-red-400 mb-2 bg-black/40 px-4 rounded animate-pulse">VOTI PALESI</div>}
+                                 <h2 className="text-3xl font-black text-white mb-6">IL FUOCO DECIDE</h2>
+                                 
+                                 <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-3xl">
+                                     {lobby.ceremonyData.safe.slice(0, lobby.ceremonyData.revealedCount).map(uid => {
+                                         const p = lobby.players.find(pl => pl.uid === uid);
+                                         const votes = lobby.ceremonyData.voteCounts?.[uid] || 0;
+                                         return (
+                                             <div key={uid} className="bg-green-600/20 border border-green-500 p-2 rounded flex flex-col items-center min-w-[80px] animate-in fade-in zoom-in">
+                                                 <div className="flex items-center gap-2 mb-1">
+                                                     <img src={p.character.img} className="w-8 h-8 rounded-full object-cover"/>
+                                                     <span className="font-bold text-sm">{p.name}</span>
+                                                 </div>
+                                                 <div className="text-xs bg-black/40 px-2 rounded-full text-slate-300">
+                                                     {votes} voti
+                                                 </div>
+                                             </div>
+                                         );
+                                     })}
+                                 </div>
+                                 
+                                 {lobby.ceremonyData.revealedCount >= lobby.ceremonyData.safe.length && (
+                                     <div className="flex gap-8 items-center mt-4">
+                                         {lobby.ceremonyData.bottomTwo.map(uid => {
+                                             const p = lobby.players.find(pl => pl.uid === uid);
+                                             const isEliminated = lobby.ceremonyData.finalReveal && ((Array.isArray(lobby.ceremonyData.eliminated) && lobby.ceremonyData.eliminated.includes(uid)) || (uid === lobby.ceremonyData.eliminated));
+                                             
+                                             let isSavedByIdol = false;
+                                             if (lobby.ceremonyData.finalReveal && lobby.idolData?.activeEffects?.idolPlayedThisRound) {
+                                                isSavedByIdol = lobby.idolData.activeEffects.idolPlayedThisRound.includes(uid);
+                                             } else if (lobby.ceremonyData.finalReveal && lobby.ceremonyData.idolPlayedBy === uid) {
+                                                isSavedByIdol = true;
+                                             }
+
+                                             const isSafe = lobby.ceremonyData.finalReveal && !isEliminated && !isSavedByIdol;
+                                             const votes = lobby.ceremonyData.voteCounts?.[uid] || 0;
+                                             const showVotes = isEliminated || (isSafe && lobby.ceremonyData.finalReveal) || isSavedByIdol;
+
+                                             return (
+                                                 <div key={uid} className={`flex flex-col items-center transition-all duration-1000 ${isEliminated ? 'opacity-50 grayscale scale-90' : isSavedByIdol ? 'scale-110 ring-8 ring-yellow-400 rounded-xl z-40' : isSafe ? 'scale-110 ring-4 ring-green-500 rounded-xl' : ''}`}>
+                                                     <img src={p.character.img} className="w-32 h-32 object-cover rounded-xl border-4 border-white shadow-2xl"/>
+                                                     <div className="font-black text-xl mt-2 bg-black/50 px-2 rounded">{p.name}</div>
+                                                     <div className={`font-mono font-bold mt-1 text-lg ${isSavedByIdol ? 'text-slate-500 line-through decoration-red-500 decoration-4' : 'text-yellow-400'}`}>
+                                                         {showVotes ? `${votes} voti` : "?"}
+                                                     </div>
+                                                     {showVotes && lobby.ceremonyData.isOpenVote && lobby.ceremonyData.votersMap?.[uid] && (
+                                                         <div className="text-[10px] text-slate-300 max-w-[120px] text-center mt-1 bg-black/50 p-1 rounded animate-in zoom-in">
+                                                             <span className="text-red-400 font-bold">Votato da:</span><br/>
+                                                             {lobby.ceremonyData.votersMap[uid].join(", ")}
+                                                         </div>
+                                                     )}
+                                                     {isEliminated && <div className="text-red-500 font-black text-2xl mt-2 rotate-12 border-4 border-red-500 px-4 rounded-xl bg-black">ELIMINATO</div>}
+                                                 </div>
+                                             )
+                                         })}
+                                     </div>
+                                 )}
+                                 </>
                              )}
                          </div>
                      )}
@@ -3738,268 +4345,89 @@
                                                          <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-600 flex-shrink-0 grayscale opacity-80">
                                                             {charImg && <img src={charImg} className="w-full h-full object-cover"/>}
                                                          </div>
-                                                         <div className="font-bold text-white text-sm">{r.name}</div>
+                                                         <div className="font-bold text-white">{r.name}</div>
                                                      </div>
-                                                     <div className="flex items-center gap-2">
-                                                         <div className="font-black text-xl text-red-500">{r.votes || 0}</div>
-                                                         <span className="text-xs text-slate-500 uppercase">Voti</span>
+                                                     <div className="font-black text-xl text-red-400 flex items-center gap-1">
+                                                         {r.votes} <Vote size={16}/>
                                                      </div>
                                                  </div>
-                                                );
-                                            });
+                                                )
+                                            })
                                          })()}
                                      </div>
                                  </div>
 
                                  <div className="flex-1 bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
-                                     <div className="bg-slate-700/50 p-4 border-b border-slate-600 text-center font-bold text-pink-400 uppercase tracking-widest sticky top-0 flex items-center justify-center gap-2">
-                                         <Heart size={20}/> I Più Amati (Top 5)
+                                     <div className="bg-slate-700/50 p-4 border-b border-slate-600 text-center font-bold text-green-400 uppercase tracking-widest sticky top-0 flex items-center justify-center gap-2">
+                                         <Shield size={20}/> Classifica Bestie (Immunità)
                                      </div>
                                      <div className="flex-1 overflow-y-auto no-scrollbar">
                                          {(() => {
-                                            const sortedByFriends = [...lobby.players].map(p => {
-                                                const score = Object.values(p.relationships || {}).reduce((acc, val) => acc + (val > 0 ? val : 0), 0);
-                                                return { name: p.name, score, img: p.character?.img };
-                                            }).sort((a, b) => b.score - a.score).slice(0, 5);
+                                            const sortedByWins = [...lobby.rankings].sort((a, b) => (b.immunities || 0) - (a.immunities || 0));
                                             
-                                            return sortedByFriends.map((r, i) => {
+                                            return sortedByWins.map((r, i) => {
+                                                if ((r.immunities || 0) === 0) return null; 
+                                                const charImg = ROSTER.find(c => c.name === r.name)?.img || "";
                                                 return (
                                                  <div key={i} className="flex items-center justify-between p-4 border-b border-slate-700 hover:bg-slate-700/50">
                                                      <div className="flex items-center gap-4">
                                                          <div className="font-bold text-slate-500 w-6 text-center">{i+1}</div>
                                                          <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-600 flex-shrink-0">
-                                                            {r.img && <img src={r.img} className="w-full h-full object-cover"/>}
+                                                            {charImg && <img src={charImg} className="w-full h-full object-cover"/>}
                                                          </div>
-                                                         <div className="font-bold text-white text-sm">{r.name}</div>
+                                                         <div className="font-bold text-white">{r.name}</div>
                                                      </div>
-                                                     <div className="flex items-center gap-2">
-                                                         <div className="font-black text-xl text-pink-500">{r.score}</div>
-                                                         <Heart size={16} className="text-pink-500" fill="currentColor"/>
+                                                     <div className="font-black text-xl text-green-400 flex items-center gap-1">
+                                                         {r.immunities} <Trophy size={16}/>
                                                      </div>
                                                  </div>
-                                                );
-                                            });
+                                                )
+                                            })
                                          })()}
                                      </div>
                                  </div>
-                             </div>
-                             
-                             <div className="mt-4 text-slate-500 text-sm animate-bounce">
-                                <ChevronDown size={24} className="mx-auto"/>
+
                              </div>
                          </div>
                      )}
 
-                     {(lobby.phase === 'social' || lobby.phase === 'ceremony') && (
-                         <>
-                         {lobby.phase === 'social' && !isMerge && lobby.losingTeam && (
-                            <div className="bg-red-600/90 text-white p-4 rounded-xl mb-4 text-center font-black text-xl shadow-lg border-2 border-red-400 animate-pulse">
-                               IL TEAM {lobby.losingTeam.toUpperCase()} HA PERSO! <br/>
-                            </div>
-                         )}
+                  </div> {/* Chiude l'area scrollabile delle fasi */}
+               </div> {/* Chiude la colonna centrale del gioco */}
 
-                         {lobby.phase === 'social' && myPlayer.status === 'active' && (
-                             <div className="flex flex-wrap gap-4 mb-6 justify-center">
-                                 {lobby.idolData?.spyDroneHolder === user.uid && lobby.idolData?.spyDroneUses > 0 && (
-                                     <button onClick={() => setShowSpyDroneModal(true)} className="bg-indigo-600 p-4 rounded-xl font-bold flex items-center gap-2 shadow-[0_0_15px_rgba(79,70,229,0.4)] hover:scale-105 transition border-2 border-indigo-400">
-                                         <Eye /> Usa Drone Spia ({lobby.idolData.spyDroneUses} rimasti)
-                                     </button>
-                                 )}
-                                 {lobby.idolData?.mutinyHolder === user.uid && !lobby.idolData?.mutinyConsumed && !isMerge && (
-                                     <button onClick={() => setShowMutinyModal(true)} className="bg-orange-600 p-4 rounded-xl font-bold flex items-center gap-2 shadow-[0_0_15px_rgba(234,88,12,0.4)] hover:scale-105 transition border-2 border-orange-400">
-                                         <RefreshCw /> Usa Ammutinamento
-                                     </button>
-                                 )}
-                             </div>
-                         )}
-
-                         {lobby.phase === 'ceremony' && lobby.ceremonyData ? (
-                            <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                                {lobby.ceremonyData.tieMatch ? (
-                                     <div className="text-center">
-                                         <h2 className="text-3xl font-black text-red-500 mb-4 animate-bounce">PAREGGIO!</h2>
-                                         <p className="mb-6">Spareggio dadi: Chi fa il numero più basso ESCE.</p>
-                                         
-                                         {(lobby.ceremonyData.tieMatch.candidates || []).includes(user.uid) && !lobby.ceremonyData.tieMatch.rolls[user.uid] && (
-                                             <button onClick={handleTieBreakRoll} className="bg-red-600 text-white px-8 py-4 rounded-xl font-black text-xl mb-8 animate-pulse shadow-xl">
-                                                 LANCIA DADO SALVEZZA
-                                             </button>
-                                         )}
-
-                                         <div className="flex gap-8 justify-center">
-                                             {lobby.ceremonyData.tieMatch.candidates.map(uid => {
-                                                 const p = lobby.players.find(pl => pl.uid === uid);
-                                                 const roll = lobby.ceremonyData.tieMatch.rolls[uid];
-                                                 return (
-                                                     <div key={uid} className="bg-slate-800 p-6 rounded-xl flex flex-col items-center border-2 border-slate-600">
-                                                         <img src={p.character.img} className="w-24 h-24 rounded-full mb-4 border-4 border-slate-500 object-cover"/>
-                                                         <div className="text-xl font-bold mb-2">{p.name}</div>
-                                                         {roll ? (
-                                                             <div className="text-4xl font-black text-yellow-400">{roll}</div>
-                                                         ) : (
-                                                             <div className="text-slate-500 italic animate-pulse">Sta lanciando...</div>
-                                                         )}
-                                                     </div>
-                                                 )
-                                             })}
-                                         </div>
-                                     </div>
-                                ) : (
-                                    <>
-                                    {/* MODIFICA: Popup Gigante Idolo Giocato */}
-                                    {lobby.ceremonyData.idolPlayedBy && lobby.ceremonyData.finalReveal && (
-                                        <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-                                            <div className="bg-gradient-to-b from-yellow-300 to-yellow-600 p-12 rounded-[3rem] border-8 border-white shadow-[0_0_100px_rgba(250,204,21,1)] text-center animate-[bounce_2s_infinite] transform scale-125">
-                                                <Gem size={100} className="text-white mx-auto mb-4 drop-shadow-md"/>
-                                                <h2 className="text-5xl font-black text-white uppercase drop-shadow-xl leading-tight" style={{ WebkitTextStroke: '2px #b45309' }}>IDOLO<br/>GIOCATO!</h2>
-                                                <p className="mt-4 text-yellow-900 font-bold text-xl uppercase bg-white/80 px-4 py-1 rounded-full">{lobby.players.find(p => p.uid === lobby.ceremonyData.idolPlayedBy)?.name} SI SALVA!</p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <Flame size={64} className="text-orange-500 animate-pulse mb-4" />
-                                    {lobby.ceremonyData.isDoubleElimination && <div className="text-3xl font-black text-red-500 mb-2">DOPPIA ELIMINAZIONE!</div>}
-                                    {lobby.ceremonyData.isOpenVote && <div className="text-xl font-black text-red-400 mb-2 bg-black/40 px-4 rounded animate-pulse">VOTI PALESI</div>}
-                                    <h2 className="text-3xl font-black text-white mb-6">IL FUOCO DECIDE</h2>
-                                    
-                                    <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-3xl">
-                                        {lobby.ceremonyData.safe.slice(0, lobby.ceremonyData.revealedCount).map(uid => {
-                                            const p = lobby.players.find(pl => pl.uid === uid);
-                                            const votes = lobby.ceremonyData.voteCounts?.[uid] || 0;
-                                            return (
-                                                <div key={uid} className="bg-green-600/20 border border-green-500 p-2 rounded flex flex-col items-center min-w-[80px] animate-in fade-in zoom-in">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <img src={p.character.img} className="w-8 h-8 rounded-full object-cover"/>
-                                                        <span className="font-bold text-sm">{p.name}</span>
-                                                    </div>
-                                                    <div className="text-xs bg-black/40 px-2 rounded-full text-slate-300">
-                                                        {votes} voti
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                    
-                                    {lobby.ceremonyData.revealedCount >= lobby.ceremonyData.safe.length && (
-                                        <div className="flex gap-8 items-center mt-4">
-                                            {lobby.ceremonyData.bottomTwo.map(uid => {
-                                                const p = lobby.players.find(pl => pl.uid === uid);
-                                                const isEliminated = lobby.ceremonyData.finalReveal && ((Array.isArray(lobby.ceremonyData.eliminated) && lobby.ceremonyData.eliminated.includes(uid)) || (uid === lobby.ceremonyData.eliminated));
-                                                const isSavedByIdol = lobby.ceremonyData.finalReveal && lobby.ceremonyData.idolPlayedBy === uid;
-                                                const isSafe = lobby.ceremonyData.finalReveal && !isEliminated && !isSavedByIdol;
-                                                const votes = lobby.ceremonyData.voteCounts?.[uid] || 0;
-                                                const showVotes = isEliminated || (isSafe && lobby.ceremonyData.finalReveal) || isSavedByIdol;
-
-                                                return (
-                                                    <div key={uid} className={`flex flex-col items-center transition-all duration-1000 ${isEliminated ? 'opacity-50 grayscale scale-90' : isSavedByIdol ? 'scale-110 ring-8 ring-yellow-400 rounded-xl z-40' : isSafe ? 'scale-110 ring-4 ring-green-500 rounded-xl' : ''}`}>
-                                                        <img src={p.character.img} className="w-32 h-32 object-cover rounded-xl border-4 border-white shadow-2xl"/>
-                                                        <div className="font-black text-xl mt-2 bg-black/50 px-2 rounded">{p.name}</div>
-                                                        <div className={`font-mono font-bold mt-1 text-lg ${isSavedByIdol ? 'text-slate-500 line-through decoration-red-500 decoration-4' : 'text-yellow-400'}`}>
-                                                            {showVotes ? `${votes} voti` : "?"}
-                                                        </div>
-                                                        {showVotes && lobby.ceremonyData.isOpenVote && lobby.ceremonyData.votersMap?.[uid] && (
-                                                            <div className="text-[10px] text-slate-300 max-w-[120px] text-center mt-1 bg-black/50 p-1 rounded animate-in zoom-in">
-                                                                <span className="text-red-400 font-bold">Votato da:</span><br/>
-                                                                {lobby.ceremonyData.votersMap[uid].join(", ")}
-                                                            </div>
-                                                        )}
-                                                        {isEliminated && <div className="text-red-500 font-black text-2xl mt-2 rotate-12 border-4 border-red-500 px-4 rounded-xl bg-black">ELIMINATO</div>}
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    )}
-                                    </>
-                                )}
-                            </div>
-                         ) : (
-                            <div className="space-y-8">
-                               {Object.entries(teams).map(([teamName, players]) => (
-                                   players.length > 0 && (
-                                   <div key={teamName} className="bg-slate-800/50 p-4 rounded-xl border border-white/5">
-                                       <h3 className={`font-black text-lg mb-3 px-2 border-l-4 ${teamName === lobby.losingTeam ? 'border-red-500 text-red-400' : 'border-green-500 text-green-400'}`}>
-                                           {teamName} ({players.length})
-                                       </h3>
-                                       <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                                           {players.map(p => {
-                                               const isMe = p.uid === user.uid;
-                                               const isImmune = (lobby.immunity || []).includes(p.uid);
-                                               const rel = p.relationships[user.uid] || 0;
-                                               const isAlly = Array.isArray(p.alliances) && p.alliances.includes(user.uid);
-                                               const isReady = (lobby.readyPlayers || []).includes(p.uid);
-
-                                               return (
-                                                   <div 
-                                                     key={p.uid} 
-                                                     onClick={() => !isMe && setSelectedPlayer(p)}
-                                                     className={`relative group bg-slate-800 rounded overflow-hidden shadow-lg transition-all cursor-pointer hover:scale-105 hover:ring-2 hover:ring-white ${isMe ? 'ring-2 ring-yellow-400 cursor-default hover:scale-100' : ''}`}
-                                                   >
-                                                       <div className="aspect-[3/4] relative">
-                                                           <img src={p.character.img} className="w-full h-full object-cover" />
-                                                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                                                           {isImmune && <Shield size={16} className="absolute top-1 right-1 text-yellow-400 fill-yellow-400 drop-shadow-md" />}
-                                                           
-                                                           {lobby.phase === 'social' && !p.isBot && isReady && (
-                                                               <div className="absolute top-1 left-1 bg-green-500 rounded-full p-0.5" title="Pronto">
-                                                                    <CheckCircle size={14} className="text-white"/>
-                                                               </div>
-                                                           )}
-
-                                                           {!isMe && (
-                                                               <div className="absolute top-1 left-1 flex flex-col gap-1">
-                                                                   {rel !== 0 && (
-                                                                       <div className={`text-[10px] font-black px-1 rounded flex items-center gap-0.5 ${rel === 15 ? 'bg-pink-600' : rel > 0 ? 'bg-green-600' : 'bg-red-600'}`}>
-                                                                           <Heart size={8} fill="currentColor"/> {rel}
-                                                                       </div>
-                                                                   )}
-                                                                   {isAlly && (
-                                                                       <div className="text-[10px] font-black bg-blue-600 px-1 rounded flex items-center gap-0.5">
-                                                                           <Swords size={8} />
-                                                                       </div>
-                                                                   )}
-                                                               </div>
-                                                           )}
-                                                           <div className="absolute bottom-0 w-full p-1 text-center">
-                                                               <div className="font-bold text-white text-xs truncate leading-tight">{p.name}</div>
-                                                           </div>
-                                                       </div>
-                                                   </div>
-                                               )
-                                           })}
-                                       </div>
-                                   </div>
-                                   )
-                               ))}
-                            </div>
-                         )}
-                         </>
-                     )}
+               {/* SIDEBAR DELLA CHAT (visibile durante tutta la partita) */}
+               <div className="hidden md:flex w-80 bg-slate-900/90 border-l border-slate-700 flex-col z-20 flex-shrink-0 h-full">
+                  <div className="p-3 bg-slate-800/90 border-b border-slate-700 font-bold flex items-center gap-2">
+                     <MessageSquare size={18} /> Chat dell'Isola
                   </div>
-               </div>
-
-               <div className="w-64 bg-slate-900 border-l border-slate-700 flex flex-col z-20">
-                  <div className="p-3 border-b border-slate-700 font-bold text-xs uppercase text-slate-400 flex items-center gap-2">
-                     <MessageSquare size={14} /> Chat Gruppo
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-2 space-y-2" ref={chatRef}>
-                     {lobby.chat?.map((msg, i) => (
-                         <div key={i} className="text-xs">
-                             <span className={`font-bold ${msg.sender === myPlayer.name ? 'text-yellow-400' : 'text-blue-400'}`}>{msg.sender}:</span>
-                             <span className="text-slate-300 ml-1 break-words">{msg.text}</span>
-                         </div>
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar" ref={chatRef}>
+                     {lobby.chat.map((msg, i) => (
+                        <div key={i} className={`flex flex-col ${msg.sender === myPlayer.name ? 'items-end' : 'items-start'}`}>
+                           <div className="text-[10px] text-slate-400 mb-1">{msg.sender} • {msg.team}</div>
+                           <div className={`px-3 py-2 rounded-xl text-sm max-w-[85%] ${msg.sender === myPlayer.name ? 'bg-blue-600 text-white rounded-br-none shadow-md' : 'bg-slate-700 text-slate-200 rounded-bl-none shadow-md'}`}>
+                              {msg.text}
+                           </div>
+                        </div>
                      ))}
                   </div>
-                  <form onSubmit={sendChat} className="p-2 border-t border-slate-700 flex gap-2">
-                     <input 
-                       value={chatInput}
-                       onChange={e => setChatInput(e.target.value)}
-                       placeholder="Scrivi..."
-                       className="flex-1 bg-slate-800 rounded px-2 py-1 text-xs text-white outline-none focus:ring-1 focus:ring-yellow-500"
-                     />
-                     <button type="submit" className="bg-yellow-500 text-black p-1 rounded hover:bg-yellow-400">
-                        <Send size={14} />
-                     </button>
-                  </form>
+                  {myPlayer.status === 'active' && (
+                     <form onSubmit={sendChat} className="p-3 bg-slate-800/90 border-t border-slate-700 flex gap-2">
+                        <input 
+                            type="text" 
+                            value={chatInput} 
+                            onChange={e => setChatInput(e.target.value)} 
+                            placeholder="Scrivi al gruppo..." 
+                            className="flex-1 bg-slate-900 border border-slate-600 rounded-full px-4 py-2 text-sm focus:border-yellow-500 outline-none text-white transition-colors" 
+                            maxLength={100}
+                        />
+                        <button 
+                            type="submit" 
+                            disabled={!chatInput.trim()} 
+                            className="bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors text-white shadow-lg"
+                        >
+                           <Send size={16} />
+                        </button>
+                     </form>
+                  )}
                </div>
             </div>
           );
