@@ -1197,6 +1197,11 @@
           
           const [mySpeech, setMySpeech] = useState("");
 
+          // --- NUOVI STATI PER ABILITÀ FAZIONI ---
+          const [specialSkillType, setSpecialSkillType] = useState(null); 
+          const [specialSkillTargets, setSpecialSkillTargets] = useState([]);
+          const [imbroglioResult, setImbroglioResult] = useState(null);
+
           // Fix: Reset delle azioni al nuovo round sociale
           useEffect(() => {
               if (lobby.phase === 'social') {
@@ -1204,6 +1209,10 @@
                   setSelectedPlayer(null); // FIX: Dimentica il giocatore del round precedente
                   setShowRumorSelector(false);
                   setShowTrioSelector(false);
+                  
+                  setSpecialSkillType(null);
+                  setSpecialSkillTargets([]);
+                  setImbroglioResult(null);
                   
                   // Reset di sicurezza per nascondere tutti gli altri modali aperti per sbaglio
                   setUseExtraVote(false);
@@ -1531,6 +1540,22 @@
                          else if (r === maxRoll) { winners.push(uid); }
                      });
 
+                     if (winners.length > 1) {
+                         const winnerNames = winners.map(w => lobby.players.find(p => p.uid === w)?.name).join(", ");
+                         
+                         updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                             [`challengeData.players`]: winners,
+                             [`challengeData.rollingIndex`]: 0,
+                             [`challengeData.originalRolls`]: lobby.challengeData.originalRolls || rolls, // FIX: Salviamo i tiri originali prima di azzerarli per lo spareggio!
+                             [`challengeData.rolls`]: {},
+                             logs: arrayUnion(`PAREGGIO (${maxRoll})! Spareggio per l'immunità tra: ${winnerNames}`)
+                         });
+                         return;
+                     }
+
+                     // FIX: Usiamo i tiri originali di tutti per trovare i peggiori, non i tiri dello spareggio
+                     const finalRollsForTargets = lobby.challengeData.originalRolls || rolls;
+
                      const activeCount = lobby.players.filter(p => p.status === 'active').length;
                      let targetRiskCount = 2;
                      if (activeCount > 30) targetRiskCount = 5;
@@ -1539,7 +1564,7 @@
                      
                      const autoRiskCount = targetRiskCount - 1; // N-1 scelti dai dadi
 
-                     const sortedScores = Object.entries(rolls).sort((a, b) => a[1] - b[1]);
+                     const sortedScores = Object.entries(finalRollsForTargets).sort((a, b) => a[1] - b[1]);
                      const uniqueScores = [...new Set(sortedScores.map(e => e[1]))];
                      
                      let autoTargets = [];
@@ -1656,15 +1681,12 @@
                       // Fallback se tutti gli altri sono immuni o auto-bersagli (rarissimo)
                       if (validTargets.length === 0) validTargets = lobby.players.filter(p => p.status === 'active' && !winner.includes(p.uid));
                       
-                      // FIX: Il bot sceglie la persona con la relazione più bassa, ma casualmente in caso di pareggio
-                      const targetsWithScore = validTargets.map(t => ({
-                          target: t,
-                          score: deciderPlayer.relationships[t.uid] || 0
-                      }));
-                      const minScore = Math.min(...targetsWithScore.map(t => t.score));
-                      const potentialTargets = targetsWithScore.filter(t => t.score === minScore).map(t => t.target);
+                      // FIX: Mescoliamo i bersagli prima di ordinarli, così in caso di pareggio (es. amicizia 0 con tutti) sceglie a caso!
+                      validTargets.sort(() => Math.random() - 0.5);
                       
-                      const chosenTarget = potentialTargets[Math.floor(Math.random() * potentialTargets.length)];
+                      // Il bot sceglie la persona con la relazione più bassa
+                      validTargets.sort((a, b) => (deciderPlayer.relationships[a.uid] || 0) - (deciderPlayer.relationships[b.uid] || 0));
+                      const chosenTarget = validTargets[0];
                       
                       const finalTargets = [...new Set([...autoTargets, chosenTarget.uid])];
                       const winnerName = deciderPlayer.name;
@@ -2140,15 +2162,23 @@
                       
                       if (lobby.config.theme === 'La Notte del Giudizio') {
                           const rollers = activePlayers.map(p => p.uid);
+                          
+                          // Calcolo dinamico del numero di persone a rischio
+                          let riskCount = 2;
+                          if (activePlayers.length > 30) riskCount = 5;
+                          else if (activePlayers.length > 20) riskCount = 4;
+                          else if (activePlayers.length > 6) riskCount = 3;
+
                           updates.challengeData = {
                               type: 'purge',
                               players: rollers,
                               rollingIndex: 0,
                               rolls: {},
                               stage: 'rolling',
-                              winner: null 
+                              winner: null,
+                              targetRiskCount: riskCount // Salviamo il numero per la UI
                           };
-                          newLogs.push("Chris: La Notte del Giudizio non si ferma! I due peggiori di questa sfida andranno al televoto!");
+                          newLogs.push(`Chris: La Notte del Giudizio non si ferma! I ${riskCount} peggiori di questa sfida andranno al televoto!`);
                       }
                       else if (rand < 0.06) {
                            const rollers = activePlayers.map(p => p.uid);
@@ -2893,7 +2923,9 @@
                 const potentialVictims = targetsWithScore.filter(t => t.score === minScore);
                 const victim = potentialVictims[Math.floor(Math.random() * potentialVictims.length)];
                 
-                votes[bot.uid] = victim.uid; 
+                if (victim) {
+                    votes[bot.uid] = victim.uid; 
+                }
             });
             return votes;
           };
@@ -2915,6 +2947,11 @@
 
               if (lobbyState.idolData?.activeEffects?.safetyUsedRound === lobbyState.round) {
                   validTargetIds = validTargetIds.filter(id => id !== lobbyState.idolData.activeEffects.safetyHolder);
+              }
+
+              if (validTargetIds.length === 0) {
+                  // FIX SCHERMO NERO: Se non c'è più nessuno votabile (es. tutti immuni), annulla per evitare il crash
+                  return { safe: shuffledTargets, bottomTwo: [], eliminated: [], voteCounts: counts, tie: null };
               }
 
               const voteStealUsed = lobbyState.idolData?.activeEffects?.voteStealUsedRound === lobbyState.round;
@@ -2998,7 +3035,7 @@
               if (bottomTwo.length < 2 && shuffledTargets.length >= 2) {
                   const zeroVotePerson = shuffledTargets.find(id => id !== elimId);
                   if (zeroVotePerson) bottomTwo.push(zeroVotePerson);
-              } else if (!bottomTwo.includes(elimId)) {
+              } else if (elimId && !bottomTwo.includes(elimId)) {
                   bottomTwo.push(elimId); 
               }
               
@@ -3201,7 +3238,93 @@
                     msg = `${updatedPlayers[targetIdx].name} ha rifiutato l'alleanza.`;
                  }
               }
+              // --- NUOVE ABILITÀ DI FAZIONE ---
+              else if (type === 'doppio_gioco') {
+                  const [t1Id, t2Id] = payload;
+                  const t1Idx = updatedPlayers.findIndex(p => p.uid === t1Id);
+                  const t2Idx = updatedPlayers.findIndex(p => p.uid === t2Id);
+                  
+                  let msgParts = [];
+                  let failed = false;
+                  
+                  if (Math.random() < 0.6) {
+                      updatedPlayers[t1Idx].relationships[user.uid] = Math.min(10, (updatedPlayers[t1Idx].relationships[user.uid] || 0) + 2);
+                      msgParts.push(`Successo con ${updatedPlayers[t1Idx].name} (+2)`);
+                  } else {
+                      updatedPlayers[t1Idx].relationships[user.uid] = Math.max(-10, (updatedPlayers[t1Idx].relationships[user.uid] || 0) - 1);
+                      msgParts.push(`Fallimento con ${updatedPlayers[t1Idx].name} (-1)`);
+                      failed = true;
+                  }
+                  
+                  if (Math.random() < 0.6) {
+                      updatedPlayers[t2Idx].relationships[user.uid] = Math.min(10, (updatedPlayers[t2Idx].relationships[user.uid] || 0) + 2);
+                      msgParts.push(`Successo con ${updatedPlayers[t2Idx].name} (+2)`);
+                  } else {
+                      updatedPlayers[t2Idx].relationships[user.uid] = Math.max(-10, (updatedPlayers[t2Idx].relationships[user.uid] || 0) - 1);
+                      msgParts.push(`Fallimento con ${updatedPlayers[t2Idx].name} (-1)`);
+                      failed = true;
+                  }
+                  
+                  setImbroglioResult(msgParts.join("\n"));
+                  
+                  let updates = { players: updatedPlayers };
+                  if (failed) {
+                      updates.logs = arrayUnion(`⚖️ ${actorName} ha tentato il Doppio Gioco ma è stato scoperto da qualcuno!`);
+                  }
+                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
+                  return;
+              }
+              else if (type === 'imbroglio') {
+                  let updates = { players: updatedPlayers };
+                  if (Math.random() < 0.6) {
+                      const hasAlliances = (updatedPlayers[targetIdx].alliances || []).length > 0;
+                      setImbroglioResult(`L'Imbroglio ha rivelato che ${targetName} ${hasAlliances ? "HA ALLEANZE SEGRETE ATTIVE!" : "NON HA NESSUNA ALLEANZA."}`);
+                  } else {
+                      setImbroglioResult(`L'Imbroglio è fallito. Non sei riuscito a scoprire i segreti di ${targetName}.`);
+                      updates.logs = arrayUnion(`🦹 ${actorName} ha provato a usare Imbroglio su ${targetName}, ma è stato scoperto!`);
+                  }
+                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
+                  return;
+              }
+              else if (type === 'pugnalata') {
+                  let updates = { players: updatedPlayers };
+                  if (Math.random() < 0.5) {
+                      const victimAllies = updatedPlayers[targetIdx].alliances || [];
+                      victimAllies.forEach(allyId => {
+                          const aIdx = updatedPlayers.findIndex(p => p.uid === allyId);
+                          if (aIdx !== -1 && updatedPlayers[aIdx].alliances) {
+                              updatedPlayers[aIdx].alliances = updatedPlayers[aIdx].alliances.filter(id => id !== targetId);
+                          }
+                      });
+                      updatedPlayers[targetIdx].alliances = [];
+                      setImbroglioResult(`🔪 PUGNALATA ALLE SPALLE RIUSCITA!\nHai distrutto la rete sociale di ${targetName}!`);
+                  } else {
+                      updatedPlayers[targetIdx].relationships[user.uid] = Math.max(-10, (updatedPlayers[targetIdx].relationships[user.uid] || 0) - 1);
+                      setImbroglioResult(`🔪 FALLIMENTO!\n${targetName} si è accorto che stavi complottando contro di lui (-1 Relazione).`);
+                      updates.logs = arrayUnion(`🔪 ATTENZIONE! ${actorName} ha tentato di pugnalare alle spalle ${targetName} ma è stato scoperto!`);
+                  }
+                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
+                  return;
+              }
+              else if (type === 'atto_eroico') {
+                  const indices = payload.map(id => updatedPlayers.findIndex(p => p.uid === id));
+                  indices.sort(() => Math.random() - 0.5); 
 
+                  const [bestIdx, midIdx, worstIdx] = indices;
+                  
+                  updatedPlayers[bestIdx].relationships[user.uid] = Math.min(10, (updatedPlayers[bestIdx].relationships[user.uid] || 0) + 2);
+                  updatedPlayers[midIdx].relationships[user.uid] = Math.min(10, (updatedPlayers[midIdx].relationships[user.uid] || 0) + 1);
+                  updatedPlayers[worstIdx].relationships[user.uid] = Math.max(-10, (updatedPlayers[worstIdx].relationships[user.uid] || 0) - 1);
+
+                  setImbroglioResult(`🦸 ATTO EROICO COMPLETATO!\n${updatedPlayers[bestIdx].name}: +2\n${updatedPlayers[midIdx].name}: +1\n${updatedPlayers[worstIdx].name}: -1 (Invidioso)`);
+                  
+                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                      players: updatedPlayers
+                  });
+                  return;
+              }
+
+              // SE NON È UNA SKILL DI FAZIONE, AGGIORNA NORMALE
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   players: updatedPlayers,
                   logs: arrayUnion(msg)
@@ -3210,6 +3333,7 @@
               setSelectedPlayer(null);
               setShowRumorSelector(false); 
               setShowTrioSelector(false); 
+              setSpecialSkillType(null);
           };
 
           const submitVote = async (targetId) => {
@@ -3494,7 +3618,23 @@
                {selectedPlayer && lobby.phase === 'social' && (
                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
                        <div className="bg-slate-900 rounded-2xl border-2 border-yellow-500 max-w-sm w-full relative">
-                           <button onClick={() => { setSelectedPlayer(null); setShowRumorSelector(false); setShowTrioSelector(false); }} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full"><X size={20}/></button>
+                           <button onClick={() => { setSelectedPlayer(null); setShowRumorSelector(false); setShowTrioSelector(false); setSpecialSkillType(null); setImbroglioResult(null); }} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full z-10"><X size={20}/></button>
+                           
+                           {/* OVERLAY ESITO ABILITÀ SEGRETA */}
+                           {imbroglioResult && (
+                               <div className="absolute inset-0 bg-slate-900 z-20 rounded-2xl flex flex-col items-center justify-center p-6 text-center border-2 border-purple-500 animate-in fade-in">
+                                   <Zap size={48} className="text-purple-500 mb-4 animate-pulse"/>
+                                   <h3 className="text-2xl font-black text-purple-400 mb-2">ESITO ABILITÀ</h3>
+                                   <p className="text-white font-bold mb-6 whitespace-pre-line">{imbroglioResult}</p>
+                                   <button 
+                                       onClick={() => { setImbroglioResult(null); setHasActed(true); setSelectedPlayer(null); setSpecialSkillType(null); }}
+                                       className="bg-purple-600 hover:bg-purple-500 px-6 py-2 rounded-xl font-bold w-full"
+                                   >
+                                       CHIUDI E CONTINUA
+                                   </button>
+                               </div>
+                           )}
+
                            <div className="p-6 text-center">
                                <h2 className="text-3xl font-black mb-1">{selectedPlayer.name}</h2>
                                <div className="text-sm text-slate-400 mb-4">{selectedPlayer.team || "Merge"}</div>
@@ -3511,8 +3651,34 @@
                                    </div>
                                </div>
                                {!hasActed && myPlayer.status === 'active' && (
-                                   !showRumorSelector && !showTrioSelector ? (
-                                   <div className="space-y-2">
+                                   !showRumorSelector && !showTrioSelector && !specialSkillType ? (
+                                   <div className="space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar px-1 pb-1">
+                                       
+                                       {/* FACTION SKILLS (Solo in tema Eroi vs Villains) */}
+                                       {lobby.config.theme === 'Eroi vs Villains vs Neutrali' && (
+                                           <div className="mb-4 p-3 bg-slate-950/80 rounded-xl border-2 border-indigo-900/50 shadow-inner">
+                                               <div className="text-[10px] uppercase font-black text-slate-400 mb-2 tracking-widest flex items-center justify-center gap-2">
+                                                   <Zap size={12} className="text-indigo-400"/> Abilità di Fazione
+                                               </div>
+                                               
+                                               {NEUTRALS.includes(myPlayer.character?.name) && (
+                                                   <button onClick={() => { setSpecialSkillType('doppio_gioco'); setSpecialSkillTargets([selectedPlayer.uid]); }} className="w-full bg-slate-700 border border-slate-500 py-2 rounded-lg font-bold flex justify-center gap-2 hover:bg-slate-600 mb-2 text-sm"><Shuffle size={16}/> Doppio Gioco (60%)</button>
+                                               )}
+                                               
+                                               {VILLAINS_LIST.includes(myPlayer.character?.name) && (
+                                                   <>
+                                                       <button onClick={() => handleInteraction('imbroglio')} className="w-full bg-purple-900 border border-purple-500 py-2 rounded-lg font-bold flex justify-center gap-2 hover:bg-purple-800 mb-2 text-sm"><Eye size={16}/> Imbroglio (60%)</button>
+                                                       <button onClick={() => handleInteraction('pugnalata')} className="w-full bg-red-900 border border-red-500 py-2 rounded-lg font-bold flex justify-center gap-2 hover:bg-red-800 text-sm"><Skull size={16}/> Pugnalata (50%)</button>
+                                                   </>
+                                               )}
+
+                                               {HEROES.includes(myPlayer.character?.name) && (
+                                                   <button onClick={() => { setSpecialSkillType('atto_eroico'); setSpecialSkillTargets([selectedPlayer.uid]); }} className="w-full bg-blue-700 border border-blue-400 py-2 rounded-lg font-bold flex justify-center gap-2 hover:bg-blue-600 text-sm"><Shield size={16}/> Atto Eroico</button>
+                                               )}
+                                           </div>
+                                       )}
+
+                                       {/* STANDARD ACTIONS */}
                                        <button onClick={() => handleInteraction('friend')} className="w-full bg-green-600 py-3 rounded font-bold flex justify-center gap-2"><Heart/> Amicizia</button>
                                        <button onClick={() => handleInteraction('suckup')} className="w-full bg-yellow-600 py-3 rounded font-bold flex justify-center gap-2 hover:bg-yellow-500"><Award/> Leccapiedi (60%)</button>
 
@@ -3572,6 +3738,67 @@
                                            );
                                        })()}
                                    </div>
+                                   ) : specialSkillType ? (
+                                      <div className="animate-in fade-in text-left">
+                                          {/* MULTI-SELECT PER ABILITA DI FAZIONE */}
+                                          {(() => {
+                                              const isDoppio = specialSkillType === 'doppio_gioco';
+                                              const reqCount = isDoppio ? 2 : 3;
+                                              const currentCount = specialSkillTargets.length;
+                                              const isReady = currentCount === reqCount;
+                                              
+                                              const toggleTarget = (uid) => {
+                                                  if (specialSkillTargets.includes(uid)) {
+                                                      setSpecialSkillTargets(prev => prev.filter(id => id !== uid));
+                                                  } else if (currentCount < reqCount) {
+                                                      setSpecialSkillTargets(prev => [...prev, uid]);
+                                                  }
+                                              };
+
+                                              return (
+                                                  <>
+                                                  <div className={`text-sm font-black mb-2 flex items-center justify-between ${isDoppio ? 'text-slate-300' : 'text-blue-400'}`}>
+                                                      <span>{isDoppio ? "⚖️ DOPPIO GIOCO" : "🦸 ATTO EROICO"}</span>
+                                                      <span className="bg-black/50 px-2 py-0.5 rounded">{currentCount}/{reqCount} Selezionati</span>
+                                                  </div>
+                                                  <p className="text-xs text-slate-400 mb-4">
+                                                      {isDoppio ? "Scegli 2 giocatori per provare a fare amicizia contemporaneamente." : "Scegli 3 giocatori da salvare. (Effetti casuali: +2, +1, -1)"}
+                                                  </p>
+                                                  
+                                                  <div className="grid grid-cols-3 gap-2 mb-4 max-h-48 overflow-y-auto custom-scrollbar">
+                                                      {lobby.players
+                                                          .filter(p => p.uid !== user.uid && p.status === 'active')
+                                                          .map(p => {
+                                                              const isSelected = specialSkillTargets.includes(p.uid);
+                                                              const isDisabled = !isSelected && currentCount >= reqCount;
+                                                              
+                                                              return (
+                                                              <button 
+                                                                  key={p.uid} 
+                                                                  onClick={() => toggleTarget(p.uid)} 
+                                                                  disabled={isDisabled}
+                                                                  className={`p-2 rounded-xl flex flex-col items-center border-2 transition-all ${isSelected ? (isDoppio ? 'bg-slate-700 border-white shadow-lg scale-105' : 'bg-blue-900 border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.8)] scale-105') : isDisabled ? 'opacity-30 border-transparent bg-slate-800' : 'bg-slate-800 border-slate-700 hover:border-slate-500'}`}
+                                                              >
+                                                                  <img src={p.character.img} className="w-10 h-10 rounded-full mb-1 object-cover"/>
+                                                                  <span className="text-[10px] truncate w-full leading-tight text-center font-bold">{p.name}</span>
+                                                              </button>
+                                                              )
+                                                          })
+                                                      }
+                                                  </div>
+                                                  
+                                                  <button 
+                                                      onClick={() => handleInteraction(specialSkillType, specialSkillTargets)}
+                                                      disabled={!isReady}
+                                                      className={`w-full py-3 rounded-xl font-black mb-2 transition-all ${isReady ? (isDoppio ? 'bg-slate-200 text-black hover:bg-white' : 'bg-blue-500 text-white hover:bg-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.6)]') : 'bg-slate-800 text-slate-500'}`}
+                                                  >
+                                                      CONFERMA AZIONE
+                                                  </button>
+                                                  <button onClick={() => { setSpecialSkillType(null); setSpecialSkillTargets([]); }} className="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700 py-2 rounded-xl text-xs font-bold text-slate-400">Annulla</button>
+                                                  </>
+                                              )
+                                          })()}
+                                      </div>
                                    ) : showRumorSelector ? (
                                      <div className="animate-in fade-in">
                                          <div className="text-sm font-bold text-slate-300 mb-2">Di chi vuoi sparlare?</div>
@@ -4100,14 +4327,7 @@
                                     <h2 className="text-3xl font-bold mb-4 uppercase flex items-center justify-center gap-3">
                                         {lobby.challengeData.type === 'sudden_death' && <AlertOctagon size={40} className="text-red-600"/>}
                                         {lobby.challengeData.type === 'sudden_death' && <span className="text-red-500 font-black">ELIMINAZIONE DIRETTA (LOWEST ROLL)</span>}
-                                        {lobby.challengeData.type === 'purge' && (() => {
-                                            const activeCount = activePlayers.length;
-                                            let riskCount = 2;
-                                            if (activeCount > 30) riskCount = 5;
-                                            else if (activeCount > 20) riskCount = 4;
-                                            else if (activeCount > 6) riskCount = 3;
-                                            return <span className="text-red-500 font-black">SFIDA PURGA (I {riskCount} PEGGIORI A RISCHIO)</span>;
-                                        })()}
+                                        {lobby.challengeData.type === 'purge' && <span className="text-red-500 font-black">SFIDA PURGA (I {lobby.challengeData.targetRiskCount || 2} PEGGIORI A RISCHIO)</span>}
                                         {lobby.challengeData.type === 'team' && "SFIDA A SQUADRE (50% IMMUNITÀ)"}
                                         {lobby.challengeData.type === 'individual' && "SFIDA INDIVIDUALE"}
                                     </h2>
@@ -4719,6 +4939,7 @@
                                      <div className="flex gap-8 justify-center">
                                          {lobby.ceremonyData.tieMatch.candidates.map(uid => {
                                              const p = lobby.players.find(pl => pl.uid === uid);
+                                             if (!p) return null; // FIX SCHERMO NERO
                                              const roll = lobby.ceremonyData.tieMatch.rolls[uid];
                                              return (
                                                  <div key={uid} className="bg-slate-800 p-6 rounded-xl flex flex-col items-center border-2 border-slate-600">
@@ -4755,6 +4976,7 @@
                                  <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-3xl">
                                      {lobby.ceremonyData.safe.slice(0, lobby.ceremonyData.revealedCount).map(uid => {
                                          const p = lobby.players.find(pl => pl.uid === uid);
+                                         if (!p) return null; // FIX SCHERMO NERO
                                          const votes = lobby.ceremonyData.voteCounts?.[uid] || 0;
                                          return (
                                              <div key={uid} className="bg-green-600/20 border border-green-500 p-2 rounded flex flex-col items-center min-w-[80px] animate-in fade-in zoom-in">
@@ -4774,6 +4996,7 @@
                                      <div className="flex gap-8 items-center mt-4">
                                          {lobby.ceremonyData.bottomTwo.map(uid => {
                                              const p = lobby.players.find(pl => pl.uid === uid);
+                                             if (!p) return null; // FIX SCHERMO NERO
                                              const isEliminated = lobby.ceremonyData.finalReveal && ((Array.isArray(lobby.ceremonyData.eliminated) && lobby.ceremonyData.eliminated.includes(uid)) || (uid === lobby.ceremonyData.eliminated));
                                              
                                              let isSavedByIdol = false;
