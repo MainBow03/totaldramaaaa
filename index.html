@@ -351,6 +351,14 @@
           "Vipere Velenose", "Iene Spietate", "Tarantole Tossiche", "Pipistrelli Predatori"
         ];
 
+        const BRAINS = ["Marinette", "Kowalski", "Conan", "Anais", "Peridot", "Dr Doofenshmirtz", "Corvina GO", "Corvina TT", "Velma", "Stewie", "Perla", "Wanda", "Shinobu", "Tails", "Gwen Tennyson"];
+        const BEAUTIES = ["Heartfixer", "Gwen", "Heather", "Rias", "Penny", "Stellarubia GO", "Fred", "Anastasia", "Ellis", "Tengen", "Zuko", "Ariana Grande", "Poison Ivy", "Simba", "Leon"];
+        const BRAWNS = ["Kagami", "Alejandro", "Lightning", "Bowser", "Brago", "Garnet", "Nicole", "Johnny Bravo", "Robin TT", "Hunter", "Tom", "Tanjiro", "Superboy", "Kratos", "Po"];
+
+        const HEROES = ["Marinette", "Adrien", "Owen", "Lindsay", "Yoshi", "Luigi", "Zatch Bell", "Steven", "Ponygon", "Jake DC", "Finn", "Mortino", "Spongebob", "Sonic", "Robin TT", "Aang"];
+        const VILLAINS_LIST = ["Dr Eggman", "Chrysalis", "Heather", "Alejandro", "Bowser", "Vicky", "Stewie", "Fiore", "Shego", "Scar", "Yzma", "Malefica", "Ghostface", "Plankton", "Poison Ivy"];
+        const NEUTRALS = ["Kratos", "Squiddi", "Mr Krab", "Zuko", "Bowser Jr", "Trixie", "Anastasia", "Re Ghiaccio", "Francine", "Dr Doofenshmirtz", "Vanessa", "Bart", "Brago", "Wario", "Waluigi", "Duncan"];
+
         const App = () => {
           const [user, setUser] = useState(null);
           const [nickname, setNickname] = useState('');
@@ -670,11 +678,23 @@
                       <label className="block text-slate-400 font-bold mb-2">Tema Stagione</label>
                       <select 
                           value={config.theme} 
-                          onChange={e => setConfig({...config, theme: e.target.value})}
+                          onChange={e => {
+                              const val = e.target.value;
+                              if (val === 'Brains vs Beauties vs Brawns' || val === 'Eroi vs Villains vs Neutrali') {
+                                  setConfig({...config, theme: val, numTeams: 3});
+                              } else if (val === 'La Notte del Giudizio') {
+                                  setConfig({...config, theme: val, numTeams: 1, mergeSize: config.maxPlayers});
+                              } else {
+                                  setConfig({...config, theme: val});
+                              }
+                          }}
                           className="w-full bg-slate-900 border border-slate-600 text-white rounded-xl p-3 focus:border-yellow-500 outline-none font-bold"
                       >
                           <option value="Tutti">Tutti (Roster Completo)</option>
                           <option value="Villain Edition">Villain Edition (Solo Cattivi)</option>
+                          <option value="Brains vs Beauties vs Brawns">Brains vs Beauties vs Brawns</option>
+                          <option value="Eroi vs Villains vs Neutrali">Eroi vs Villains vs Neutrali</option>
+                          <option value="La Notte del Giudizio">La Notte del Giudizio (Tutti vs Tutti, Voto ai Peggiori 2)</option>
                       </select>
                     </div>
 
@@ -686,7 +706,7 @@
                             setConfig({
                                 ...config, 
                                 maxPlayers: newVal,
-                                mergeSize: Math.min(config.mergeSize, newVal - 1)
+                                mergeSize: config.theme === 'La Notte del Giudizio' ? newVal : Math.min(config.mergeSize, newVal - 1)
                             });
                         }} className="flex-1 accent-yellow-500" />
                         <span className="text-2xl font-bold w-12 text-center">{config.maxPlayers}</span>
@@ -696,8 +716,8 @@
                     <div>
                       <label className="block text-slate-400 font-bold mb-2">Squadre (2 - 8)</label>
                       <div className="flex items-center gap-4">
-                        <input type="range" min="2" max="8" value={config.numTeams} onChange={e => setConfig({...config, numTeams: parseInt(e.target.value)})} className="flex-1 accent-blue-500" />
-                        <span className="text-2xl font-bold w-12 text-center">{config.numTeams}</span>
+                        <input type="range" min="2" max="8" value={config.numTeams} disabled={config.theme === 'Brains vs Beauties vs Brawns' || config.theme === 'Eroi vs Villains vs Neutrali' || config.theme === 'La Notte del Giudizio'} onChange={e => setConfig({...config, numTeams: parseInt(e.target.value)})} className="flex-1 accent-blue-500 disabled:opacity-50" />
+                        <span className="text-2xl font-bold w-12 text-center">{config.theme === 'La Notte del Giudizio' ? 1 : config.numTeams}</span>
                       </div>
                     </div>
 
@@ -709,8 +729,9 @@
                             min="3" 
                             max={Math.max(3, config.maxPlayers - 2)} 
                             value={config.mergeSize} 
+                            disabled={config.theme === 'La Notte del Giudizio'}
                             onChange={e => setConfig({...config, mergeSize: parseInt(e.target.value)})} 
-                            className="flex-1 accent-red-500" 
+                            className="flex-1 accent-red-500 disabled:opacity-50" 
                         />
                         <span className="text-2xl font-bold w-12 text-center">{config.mergeSize}</span>
                       </div>
@@ -858,6 +879,8 @@
             // FUNZIONE FILTRO TEMA STAGIONE
             const themeFilter = (r) => {
                 if (lobby.config.theme === 'Villain Edition') return r.alignment === 'villain';
+                if (lobby.config.theme === 'Brains vs Beauties vs Brawns') return BRAINS.includes(r.name) || BEAUTIES.includes(r.name) || BRAWNS.includes(r.name);
+                if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') return HEROES.includes(r.name) || VILLAINS_LIST.includes(r.name) || NEUTRALS.includes(r.name);
                 return true; 
             };
 
@@ -876,19 +899,74 @@
             });
 
             while (currentPlayers.length < lobby.config.maxPlayers) {
-              const available = ROSTER.filter(r => !usedNames.has(r.name) && themeFilter(r));
-              
               let randomChar;
               let botName;
 
-              if (available.length > 0) {
-                  randomChar = available[Math.floor(Math.random() * available.length)];
-                  botName = randomChar.name;
-                  usedNames.add(botName);
+              if (lobby.config.theme === 'Brains vs Beauties vs Brawns' || lobby.config.theme === 'Eroi vs Villains vs Neutrali') {
+                  const isTheme1 = lobby.config.theme === 'Brains vs Beauties vs Brawns';
+                  
+                  // Conta quanti membri ci sono attualmente per ogni fazione
+                  let count1 = 0, count2 = 0, count3 = 0;
+                  currentPlayers.forEach(p => {
+                      const cName = p.character?.name;
+                      if (isTheme1) {
+                          if (BRAINS.includes(cName)) count1++;
+                          else if (BEAUTIES.includes(cName)) count2++;
+                          else if (BRAWNS.includes(cName)) count3++;
+                      } else {
+                          if (HEROES.includes(cName)) count1++;
+                          else if (VILLAINS_LIST.includes(cName)) count2++;
+                          else if (NEUTRALS.includes(cName)) count3++;
+                      }
+                  });
+
+                  // Trova la fazione con meno membri
+                  const counts = isTheme1 ? [
+                      { cat: 'Brains', count: count1, arr: BRAINS },
+                      { cat: 'Beauties', count: count2, arr: BEAUTIES },
+                      { cat: 'Brawns', count: count3, arr: BRAWNS }
+                  ] : [
+                      { cat: 'Eroi', count: count1, arr: HEROES },
+                      { cat: 'Villains', count: count2, arr: VILLAINS_LIST },
+                      { cat: 'Neutrali', count: count3, arr: NEUTRALS }
+                  ];
+                  counts.sort((a, b) => a.count - b.count);
+
+                  // Cerca un personaggio disponibile nella fazione più svantaggiata
+                  let availableInCat = [];
+                  for (let i = 0; i < counts.length; i++) {
+                      availableInCat = ROSTER.filter(r => !usedNames.has(r.name) && counts[i].arr.includes(r.name));
+                      if (availableInCat.length > 0) break;
+                  }
+
+                  if (availableInCat.length > 0) {
+                      randomChar = availableInCat[Math.floor(Math.random() * availableInCat.length)];
+                      botName = randomChar.name;
+                      usedNames.add(botName);
+                  } else {
+                      // Fallback se una fazione è completamente esaurita
+                      const available = ROSTER.filter(r => !usedNames.has(r.name) && themeFilter(r));
+                      if (available.length > 0) {
+                          randomChar = available[Math.floor(Math.random() * available.length)];
+                          botName = randomChar.name;
+                          usedNames.add(botName);
+                      } else {
+                          randomChar = ROSTER[Math.floor(Math.random() * ROSTER.length)];
+                          botName = `${randomChar.name} ${Math.floor(Math.random() * 999)}`;
+                      }
+                  }
               } else {
-                  // FALLBACK DI SICUREZZA: cloni casuali se finiscono i personaggi
-                  randomChar = ROSTER[Math.floor(Math.random() * ROSTER.length)];
-                  botName = `${randomChar.name} ${Math.floor(Math.random() * 999)}`;
+                  // LOGICA NORMALE (Tutti o Villain Edition)
+                  const available = ROSTER.filter(r => !usedNames.has(r.name) && themeFilter(r));
+                  if (available.length > 0) {
+                      randomChar = available[Math.floor(Math.random() * available.length)];
+                      botName = randomChar.name;
+                      usedNames.add(botName);
+                  } else {
+                      // FALLBACK DI SICUREZZA: cloni casuali se finiscono i personaggi
+                      randomChar = ROSTER[Math.floor(Math.random() * ROSTER.length)];
+                      botName = `${randomChar.name} ${Math.floor(Math.random() * 999)}`;
+                  }
               }
               
               const botId = `bot_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
@@ -911,14 +989,32 @@
             const numTeams = lobby.config.numTeams;
             const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : DEFAULT_TEAM_NAMES;
 
-            for (let i = currentPlayers.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [currentPlayers[i], currentPlayers[j]] = [currentPlayers[j], currentPlayers[i]];
+            if (lobby.config.theme === 'Brains vs Beauties vs Brawns') {
+                currentPlayers = currentPlayers.map(p => {
+                    let team = "Brains";
+                    if (BEAUTIES.includes(p.character?.name)) team = "Beauties";
+                    else if (BRAWNS.includes(p.character?.name)) team = "Brawns";
+                    return { ...p, team };
+                });
+            } else if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') {
+                currentPlayers = currentPlayers.map(p => {
+                    let team = "Eroi";
+                    if (VILLAINS_LIST.includes(p.character?.name)) team = "Villains";
+                    else if (NEUTRALS.includes(p.character?.name)) team = "Neutrali";
+                    return { ...p, team };
+                });
+            } else if (lobby.config.theme === 'La Notte del Giudizio') {
+                currentPlayers = currentPlayers.map(p => ({ ...p, team: "MERGE" }));
+            } else {
+                for (let i = currentPlayers.length - 1; i > 0; i--) {
+                  const j = Math.floor(Math.random() * (i + 1));
+                  [currentPlayers[i], currentPlayers[j]] = [currentPlayers[j], currentPlayers[i]];
+                }
+                currentPlayers = currentPlayers.map((p, idx) => ({
+                  ...p,
+                  team: currentTeamNames[idx % numTeams]
+                }));
             }
-            currentPlayers = currentPlayers.map((p, idx) => ({
-              ...p,
-              team: currentTeamNames[idx % numTeams]
-            }));
 
             // --- SISTEMA INVENTARIO MULTIPLO ---
             const advantageConfig = lobby.config.advantages || { idol: 1, extraVote: 1, advantage: 1, voteSteal: 1, spyDrone: 1, mutiny: 1, safety: 1, immunitySteal: 1, legacy: 1 };
@@ -990,18 +1086,60 @@
                 <div className="flex-1 p-4 overflow-y-auto bg-slate-900">
                    <h3 className="text-xl font-bold mb-4 text-center text-yellow-400 flex-shrink-0">SCEGLI IL TUO PERSONAGGIO</h3>
                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                     {ROSTER.filter(char => lobby.config.theme === 'Villain Edition' ? char.alignment === 'villain' : true).map(char => {
+                     {ROSTER.filter(char => {
+                         if (lobby.config.theme === 'Villain Edition') return char.alignment === 'villain';
+                         if (lobby.config.theme === 'Brains vs Beauties vs Brawns') return BRAINS.includes(char.name) || BEAUTIES.includes(char.name) || BRAWNS.includes(char.name);
+                         if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') return HEROES.includes(char.name) || VILLAINS_LIST.includes(char.name) || NEUTRALS.includes(char.name);
+                         return true;
+                     }).map(char => {
                        const takenBy = lobby.players.find(p => p.character?.name === char.name);
                        const isMe = takenBy?.uid === user.uid;
+                       
+                       // --- LOGICA AURA E BADGE TEMA ---
+                       let auraShadow = '';
+                       let auraBorder = 'border-slate-700 hover:border-yellow-500';
+                       let badge = null;
+                       
+                       if (lobby.config.theme === 'Brains vs Beauties vs Brawns') {
+                           if (BRAINS.includes(char.name)) {
+                               auraShadow = 'shadow-[0_0_15px_rgba(59,130,246,0.6)]';
+                               auraBorder = 'border-blue-500 hover:border-blue-400';
+                               badge = <div className="absolute top-1 left-1 bg-blue-600/90 text-blue-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-blue-400/50">Brain</div>;
+                           } else if (BEAUTIES.includes(char.name)) {
+                               auraShadow = 'shadow-[0_0_15px_rgba(236,72,153,0.6)]';
+                               auraBorder = 'border-pink-500 hover:border-pink-400';
+                               badge = <div className="absolute top-1 left-1 bg-pink-600/90 text-pink-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-pink-400/50">Beauty</div>;
+                           } else if (BRAWNS.includes(char.name)) {
+                               auraShadow = 'shadow-[0_0_15px_rgba(249,115,22,0.6)]';
+                               auraBorder = 'border-orange-500 hover:border-orange-400';
+                               badge = <div className="absolute top-1 left-1 bg-orange-600/90 text-orange-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-orange-400/50">Brawn</div>;
+                           }
+                       } else if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') {
+                           if (HEROES.includes(char.name)) {
+                               auraShadow = 'shadow-[0_0_15px_rgba(59,130,246,0.6)]';
+                               auraBorder = 'border-blue-500 hover:border-blue-400';
+                               badge = <div className="absolute top-1 left-1 bg-blue-600/90 text-blue-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-blue-400/50">Eroe</div>;
+                           } else if (VILLAINS_LIST.includes(char.name)) {
+                               auraShadow = 'shadow-[0_0_15px_rgba(220,38,38,0.6)]';
+                               auraBorder = 'border-red-500 hover:border-red-400';
+                               badge = <div className="absolute top-1 left-1 bg-red-600/90 text-red-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-red-400/50">Villain</div>;
+                           } else if (NEUTRALS.includes(char.name)) {
+                               auraShadow = 'shadow-[0_0_15px_rgba(156,163,175,0.6)]';
+                               auraBorder = 'border-gray-500 hover:border-gray-400';
+                               badge = <div className="absolute top-1 left-1 bg-gray-600/90 text-gray-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-gray-400/50">Neutrale</div>;
+                           }
+                       }
+
                        return (
                          <button 
                            key={char.name}
                            onClick={() => selectCharacter(char)}
                            disabled={!!takenBy}
-                           className={`relative rounded-lg overflow-hidden border-2 aspect-[3/4] transition ${isMe ? 'border-green-500 ring-2 ring-green-500' : takenBy ? 'border-red-900 opacity-40' : 'border-slate-700 hover:border-yellow-500'}`}
+                           className={`relative rounded-lg overflow-hidden border-2 aspect-[3/4] transition-all duration-300 ${auraShadow} ${isMe ? 'border-green-500 ring-2 ring-green-500' : takenBy ? 'border-red-900 opacity-40' : auraBorder}`}
                          >
                            <img src={char.img} alt={char.name} className="w-full h-full object-cover" />
-                           {isMe && <div className="absolute inset-0 border-4 border-green-500"></div>}
+                           {badge}
+                           {isMe && <div className="absolute inset-0 border-4 border-green-500 z-20"></div>}
                          </button>
                        )
                      })}
@@ -1058,6 +1196,27 @@
           const [legacyTarget, setLegacyTarget] = useState("");
           
           const [mySpeech, setMySpeech] = useState("");
+
+          // Fix: Reset delle azioni al nuovo round sociale
+          useEffect(() => {
+              if (lobby.phase === 'social') {
+                  setHasActed(false);
+                  setSelectedPlayer(null); // FIX: Dimentica il giocatore del round precedente
+                  setShowRumorSelector(false);
+                  setShowTrioSelector(false);
+                  
+                  // Reset di sicurezza per nascondere tutti gli altri modali aperti per sbaglio
+                  setUseExtraVote(false);
+                  setUseAdvantage(false);
+                  setUseVoteSteal(false);
+                  setVoteStealVictim("");
+                  setShowSpyDroneModal(false);
+                  setShowMutinyModal(false);
+                  setShowSafetyModal(false);
+                  setShowImmunityStealModal(false);
+                  setShowLegacyModal(false);
+              }
+          }, [lobby.phase, lobby.round]);
 
           const generateBotSocialUpdates = (currentPlayers, currentLogs) => {
                  let updatedPlayers = [...currentPlayers];
@@ -1197,27 +1356,38 @@
               });
           };
 
-          useEffect(() => {
-            setHasActed(false);
-            setSelectedPlayer(null);
-            setShowRumorSelector(false);
-            setShowTrioSelector(false);
-            setUseExtraVote(false); 
-            setUseAdvantage(false);
-            setUseVoteSteal(false);
-            setVoteStealVictim("");
-            setMySpeech("");
-            setShowSpyDroneModal(false);
-            setSpyDroneTarget("");
-            setSpyDroneResult(null);
-            setShowMutinyModal(false);
-            setMutinyTarget("");
-            setShowSafetyModal(false);
-            setShowImmunityStealModal(false);
-            setImmunityStealTarget("");
-            setShowLegacyModal(false);
-            setLegacyTarget("");
-          }, [lobby.phase, lobby.round]);
+          const submitPurgeChoice = async (chosenTargetId) => {
+              if (lobby.phase !== 'challenge' || lobby.challengeData?.stage !== 'purge_selection') return;
+              
+              const deciderPlayer = lobby.players.find(p => p.uid === lobby.challengeData.decider);
+              const chosenTarget = lobby.players.find(p => p.uid === chosenTargetId);
+              
+              const finalTargets = [...new Set([...lobby.challengeData.autoTargets, chosenTargetId])];
+              const targetNames = finalTargets.map(id => lobby.players.find(p => p.uid === id)?.name).join(", ");
+              const winnerName = deciderPlayer.name;
+
+              const updatedPlayersTemp = lobby.players.map(p => {
+                   if (lobby.challengeData.winner.includes(p.uid)) return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
+                   return p;
+              });
+
+              const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [
+                   `${winnerName} VINCE L'IMMUNITÀ!`,
+                   `🎯 ${winnerName.toUpperCase()} HA SCELTO DI CONDANNARE ${chosenTarget.name.toUpperCase()}!`,
+                   `⚠️ I bersagli finali sono ${targetNames}. SOLO LORO POTRANNO ESSERE VOTATI AL FALÒ!`
+              ]);
+
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                   players: updatedPlayers,
+                   [`challengeData.stage`]: 'finished',
+                   immunity: lobby.challengeData.winner,
+                   losingTeam: "MERGE",
+                   readyPlayers: [], 
+                   phase: 'social',
+                   twistData: { type: 'purge', targets: finalTargets },
+                   logs: arrayUnion(...newLogs)
+              });
+          };
 
           useEffect(() => {
             if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
@@ -1291,7 +1461,7 @@
                  
                  // --- LOGICA SUDDEN DEATH (ELIMINAZIONE DIRETTA) ---
                  if (lobby.challengeData.type === 'sudden_death') {
-                    let minRoll = 11;
+                    let minRoll = 999;
                     let losers = [];
                     Object.entries(rolls).forEach(([uid, r]) => {
                         if (r < minRoll) { minRoll = r; losers = [uid]; }
@@ -1352,6 +1522,47 @@
                      return;
                  }
 
+                 // --- LOGICA PURGE (LA NOTTE DEL GIUDIZIO) ---
+                 if (lobby.challengeData.type === 'purge') {
+                     let maxRoll = -1;
+                     let winners = [];
+                     Object.entries(rolls).forEach(([uid, r]) => {
+                         if (r > maxRoll) { maxRoll = r; winners = [uid]; }
+                         else if (r === maxRoll) { winners.push(uid); }
+                     });
+
+                     const activeCount = lobby.players.filter(p => p.status === 'active').length;
+                     let targetRiskCount = 2;
+                     if (activeCount > 30) targetRiskCount = 5;
+                     else if (activeCount > 20) targetRiskCount = 4;
+                     else if (activeCount > 6) targetRiskCount = 3;
+                     
+                     const autoRiskCount = targetRiskCount - 1; // N-1 scelti dai dadi
+
+                     const sortedScores = Object.entries(rolls).sort((a, b) => a[1] - b[1]);
+                     const uniqueScores = [...new Set(sortedScores.map(e => e[1]))];
+                     
+                     let autoTargets = [];
+                     for (let score of uniqueScores) {
+                         if (autoTargets.length >= autoRiskCount) break;
+                         const rollers = sortedScores.filter(e => e[1] === score).map(e => e[0]);
+                         autoTargets.push(...rollers);
+                     }
+
+                     autoTargets = autoTargets.filter(id => !winners.includes(id));
+                     if (autoTargets.length === 0) autoTargets = [sortedScores[0][0]]; 
+
+                     updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                         [`challengeData.stage`]: 'purge_selection',
+                         [`challengeData.winner`]: winners,
+                         [`challengeData.decider`]: winners[0], // Il primo vincitore decide
+                         [`challengeData.autoTargets`]: autoTargets,
+                         [`challengeData.targetRiskCount`]: targetRiskCount,
+                         logs: arrayUnion(`I dadi sono tratti! ${lobby.players.find(p=>p.uid===winners[0]).name} ha il punteggio più alto e sceglierà l'ultimo bersaglio!`)
+                     });
+                     return;
+                 }
+
                  // --- LOGICA INDIVIDUALE STANDARD ---
                  let maxRoll = -1;
                  let winners = [];
@@ -1403,7 +1614,8 @@
             if (playerObj?.isBot) {
                 const timer = setTimeout(async () => {
                     playSound('roll');
-                    let roll = Math.floor(Math.random() * 10) + 1;
+                    const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
+                    let roll = Math.floor(Math.random() * maxFaces) + 1;
                     if (playerObj.nextRollNerf) {
                         roll = Math.floor(Math.random() * 4) + 1; 
                     }
@@ -1423,6 +1635,68 @@
                 return () => clearTimeout(timer);
             }
           }, [lobby.challengeData, isHost]);
+
+          // --- BOT PURGE SELECTION LOGIC ---
+          useEffect(() => {
+              if (!isHost || lobby.phase !== 'challenge' || lobby.challengeData?.stage !== 'purge_selection') return;
+              
+              const deciderId = lobby.challengeData.decider;
+              const deciderPlayer = lobby.players.find(p => p.uid === deciderId);
+              
+              if (deciderPlayer?.isBot && !lobby.challengeData.pendingWinnerChoiceResolved) {
+                  const timer = setTimeout(async () => {
+                      const { autoTargets, winner } = lobby.challengeData;
+                      
+                      let validTargets = lobby.players.filter(p => 
+                          p.status === 'active' && 
+                          !autoTargets.includes(p.uid) && 
+                          !winner.includes(p.uid)
+                      );
+                      
+                      // Fallback se tutti gli altri sono immuni o auto-bersagli (rarissimo)
+                      if (validTargets.length === 0) validTargets = lobby.players.filter(p => p.status === 'active' && !winner.includes(p.uid));
+                      
+                      // FIX: Il bot sceglie la persona con la relazione più bassa, ma casualmente in caso di pareggio
+                      const targetsWithScore = validTargets.map(t => ({
+                          target: t,
+                          score: deciderPlayer.relationships[t.uid] || 0
+                      }));
+                      const minScore = Math.min(...targetsWithScore.map(t => t.score));
+                      const potentialTargets = targetsWithScore.filter(t => t.score === minScore).map(t => t.target);
+                      
+                      const chosenTarget = potentialTargets[Math.floor(Math.random() * potentialTargets.length)];
+                      
+                      const finalTargets = [...new Set([...autoTargets, chosenTarget.uid])];
+                      const winnerName = deciderPlayer.name;
+                      const targetNames = finalTargets.map(id => lobby.players.find(p => p.uid === id)?.name).join(", ");
+
+                      const updatedPlayersTemp = lobby.players.map(p => {
+                           if (winner.includes(p.uid)) return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
+                           return p;
+                      });
+
+                      const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [
+                           `${winnerName} VINCE L'IMMUNITÀ!`,
+                           `🎯 ${winnerName.toUpperCase()} HA SCELTO DI CONDANNARE ${chosenTarget.name.toUpperCase()}!`,
+                           `⚠️ I bersagli finali sono ${targetNames}. SOLO LORO POTRANNO ESSERE VOTATI AL FALÒ!`
+                      ]);
+
+                      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                           players: updatedPlayers,
+                           [`challengeData.stage`]: 'finished',
+                           [`challengeData.pendingWinnerChoiceResolved`]: true,
+                           immunity: winner,
+                           losingTeam: "MERGE",
+                           readyPlayers: [], 
+                           phase: 'social',
+                           twistData: { type: 'purge', targets: finalTargets },
+                           logs: arrayUnion(...newLogs)
+                      });
+
+                  }, 3000 + Math.random() * 2000);
+                  return () => clearTimeout(timer);
+              }
+          }, [lobby.challengeData, isHost, lobby.phase]);
 
           // --- BOT FINAL SPEECH LOGIC ---
           useEffect(() => {
@@ -1484,7 +1758,8 @@
               finalists.forEach(p => {
                   if (p.isBot && (!currentRolls || !currentRolls[p.uid])) {
                        const timer = setTimeout(async () => {
-                           const r = Math.floor(Math.random() * 10) + 1;
+                           const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
+                           const r = Math.floor(Math.random() * maxFaces) + 1;
                            const updatedRolls = { ...(currentRolls || {}), [p.uid]: r };
                            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                                [`finalData.currentRolls`]: updatedRolls
@@ -1505,7 +1780,8 @@
                   const p = lobby.players.find(x => x.uid === uid);
                   if (p && p.isBot && !rolls[uid]) {
                       const timer = setTimeout(async () => {
-                          const r = Math.floor(Math.random() * 10) + 1;
+                          const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
+                          const r = Math.floor(Math.random() * maxFaces) + 1;
                           await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                               [`redemptionData.rolls.${uid}`]: r
                           });
@@ -1535,11 +1811,12 @@
               playSound('roll');
               let roll;
               const player = lobby.players.find(p => p.uid === user.uid);
+              const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
               
               if (player.nextRollNerf) {
                   roll = Math.floor(Math.random() * 4) + 1; 
               } else {
-                  roll = Math.floor(Math.random() * 10) + 1; 
+                  roll = Math.floor(Math.random() * maxFaces) + 1; 
               }
 
               let usedAdvantage = false;
@@ -1576,7 +1853,8 @@
 
           const handleTieBreakRoll = async () => {
               playSound('roll');
-              const roll = Math.floor(Math.random() * 10) + 1;
+              const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
+              const roll = Math.floor(Math.random() * maxFaces) + 1;
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   [`ceremonyData.tieMatch.rolls.${user.uid}`]: roll
               });
@@ -1585,7 +1863,8 @@
           const handleFinalRoll = async () => {
               if (lobby.phase !== 'final_showdown') return;
               playSound('roll');
-              const roll = Math.floor(Math.random() * 10) + 1;
+              const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
+              const roll = Math.floor(Math.random() * maxFaces) + 1;
               const currentRolls = lobby.finalData.currentRolls || {};
               
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
@@ -1595,7 +1874,8 @@
 
           const handleRedemptionRoll = async () => {
              playSound('roll');
-             const roll = Math.floor(Math.random() * 10) + 1;
+             const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
+             const roll = Math.floor(Math.random() * maxFaces) + 1;
              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   [`redemptionData.rolls.${user.uid}`]: roll
              });
@@ -1692,10 +1972,27 @@
             const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : DEFAULT_TEAM_NAMES;
             
             nextPlayers.sort(() => Math.random() - 0.5);
-            nextPlayers = nextPlayers.map((p, idx) => ({
-              ...p,
-              team: currentTeamNames[idx % numTeams]
-            }));
+            
+            if (lobby.config.theme === 'Brains vs Beauties vs Brawns') {
+                nextPlayers = nextPlayers.map(p => {
+                    let team = "Brains";
+                    if (BEAUTIES.includes(p.character?.name)) team = "Beauties";
+                    else if (BRAWNS.includes(p.character?.name)) team = "Brawns";
+                    return { ...p, team };
+                });
+            } else if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') {
+                nextPlayers = nextPlayers.map(p => {
+                    let team = "Eroi";
+                    if (VILLAINS_LIST.includes(p.character?.name)) team = "Villains";
+                    else if (NEUTRALS.includes(p.character?.name)) team = "Neutrali";
+                    return { ...p, team };
+                });
+            } else {
+                nextPlayers = nextPlayers.map((p, idx) => ({
+                  ...p,
+                  team: currentTeamNames[idx % numTeams]
+                }));
+            }
 
             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                currentSeasonIndex: nextIndex,
@@ -1841,7 +2138,19 @@
                   if (isMerge) {
                       const rand = Math.random();
                       
-                      if (rand < 0.06) {
+                      if (lobby.config.theme === 'La Notte del Giudizio') {
+                          const rollers = activePlayers.map(p => p.uid);
+                          updates.challengeData = {
+                              type: 'purge',
+                              players: rollers,
+                              rollingIndex: 0,
+                              rolls: {},
+                              stage: 'rolling',
+                              winner: null 
+                          };
+                          newLogs.push("Chris: La Notte del Giudizio non si ferma! I due peggiori di questa sfida andranno al televoto!");
+                      }
+                      else if (rand < 0.06) {
                            const rollers = activePlayers.map(p => p.uid);
                            updates.challengeData = {
                                type: 'sudden_death',
@@ -2171,7 +2480,7 @@
                   const { candidates, rolls } = data.tieMatch;
                   const allRolled = (candidates || []).every(uid => rolls[uid]);
                   if (allRolled) {
-                     let minRoll = 11;
+                     let minRoll = 999;
                      let losers = [];
                      (candidates || []).forEach(uid => {
                          if (rolls[uid] < minRoll) { minRoll = rolls[uid]; losers = [uid]; }
@@ -2200,7 +2509,8 @@
                           if (!rolls[uid]) {
                               const p = lobby.players.find(x => x.uid === uid);
                               if (p && p.isBot) {
-                                  const r = Math.floor(Math.random() * 10) + 1;
+                                  const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
+                                  const r = Math.floor(Math.random() * maxFaces) + 1;
                                   updates[`ceremonyData.tieMatch.rolls.${uid}`] = r;
                               }
                           }
@@ -2522,6 +2832,22 @@
 
           const calculateBotVotes = (lobbyState, isMerge) => {
             const votes = {};
+            
+            if (lobbyState.config.theme === 'Ridonculous Race') {
+                const activeTeams = [...new Set(lobbyState.players.filter(p => p.status === 'active').map(p => p.team))];
+                const nominatedTeams = lobbyState.losingTeam || [];
+                activeTeams.forEach(t => {
+                    const isBotTeam = lobbyState.players.filter(p => p.team === t && p.status === 'active').every(p => p.isBot);
+                    if (isBotTeam) {
+                        const validTargets = nominatedTeams.filter(nom => nom !== t);
+                        if (validTargets.length > 0) {
+                            votes[t] = validTargets[Math.floor(Math.random() * validTargets.length)];
+                        }
+                    }
+                });
+                return votes;
+            }
+
             let activeBots = lobbyState.players.filter(p => { 
                 if (!p.isBot || p.status !== 'active') return false;
                 if (lobbyState.idolData?.activeEffects?.safetyUsedRound === lobbyState.round && lobbyState.idolData.activeEffects.safetyHolder === p.uid) return false;
@@ -2538,7 +2864,9 @@
 
             let candidates = [];
             
-            if (isMerge) {
+            if (lobbyState.twistData?.type === 'purge') {
+                candidates = lobbyState.players.filter(p => p.status === 'active' && lobbyState.twistData.targets.includes(p.uid) && !p.legacyImmunityActive);
+            } else if (isMerge) {
                 candidates = lobbyState.players.filter(p => p.status === 'active' && !(lobbyState.immunity || []).includes(p.uid) && !p.legacyImmunityActive);
             } else {
                 candidates = lobbyState.players.filter(p => p.status === 'active' && p.team === lobbyState.losingTeam && !(lobbyState.immunity || []).includes(p.uid) && !p.legacyImmunityActive);
@@ -2573,9 +2901,15 @@
           const calculateCeremonyResults = (lobbyState, currentVotes, isMerge, isDoubleElimination = false) => {
               const counts = {};
               const activePlayers = lobbyState.players.filter(p => p.status === 'active');
-              let validTargetIds = isMerge 
-                ? activePlayers.filter(p => !(lobbyState.immunity || []).includes(p.uid)).map(p => p.uid)
-                : activePlayers.filter(p => p.team === lobbyState.losingTeam).map(p => p.uid);
+              
+              let validTargetIds = [];
+              if (lobbyState.twistData?.type === 'purge') {
+                  validTargetIds = lobbyState.twistData.targets.filter(id => lobbyState.players.find(p => p.uid === id)?.status === 'active');
+              } else {
+                  validTargetIds = isMerge 
+                    ? activePlayers.filter(p => !(lobbyState.immunity || []).includes(p.uid)).map(p => p.uid)
+                    : activePlayers.filter(p => p.team === lobbyState.losingTeam).map(p => p.uid);
+              }
 
               validTargetIds = validTargetIds.filter(id => !lobbyState.players.find(p => p.uid === id)?.legacyImmunityActive);
 
@@ -2942,11 +3276,24 @@
              if (isMerge) {
                  groups["MERGE"] = activePlayers;
              } else {
-                 const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : DEFAULT_TEAM_NAMES;
+                 let currentTeamNames = DEFAULT_TEAM_NAMES;
+                 if (lobby.config.theme === 'Villain Edition') {
+                     currentTeamNames = VILLAIN_TEAM_NAMES;
+                 } else if (lobby.config.theme === 'Brains vs Beauties vs Brawns') {
+                     currentTeamNames = ["Brains", "Beauties", "Brawns"];
+                 } else if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') {
+                     currentTeamNames = ["Eroi", "Villains", "Neutrali"];
+                 }
+                 
                  if (lobby.config.numTeams > 0) {
                      currentTeamNames.slice(0, lobby.config.numTeams).forEach(t => groups[t] = []);
                  }
-                 activePlayers.forEach(p => { if (!groups[p.team]) groups[p.team] = []; groups[p.team].push(p); });
+                 activePlayers.forEach(p => { 
+                     if (p.team) {
+                         if (!groups[p.team]) groups[p.team] = []; 
+                         groups[p.team].push(p); 
+                     }
+                 });
              }
              return groups;
           }, [activePlayers, isMerge, lobby.config.numTeams, lobby.config.theme]);
@@ -3390,6 +3737,14 @@
                                     'Tarantole Tossiche': { bg: 'bg-indigo-950/80', border: 'border-indigo-800', text: 'text-indigo-600' },
                                     'Pipistrelli Predatori': { bg: 'bg-gray-900/80', border: 'border-gray-600', text: 'text-gray-400' },
 
+                                    'Brains': { bg: 'bg-blue-900/40', border: 'border-blue-500', text: 'text-blue-400' },
+                                    'Beauties': { bg: 'bg-pink-900/40', border: 'border-pink-500', text: 'text-pink-400' },
+                                    'Brawns': { bg: 'bg-orange-900/40', border: 'border-orange-500', text: 'text-orange-400' },
+
+                                    'Eroi': { bg: 'bg-blue-900/40', border: 'border-blue-500', text: 'text-blue-400' },
+                                    'Villains': { bg: 'bg-red-900/40', border: 'border-red-500', text: 'text-red-400' },
+                                    'Neutrali': { bg: 'bg-gray-700/40', border: 'border-gray-500', text: 'text-gray-300' },
+
                                     'MERGE': { bg: 'bg-yellow-600/30', border: 'border-yellow-400', text: 'text-yellow-300' }
                                  };
                                  const colors = teamColors[teamName] || { bg: 'bg-slate-800/80', border: 'border-slate-700', text: 'text-white' };
@@ -3745,6 +4100,14 @@
                                     <h2 className="text-3xl font-bold mb-4 uppercase flex items-center justify-center gap-3">
                                         {lobby.challengeData.type === 'sudden_death' && <AlertOctagon size={40} className="text-red-600"/>}
                                         {lobby.challengeData.type === 'sudden_death' && <span className="text-red-500 font-black">ELIMINAZIONE DIRETTA (LOWEST ROLL)</span>}
+                                        {lobby.challengeData.type === 'purge' && (() => {
+                                            const activeCount = activePlayers.length;
+                                            let riskCount = 2;
+                                            if (activeCount > 30) riskCount = 5;
+                                            else if (activeCount > 20) riskCount = 4;
+                                            else if (activeCount > 6) riskCount = 3;
+                                            return <span className="text-red-500 font-black">SFIDA PURGA (I {riskCount} PEGGIORI A RISCHIO)</span>;
+                                        })()}
                                         {lobby.challengeData.type === 'team' && "SFIDA A SQUADRE (50% IMMUNITÀ)"}
                                         {lobby.challengeData.type === 'individual' && "SFIDA INDIVIDUALE"}
                                     </h2>
@@ -3804,17 +4167,105 @@
                                                 })}
                                             </div>
                                         ) : (
-                                            Object.entries(lobby.challengeData.rolls).map(([uid, val]) => {
-                                                const p = lobby.players.find(pl => pl.uid === uid);
-                                                return (
-                                                    <div key={uid} className={`bg-slate-800 p-4 rounded-xl flex flex-col items-center border ${lobby.challengeData.type === 'sudden_death' ? 'border-red-500' : 'border-slate-600'} animate-in zoom-in`}>
-                                                        <img src={p.character.img} className="w-12 h-12 rounded-full mb-2"/>
-                                                        <div className={`text-3xl font-black ${lobby.challengeData.type === 'sudden_death' ? 'text-red-400' : 'text-white'}`}>{val}</div>
-                                                    </div>
-                                                )
-                                            })
+                                            (() => {
+                                                const entries = Object.entries(lobby.challengeData.rolls);
+                                                let atRiskUids = [];
+                                                
+                                                if (entries.length > 0) {
+                                                    const activeCount = lobby.players.filter(p => p.status === 'active').length;
+                                                    let targetRiskCount = 2;
+                                                    if (activeCount > 30) targetRiskCount = 5;
+                                                    else if (activeCount > 20) targetRiskCount = 4;
+                                                    else if (activeCount > 6) targetRiskCount = 3;
+                                                    
+                                                    const autoRiskCount = targetRiskCount - 1; // N-1 per il contatore dadi dinamico
+
+                                                    const sortedEntries = [...entries].sort((a, b) => a[1] - b[1]);
+                                                    const uniqueScores = [...new Set(sortedEntries.map(e => e[1]))];
+                                                    
+                                                    for (let score of uniqueScores) {
+                                                        if (atRiskUids.length >= autoRiskCount) break;
+                                                        const rollers = sortedEntries.filter(e => e[1] === score).map(e => e[0]);
+                                                        atRiskUids.push(...rollers);
+                                                    }
+                                                }
+                                                
+                                                return entries.map(([uid, val]) => {
+                                                    const p = lobby.players.find(pl => pl.uid === uid);
+                                                    const isAtRisk = lobby.challengeData.type === 'purge' && atRiskUids.includes(uid);
+                                                    
+                                                    return (
+                                                        <div key={uid} className={`bg-slate-800 p-4 rounded-xl flex flex-col items-center border ${lobby.challengeData.type === 'sudden_death' || lobby.challengeData.type === 'purge' ? 'border-red-500' : 'border-slate-600'} animate-in zoom-in relative`}>
+                                                            <img src={p.character.img} className="w-12 h-12 rounded-full mb-2"/>
+                                                            <div className={`text-3xl font-black ${lobby.challengeData.type === 'sudden_death' || lobby.challengeData.type === 'purge' ? 'text-red-400' : 'text-white'}`}>{val}</div>
+                                                            {isAtRisk && (
+                                                                <div className="absolute -bottom-3 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-red-400 shadow-[0_0_10px_rgba(220,38,38,0.8)] animate-pulse whitespace-nowrap z-10">
+                                                                    A RISCHIO
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )
+                                                });
+                                            })()
                                         )}
                                     </div>
+                                </div>
+                            ) : lobby.challengeData.stage === 'purge_selection' ? (
+                                <div className="text-center animate-in zoom-in w-full max-w-5xl">
+                                     <h2 className="text-4xl md:text-5xl font-black text-red-500 mb-4 uppercase flex items-center justify-center gap-3 drop-shadow-lg">
+                                         <Skull size={40}/> SCELTA DEL BERSAGLIO <Skull size={40}/>
+                                     </h2>
+                                     <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+                                         I peggiori nei dadi sono automaticamente al falò. Ma manca <span className="font-bold text-yellow-400 bg-black/50 px-2 py-1 rounded">1 BERSAGLIO</span>! Il vincitore dell'immunità deve sceglierlo.
+                                     </p>
+                                     
+                                     <div className="flex flex-col md:flex-row justify-center gap-8 mb-12">
+                                         <div className="bg-red-950/40 p-6 rounded-2xl border-2 border-red-500 shadow-[0_0_20px_rgba(220,38,38,0.3)]">
+                                             <div className="text-red-400 font-bold mb-4 uppercase tracking-widest text-sm">Autom. A Rischio (Dadi)</div>
+                                             <div className="flex flex-wrap gap-4 justify-center">
+                                                 {lobby.challengeData.autoTargets.map(uid => {
+                                                     const p = lobby.players.find(pl=>pl.uid===uid);
+                                                     return (
+                                                         <div key={uid} className="flex flex-col items-center">
+                                                             <img src={p?.character.img} className="w-16 h-16 rounded-full border-4 border-red-500 object-cover" />
+                                                             <span className="text-xs font-bold mt-2">{p?.name}</span>
+                                                         </div>
+                                                     )
+                                                 })}
+                                             </div>
+                                         </div>
+                                         <div className="bg-yellow-900/30 p-6 rounded-2xl border-2 border-yellow-500 flex flex-col items-center justify-center min-w-[200px] shadow-[0_0_20px_rgba(234,179,8,0.2)]">
+                                             <div className="text-yellow-400 font-bold mb-4 uppercase tracking-widest text-sm">Vincitore (Sceglie)</div>
+                                             <img src={lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.character.img} className="w-20 h-20 rounded-full border-4 border-yellow-500 object-cover" />
+                                             <span className="font-black mt-2 text-lg text-yellow-100">{lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.name}</span>
+                                         </div>
+                                     </div>
+
+                                     {lobby.challengeData.decider === user.uid ? (
+                                         <div className="bg-slate-800 p-8 rounded-3xl border-4 border-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.4)] relative">
+                                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Tocca a te!</div>
+                                             <h3 className="text-2xl font-bold text-indigo-300 mb-6">Scegli chi condannare al falò d'eliminazione:</h3>
+                                             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                                                 {activePlayers
+                                                     .filter(p => !lobby.challengeData.autoTargets.includes(p.uid) && !lobby.challengeData.winner.includes(p.uid))
+                                                     .map(p => (
+                                                         <button 
+                                                             key={p.uid}
+                                                             onClick={() => submitPurgeChoice(p.uid)}
+                                                             className="bg-slate-900 hover:bg-indigo-600 p-3 rounded-2xl flex flex-col items-center border-2 border-slate-700 hover:border-indigo-400 hover:scale-110 transition-all shadow-lg"
+                                                         >
+                                                             <img src={p.character.img} className="w-16 h-16 rounded-full mb-2 object-cover border-2 border-transparent"/>
+                                                             <span className="text-xs font-bold text-center leading-tight w-full">{p.name}</span>
+                                                         </button>
+                                                     ))
+                                                 }
+                                             </div>
+                                         </div>
+                                     ) : (
+                                         <div className="text-2xl font-black text-indigo-300 animate-pulse bg-indigo-900/40 p-8 rounded-2xl border-2 border-indigo-500 inline-block shadow-lg">
+                                             <span className="opacity-80">In attesa che</span> {lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.name} <span className="opacity-80">faccia la sua scelta...</span>
+                                         </div>
+                                     )}
                                 </div>
                             ) : (
                                 <div className="text-center animate-in zoom-in duration-500">
@@ -4096,6 +4547,17 @@
                                      </p>
                                  </div>
                              )}
+
+                             {lobby.twistData?.type === 'purge' && (
+                                 <div className="bg-red-900/80 border-2 border-red-500 p-4 rounded-xl mb-6 text-center shadow-[0_0_20px_rgba(220,38,38,0.4)] animate-in slide-in-from-top duration-500">
+                                     <h3 className="text-2xl font-black text-red-300 uppercase flex items-center justify-center gap-2 mb-2">
+                                        <Skull className="animate-pulse"/> LA NOTTE DEL GIUDIZIO!
+                                     </h3>
+                                     <p className="text-white text-lg leading-tight">
+                                         Puoi votare SOLO i giocatori che hanno fatto il punteggio più basso nella sfida di oggi!
+                                     </p>
+                                 </div>
+                             )}
                              
                              {!isMerge && myPlayer.team !== lobby.losingTeam && lobby.twistData?.type !== 'joint_ceremony' ? (
                                  <div className="mt-8 bg-green-600/20 border-2 border-green-500 p-8 rounded-2xl text-center animate-in zoom-in">
@@ -4199,19 +4661,22 @@
                                  ) : (
                                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-5">
                                          {activePlayers.map(p => {
-                                             const canVoteFor = (!isMerge && p.team === lobby.losingTeam) || (isMerge && !(lobby.immunity || []).includes(p.uid));
-                                             
+                                             let canVoteFor = (!isMerge && p.team === lobby.losingTeam) || (isMerge && !(lobby.immunity || []).includes(p.uid));
+                                             if (lobby.twistData?.type === 'purge') {
+                                                 canVoteFor = lobby.twistData.targets.includes(p.uid);
+                                             }
+
                                              const myTeamActivePlayers = activePlayers.filter(ap => ap.team === myPlayer.team);
                                              const isOnlyMember = !isMerge && myTeamActivePlayers.length === 1 && p.team === lobby.losingTeam;
                                              
-                                             if (!canVoteFor || (p.uid === user.uid && !isOnlyMember)) return null;
+                                             if (!canVoteFor || (p.uid === user.uid && !isOnlyMember && lobby.twistData?.type !== 'purge')) return null;
                                              if (lobby.idolData?.activeEffects?.safetyUsedRound === lobby.round && lobby.idolData?.activeEffects?.safetyHolder === p.uid) return null;
                                              
                                              const iVotedFor = lobby.votes?.[user.uid] === p.uid;
                                              
                                              const ringClass = (useExtraVote || useVoteSteal)
                                                 ? 'hover:ring-4 hover:ring-green-500 cursor-crosshair' 
-                                                : iVotedFor ? 'ring-4 ring-red-600 scale-105' : 'hover:scale-105';
+                                                : iVotedFor ? 'ring-4 ring-red-600 scale-105' : lobby.twistData?.type === 'purge' ? 'ring-2 ring-red-500 hover:ring-4 hover:scale-105' : 'hover:scale-105';
 
                                              return (
                                                  <button 
@@ -4322,13 +4787,12 @@
                                              const votes = lobby.ceremonyData.voteCounts?.[uid] || 0;
                                              const showVotes = isEliminated || (isSafe && lobby.ceremonyData.finalReveal) || isSavedByIdol;
                                              const isMe = p.uid === user.uid;
-                                             const humanColor = !p.isBot ? humanColorsMap[p.uid] : null;
 
                                              return (
-                                                 <div key={uid} className={`flex flex-col items-center transition-all duration-1000 ${isEliminated ? 'opacity-50 grayscale scale-90' : isSavedByIdol ? 'scale-110 ring-8 ring-yellow-400 rounded-xl z-40' : isSafe ? 'scale-110 ring-4 ring-green-500 rounded-xl' : humanColor ? `scale-110 ring-4 ${humanColor.ring} rounded-xl ${humanColor.shadow}` : ''}`}>
+                                                 <div key={uid} className={`flex flex-col items-center transition-all duration-1000 ${isEliminated ? 'opacity-50 grayscale scale-90' : isSavedByIdol ? 'scale-110 ring-8 ring-yellow-400 rounded-xl z-40' : isSafe ? 'scale-110 ring-4 ring-green-500 rounded-xl' : ''}`}>
                                                      <img src={p.character.img} className="w-32 h-32 object-cover rounded-xl border-4 border-white shadow-2xl"/>
-                                                     <div className={`font-black text-xl mt-2 px-2 rounded ${humanColor ? `${humanColor.bg} text-black` : 'bg-black/50'}`}>{p.name} {isMe && "(TU)"}</div>
-                                                     <div className={`font-mono font-bold mt-1 text-lg ${isSavedByIdol ? 'text-slate-500 line-through decoration-red-500 decoration-4' : humanColor ? humanColor.text : 'text-yellow-400'}`}>
+                                                     <div className={`font-black text-xl mt-2 px-2 rounded bg-black/50`}>{p.name} {isMe && "(TU)"}</div>
+                                                     <div className={`font-mono font-bold mt-1 text-lg ${isSavedByIdol ? 'text-slate-500 line-through decoration-red-500 decoration-4' : 'text-yellow-400'}`}>
                                                          {showVotes ? `${votes} voti` : "?"}
                                                      </div>
                                                      {showVotes && lobby.ceremonyData.isOpenVote && lobby.ceremonyData.votersMap?.[uid] && (
