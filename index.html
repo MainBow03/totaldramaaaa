@@ -682,7 +682,7 @@
                               const val = e.target.value;
                               if (val === 'Brains vs Beauties vs Brawns' || val === 'Eroi vs Villains vs Neutrali') {
                                   setConfig({...config, theme: val, numTeams: 3});
-                              } else if (val === 'La Notte del Giudizio') {
+                              } else if (val === 'La Notte del Giudizio' || val === 'Popolarità') {
                                   setConfig({...config, theme: val, numTeams: 1, mergeSize: config.maxPlayers});
                               } else {
                                   setConfig({...config, theme: val});
@@ -695,6 +695,7 @@
                           <option value="Brains vs Beauties vs Brawns">Brains vs Beauties vs Brawns</option>
                           <option value="Eroi vs Villains vs Neutrali">Eroi vs Villains vs Neutrali</option>
                           <option value="La Notte del Giudizio">La Notte del Giudizio (Tutti vs Tutti, Voto ai Peggiori 2)</option>
+                          <option value="Popolarità">Popolarità (Niente sfide, immunità ai più amati)</option>
                       </select>
                     </div>
 
@@ -716,8 +717,8 @@
                     <div>
                       <label className="block text-slate-400 font-bold mb-2">Squadre (2 - 8)</label>
                       <div className="flex items-center gap-4">
-                        <input type="range" min="2" max="8" value={config.numTeams} disabled={config.theme === 'Brains vs Beauties vs Brawns' || config.theme === 'Eroi vs Villains vs Neutrali' || config.theme === 'La Notte del Giudizio'} onChange={e => setConfig({...config, numTeams: parseInt(e.target.value)})} className="flex-1 accent-blue-500 disabled:opacity-50" />
-                        <span className="text-2xl font-bold w-12 text-center">{config.theme === 'La Notte del Giudizio' ? 1 : config.numTeams}</span>
+                        <input type="range" min="2" max="8" value={config.numTeams} disabled={config.theme === 'Brains vs Beauties vs Brawns' || config.theme === 'Eroi vs Villains vs Neutrali' || config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità'} onChange={e => setConfig({...config, numTeams: parseInt(e.target.value)})} className="flex-1 accent-blue-500 disabled:opacity-50" />
+                        <span className="text-2xl font-bold w-12 text-center">{config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità' ? 1 : config.numTeams}</span>
                       </div>
                     </div>
 
@@ -729,7 +730,7 @@
                             min="3" 
                             max={Math.max(3, config.maxPlayers - 2)} 
                             value={config.mergeSize} 
-                            disabled={config.theme === 'La Notte del Giudizio'}
+                            disabled={config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità'}
                             onChange={e => setConfig({...config, mergeSize: parseInt(e.target.value)})} 
                             className="flex-1 accent-red-500 disabled:opacity-50" 
                         />
@@ -1003,7 +1004,7 @@
                     else if (NEUTRALS.includes(p.character?.name)) team = "Neutrali";
                     return { ...p, team };
                 });
-            } else if (lobby.config.theme === 'La Notte del Giudizio') {
+            } else if (lobby.config.theme === 'La Notte del Giudizio' || lobby.config.theme === 'Popolarità') {
                 currentPlayers = currentPlayers.map(p => ({ ...p, team: "MERGE" }));
             } else {
                 for (let i = currentPlayers.length - 1; i > 0; i--) {
@@ -1201,6 +1202,9 @@
           const [specialSkillType, setSpecialSkillType] = useState(null); 
           const [specialSkillTargets, setSpecialSkillTargets] = useState([]);
           const [imbroglioResult, setImbroglioResult] = useState(null);
+          
+          const [popularitySelections, setPopularitySelections] = useState([]);
+          const [nominationSelections, setNominationSelections] = useState([]);
 
           // Fix: Reset delle azioni al nuovo round sociale
           useEffect(() => {
@@ -1224,6 +1228,8 @@
                   setShowSafetyModal(false);
                   setShowImmunityStealModal(false);
                   setShowLegacyModal(false);
+                  setPopularitySelections([]);
+                  setNominationSelections([]);
               }
           }, [lobby.phase, lobby.round]);
 
@@ -1231,10 +1237,39 @@
                  let updatedPlayers = [...currentPlayers];
                  let newLogs = [...currentLogs];
                  const activeBots = updatedPlayers.filter(p => p.status === 'active' && p.isBot);
+                 const activeHumans = updatedPlayers.filter(p => p.status === 'active' && !p.isBot);
+                 
                  activeBots.sort(() => Math.random() - 0.5);
-                 const botsToAct = activeBots.slice(0, 4);
+                 
+                 const isPopularity = lobby.config.theme === 'Popolarità';
+                 const numBotsToAct = isPopularity ? Math.min(8, activeBots.length) : Math.min(4, activeBots.length);
+                 const botsToAct = activeBots.slice(0, numBotsToAct);
+
+                 let rumorBots = [];
+                 if (isPopularity && activeHumans.length > 0) {
+                     const numRumorBots = Math.min(Math.floor(Math.random() * 2) + 1, botsToAct.length); // 1 o 2
+                     rumorBots = botsToAct.slice(0, numRumorBots);
+                 }
 
                  botsToAct.forEach(bot => {
+                     if (rumorBots.some(b => b.uid === bot.uid)) {
+                         const humanTarget = activeHumans[Math.floor(Math.random() * activeHumans.length)];
+                         const possibleListeners = updatedPlayers.filter(p => p.status === 'active' && p.uid !== bot.uid && p.uid !== humanTarget.uid);
+                         
+                         if (possibleListeners.length > 0) {
+                             const listener = possibleListeners[Math.floor(Math.random() * possibleListeners.length)];
+                             const listenerIdx = updatedPlayers.findIndex(p => p.uid === listener.uid);
+                             
+                             const currentRel = updatedPlayers[listenerIdx].relationships[humanTarget.uid] || 0;
+                             updatedPlayers[listenerIdx].relationships = {
+                                 ...updatedPlayers[listenerIdx].relationships,
+                                 [humanTarget.uid]: Math.max(-10, currentRel - 2) 
+                             };
+                             newLogs.push(`🤖 ${bot.name} ha sparso cattive voci su ${humanTarget.name} con ${listener.name}! (-2 relaz)`);
+                             return; 
+                         }
+                     }
+
                      const possibleTargets = updatedPlayers.filter(p => p.status === 'active' && p.uid !== bot.uid);
                      if (possibleTargets.length === 0) return;
                      const target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
@@ -1375,16 +1410,28 @@
               const targetNames = finalTargets.map(id => lobby.players.find(p => p.uid === id)?.name).join(", ");
               const winnerName = deciderPlayer.name;
 
-              const updatedPlayersTemp = lobby.players.map(p => {
+              let updatedPlayersTemp = lobby.players.map(p => {
                    if (lobby.challengeData.winner.includes(p.uid)) return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
                    return p;
               });
 
-              const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [
+              let logsToAdd = [
                    `${winnerName} VINCE L'IMMUNITÀ!`,
                    `🎯 ${winnerName.toUpperCase()} HA SCELTO DI CONDANNARE ${chosenTarget.name.toUpperCase()}!`,
                    `⚠️ I bersagli finali sono ${targetNames}. SOLO LORO POTRANNO ESSERE VOTATI AL FALÒ!`
-              ]);
+              ];
+
+              if (chosenTarget && chosenTarget.isBot && Math.random() < 0.30) {
+                  const targetIdx = updatedPlayersTemp.findIndex(p => p.uid === chosenTargetId);
+                  const currentRel = updatedPlayersTemp[targetIdx].relationships[deciderPlayer.uid] || 0;
+                  updatedPlayersTemp[targetIdx].relationships = {
+                      ...updatedPlayersTemp[targetIdx].relationships,
+                      [deciderPlayer.uid]: Math.max(-10, currentRel - 1)
+                  };
+                  logsToAdd.push(`💢 ${chosenTarget.name} se l'è presa per essere stato mandato a rischio da ${deciderPlayer.name}! (-1 Relaz)`);
+              }
+
+              const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, logsToAdd);
 
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                    players: updatedPlayers,
@@ -1462,6 +1509,9 @@
           // SEQUENTIAL DICE ANIMATION E RISOLUZIONE
           useEffect(() => {
             if (!isHost || lobby.phase !== 'challenge' || !lobby.challengeData || lobby.challengeData.stage !== 'rolling') return;
+            
+            // Ignora questa logica se è una sfida di popolarità
+            if (lobby.challengeData.type === 'popularity_vote') return;
 
             const { rollingIndex, players: rollPlayers, rolls } = lobby.challengeData;
             
@@ -1661,6 +1711,31 @@
             }
           }, [lobby.challengeData, isHost]);
 
+          // --- BOT POPULARITY VOTE LOGIC ---
+          useEffect(() => {
+              if (!isHost || lobby.phase !== 'challenge' || lobby.challengeData?.type !== 'popularity_vote' || lobby.challengeData?.stage !== 'voting') return;
+              
+              const bots = lobby.players.filter(p => p.status === 'active' && p.isBot);
+              
+              bots.forEach(bot => {
+                  if (!lobby.challengeData.votes || !lobby.challengeData.votes[bot.uid]) {
+                      const timer = setTimeout(async () => {
+                          let validTargets = lobby.players.filter(p => p.status === 'active' && p.uid !== bot.uid);
+                          
+                          validTargets.sort(() => Math.random() - 0.5);
+                          validTargets.sort((a, b) => (bot.relationships[b.uid] || 0) - (bot.relationships[a.uid] || 0));
+                          
+                          const votes = validTargets.slice(0, 2).map(p => p.uid);
+                          
+                          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                              [`challengeData.votes.${bot.uid}`]: votes
+                          });
+                      }, 2000 + Math.random() * 3000);
+                      return () => clearTimeout(timer);
+                  }
+              });
+          }, [lobby.challengeData, isHost]);
+
           // --- BOT PURGE SELECTION LOGIC ---
           useEffect(() => {
               if (!isHost || lobby.phase !== 'challenge' || lobby.challengeData?.stage !== 'purge_selection') return;
@@ -1692,16 +1767,28 @@
                       const winnerName = deciderPlayer.name;
                       const targetNames = finalTargets.map(id => lobby.players.find(p => p.uid === id)?.name).join(", ");
 
-                      const updatedPlayersTemp = lobby.players.map(p => {
+                      let updatedPlayersTemp = lobby.players.map(p => {
                            if (winner.includes(p.uid)) return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
                            return p;
                       });
 
-                      const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [
+                      let logsToAdd = [
                            `${winnerName} VINCE L'IMMUNITÀ!`,
                            `🎯 ${winnerName.toUpperCase()} HA SCELTO DI CONDANNARE ${chosenTarget.name.toUpperCase()}!`,
                            `⚠️ I bersagli finali sono ${targetNames}. SOLO LORO POTRANNO ESSERE VOTATI AL FALÒ!`
-                      ]);
+                      ];
+
+                      if (chosenTarget && chosenTarget.isBot && Math.random() < 0.30) {
+                          const targetIdx = updatedPlayersTemp.findIndex(p => p.uid === chosenTarget.uid);
+                          const currentRel = updatedPlayersTemp[targetIdx].relationships[deciderPlayer.uid] || 0;
+                          updatedPlayersTemp[targetIdx].relationships = {
+                              ...updatedPlayersTemp[targetIdx].relationships,
+                              [deciderPlayer.uid]: Math.max(-10, currentRel - 1)
+                          };
+                          logsToAdd.push(`💢 ${chosenTarget.name} se l'è presa per essere stato mandato a rischio da ${deciderPlayer.name}! (-1 Relaz)`);
+                      }
+
+                      const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, logsToAdd);
 
                       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                            players: updatedPlayers,
@@ -1715,6 +1802,55 @@
                            logs: arrayUnion(...newLogs)
                       });
 
+                  }, 3000 + Math.random() * 2000);
+                  return () => clearTimeout(timer);
+              }
+          }, [lobby.challengeData, isHost, lobby.phase]);
+
+          // --- BOT POPULARITY NOMINATION LOGIC ---
+          useEffect(() => {
+              if (!isHost || lobby.phase !== 'challenge' || lobby.challengeData?.stage !== 'nomination' || lobby.challengeData?.type !== 'popularity_vote') return;
+
+              const deciderId = lobby.challengeData.decider;
+              const deciderPlayer = lobby.players.find(p => p.uid === deciderId);
+
+              if (deciderPlayer?.isBot && !lobby.challengeData.pendingNominationResolved) {
+                  const timer = setTimeout(async () => {
+                      let validTargets = lobby.players.filter(p => p.status === 'active' && !lobby.challengeData.winner.includes(p.uid));
+
+                      // Mescola prima per casualità nei pareggi, poi ordina per relazione più bassa
+                      validTargets.sort(() => Math.random() - 0.5);
+                      validTargets.sort((a, b) => (deciderPlayer.relationships[a.uid] || 0) - (deciderPlayer.relationships[b.uid] || 0));
+
+                      const numToPick = Math.min(4, validTargets.length);
+                      const chosenTargets = validTargets.slice(0, numToPick).map(p => p.uid);
+                      const targetNames = chosenTargets.map(id => lobby.players.find(p => p.uid === id)?.name).join(", ");
+
+                      let updatedPlayers = [...lobby.players];
+                      let logsToAdd = [`🎯 COLPO DI SCENA! ${deciderPlayer.name.toUpperCase()} HA SCELTO I BERSAGLI! Solo ${targetNames} potranno essere votati stasera!`];
+
+                      chosenTargets.forEach(targetId => {
+                          const targetPlayer = updatedPlayers.find(p => p.uid === targetId);
+                          if (targetPlayer && targetPlayer.isBot && Math.random() < 0.30) {
+                              const targetIdx = updatedPlayers.findIndex(p => p.uid === targetId);
+                              const currentRel = updatedPlayers[targetIdx].relationships[deciderPlayer.uid] || 0;
+                              updatedPlayers[targetIdx].relationships = {
+                                  ...updatedPlayers[targetIdx].relationships,
+                                  [deciderPlayer.uid]: Math.max(-10, currentRel - 1)
+                              };
+                              logsToAdd.push(`💢 ${targetPlayer.name} se l'è presa per essere stato mandato a rischio da ${deciderPlayer.name}! (-1 Relaz)`);
+                          }
+                      });
+
+                      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                          players: updatedPlayers,
+                          [`challengeData.stage`]: 'finished',
+                          [`challengeData.pendingNominationResolved`]: true,
+                          readyPlayers: [],
+                          phase: 'social',
+                          twistData: { type: 'purge', targets: chosenTargets }, // Riutilizza la logica della Purga per limitare i voti!
+                          logs: arrayUnion(...logsToAdd)
+                      });
                   }, 3000 + Math.random() * 2000);
                   return () => clearTimeout(timer);
               }
@@ -1894,6 +2030,78 @@
               });
           };
 
+          const submitPopularityVote = async () => {
+              if (popularitySelections.length !== 2) return;
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`challengeData.votes.${user.uid}`]: popularitySelections
+              });
+          };
+
+          const submitPopularityNomination = async (chosenTargets) => {
+              if (lobby.phase !== 'challenge' || lobby.challengeData?.stage !== 'nomination') return;
+
+              const deciderPlayer = lobby.players.find(p => p.uid === lobby.challengeData.decider);
+              const targetNames = chosenTargets.map(id => lobby.players.find(p => p.uid === id)?.name).join(", ");
+
+              let updatedPlayers = [...lobby.players];
+              let logsToAdd = [`🎯 ${deciderPlayer.name.toUpperCase()} HA SCELTO I BERSAGLI! Solo ${targetNames} potranno essere votati stasera!`];
+
+              chosenTargets.forEach(targetId => {
+                  const targetPlayer = updatedPlayers.find(p => p.uid === targetId);
+                  if (targetPlayer && targetPlayer.isBot && Math.random() < 0.30) {
+                      const targetIdx = updatedPlayers.findIndex(p => p.uid === targetId);
+                      const currentRel = updatedPlayers[targetIdx].relationships[deciderPlayer.uid] || 0;
+                      updatedPlayers[targetIdx].relationships = {
+                          ...updatedPlayers[targetIdx].relationships,
+                          [deciderPlayer.uid]: Math.max(-10, currentRel - 1)
+                      };
+                      logsToAdd.push(`💢 ${targetPlayer.name} se l'è presa per essere stato mandato a rischio da ${deciderPlayer.name}! (-1 Relaz)`);
+                  }
+              });
+
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  players: updatedPlayers,
+                  [`challengeData.stage`]: 'finished',
+                  readyPlayers: [],
+                  phase: 'social',
+                  twistData: { type: 'purge', targets: chosenTargets }, // Blocca i voti solo su questi 4
+                  logs: arrayUnion(...logsToAdd)
+              });
+          };
+
+          const resolvePopularityVote = async () => {
+              if (!isHost || lobby.phase !== 'challenge' || lobby.challengeData?.type !== 'popularity_vote') return;
+              
+              const votesMap = lobby.challengeData.votes || {};
+              const counts = {};
+              
+              Object.values(votesMap).forEach(voteArray => {
+                  voteArray.forEach(uid => {
+                      counts[uid] = (counts[uid] || 0) + 1;
+                  });
+              });
+              
+              const activePlayersList = lobby.players.filter(p => p.status === 'active');
+              activePlayersList.forEach(p => {
+                  if (counts[p.uid] === undefined) counts[p.uid] = 0;
+              });
+
+              // Ordina dal meno votato al più votato. A parità di voti, mescola a caso per suspense
+              const sortedResults = Object.entries(counts)
+                  .map(([uid, score]) => ({ uid, score }))
+                  .sort((a, b) => {
+                      if (a.score === b.score) return Math.random() - 0.5;
+                      return a.score - b.score;
+                  });
+
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`challengeData.stage`]: 'revealing',
+                  [`challengeData.popularityResults`]: sortedResults,
+                  [`challengeData.revealIndex`]: -1,
+                  logs: arrayUnion(`I voti sono chiusi! Inizia lo spoglio per scoprire chi riceverà l'immunità!`)
+              });
+          };
+
           const handleRedemptionRoll = async () => {
              playSound('roll');
              const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
@@ -2009,6 +2217,8 @@
                     else if (NEUTRALS.includes(p.character?.name)) team = "Neutrali";
                     return { ...p, team };
                 });
+            } else if (lobby.config.theme === 'La Notte del Giudizio' || lobby.config.theme === 'Popolarità') {
+                nextPlayers = nextPlayers.map(p => ({ ...p, team: "MERGE" }));
             } else {
                 nextPlayers = nextPlayers.map((p, idx) => ({
                   ...p,
@@ -2180,6 +2390,15 @@
                           };
                           newLogs.push(`Chris: La Notte del Giudizio non si ferma! I ${riskCount} peggiori di questa sfida andranno al televoto!`);
                       }
+                      else if (lobby.config.theme === 'Popolarità') {
+                          updates.challengeData = {
+                              type: 'popularity_vote',
+                              stage: 'voting',
+                              votes: {},
+                              winner: null
+                          };
+                          newLogs.push("Chris: È il momento del Test di Popolarità! Assegnate la vostra preferenza a 2 persone. Chi ottiene più cuori sarà immune stasera!");
+                      }
                       else if (rand < 0.06) {
                            const rollers = activePlayers.map(p => p.uid);
                            updates.challengeData = {
@@ -2229,49 +2448,72 @@
                   } else {
                       if (Math.random() < 0.10) {
                           const teamsMap = {};
-                          activePlayers.forEach(p => {
-                              if (!teamsMap[p.team]) teamsMap[p.team] = [];
-                              teamsMap[p.team].push(p);
-                          });
-                          
-                          const teamNames = Object.keys(teamsMap);
-                          if (teamNames.length >= 2) {
-                              teamNames.sort((a, b) => teamsMap[b].length - teamsMap[a].length);
-                              
-                              const bigTeam = teamNames[0];
-                              const smallTeam = teamNames[teamNames.length - 1];
-                              
-                              if (teamsMap[bigTeam].length > teamsMap[smallTeam].length) {
-                                  const victim = teamsMap[bigTeam][Math.floor(Math.random() * teamsMap[bigTeam].length)];
-                                  
-                                  const updatedPlayers = lobby.players.map(p => 
-                                      p.uid === victim.uid ? { ...p, team: smallTeam } : p
-                                  );
-                                  
-                                  updates.players = updatedPlayers;
-                                  newLogs.push(`COLPO DI SCENA! Chris: "${victim.name}, prendi le tue cose! Passi dai ${bigTeam} ai ${smallTeam}!"`);
-                                  
-                                  updates.twistData = { 
-                                      type: 'team_swap', 
-                                      victimName: victim.name, 
-                                      fromTeam: bigTeam, 
-                                      toTeam: smallTeam 
-                                  };
-                              }
-                          }
+                          updates.challengeData = {
+                             type: 'standard', 
+                             players: rollers,
+                          };
                       }
-
-                      const rollers = activePlayers.map(p => p.uid);
-                      updates.challengeData = {
-                         type: 'standard', 
-                         players: rollers,
-                      };
                   }
               }
             }
             
             else if (lobby.phase === 'challenge') {
-              if (lobby.challengeData.type === 'sudden_death') {
+              if (lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'revealing') {
+                  const { popularityResults, revealIndex } = lobby.challengeData;
+                  if (revealIndex < popularityResults.length - 1) {
+                      const nextIndex = revealIndex + 1;
+                      updates = {
+                          [`challengeData.revealIndex`]: nextIndex
+                      };
+                      if (nextIndex === popularityResults.length - 1) {
+                         playSound('victory');
+                      } else {
+                         playSound('roll');
+                      }
+                  } else {
+                      const maxVotes = popularityResults[popularityResults.length - 1].score;
+                      const winners = popularityResults.filter(r => r.score === maxVotes).map(r => r.uid);
+                      
+                      const winnerNames = winners.map(uid => lobby.players.find(p => p.uid === uid)?.name).join(", ");
+                      const winnerStr = winners.length > 1 ? "I PIÙ POPOLARI SONO" : "IL PIÙ POPOLARE È";
+                      
+                      const updatedPlayersTemp = lobby.players.map(p => {
+                          if (winners.includes(p.uid)) return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
+                          return p;
+                      });
+
+                      const hasTwist = Math.random() < 0.5;
+
+                      if (hasTwist) {
+                           const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [
+                               `💖 RISULTATI POPOLARITÀ! ${winnerStr} ${winnerNames.toUpperCase()} con ${maxVotes} voti! Ottengono l'immunità.`,
+                               `🚨 COLPO DI SCENA! Il vincitore dell'immunità deciderà i nominati per il falò!`
+                           ]);
+                           updates = {
+                               players: updatedPlayers,
+                               [`challengeData.stage`]: 'nomination',
+                               [`challengeData.decider`]: winners[0], // Il primo vincitore sceglie i 4
+                               [`challengeData.winner`]: winners,
+                               immunity: winners,
+                               losingTeam: "MERGE",
+                               logs: arrayUnion(...newLogs)
+                           };
+                      } else {
+                           const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [`💖 RISULTATI POPOLARITÀ! ${winnerStr} ${winnerNames.toUpperCase()} con ${maxVotes} voti! Ottengono l'immunità.`]);
+                           updates = {
+                               players: updatedPlayers,
+                               [`challengeData.stage`]: 'finished',
+                               [`challengeData.winner`]: winners,
+                               immunity: winners,
+                               losingTeam: "MERGE",
+                               readyPlayers: [],
+                               phase: 'social',
+                               logs: arrayUnion(...newLogs)
+                           };
+                      }
+                  }
+              }
+              else if (lobby.challengeData.type === 'sudden_death') {
                   const victimId = lobby.challengeData.loser;
                   const victim = lobby.players.find(p => p.uid === victimId);
                   
@@ -3893,8 +4135,8 @@
                         {isHost && lobby.phase !== 'final_showdown' && lobby.phase !== 'season_setup' && lobby.phase !== 'redemption' && (
                             <button 
                                 onClick={advanceGame} 
-                                disabled={(lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0)}
-                                className={`${((lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0)) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-4 py-1 rounded shadow text-sm flex items-center gap-2 transition-all`}
+                                disabled={(lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')}
+                                className={`${((lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-4 py-1 rounded shadow text-sm flex items-center gap-2 transition-all`}
                             >
                             {lobby.phase === 'voting' && pendingVotesCount > 0 
                                 ? `ATTESA VOTI (UMANI: ${pendingVotesCount})` 
@@ -3912,7 +4154,9 @@
                                                         ? 'INIZIA SPOGLIO'
                                                         : lobby.phase === 'ceremony' || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'revealing')
                                                             ? (lobby.ceremonyData?.finalReveal && !lobby.ceremonyData?.tieMatch ? 'FINISCI' : lobby.ceremonyData?.tieMatch ? 'SPAREGGIO' : 'RIVELA') 
-                                                            : 'AVANTI'} 
+                                                            : lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'revealing'
+                                                                ? (lobby.challengeData.revealIndex < lobby.challengeData.popularityResults.length - 1 ? 'SVELA POSIZIONE' : 'PROCLAMA VINCITORI')
+                                                                : 'AVANTI'} 
                             {!(lobby.phase === 'voting' && pendingVotesCount > 0) && !(lobby.phase === 'social' && pendingReadyCount > 0) && !(lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') && !(lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) && !(lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) && <ArrowRight size={16} />}
                             </button>
                         )}
@@ -4322,7 +4566,169 @@
                             )}
 
                             {isMerge && lobby.challengeData && (
-                                lobby.challengeData.stage === 'rolling' ? (
+                                lobby.challengeData.type === 'popularity_vote' ? (
+                                    <div className="text-center animate-in zoom-in w-full max-w-5xl">
+                                         <h2 className="text-4xl md:text-5xl font-black text-pink-500 mb-4 uppercase flex items-center justify-center gap-3 drop-shadow-lg">
+                                             <Heart size={40} className="fill-current"/> TEST DI POPOLARITÀ <Heart size={40} className="fill-current"/>
+                                         </h2>
+                                         
+                                         {lobby.challengeData.stage === 'voting' ? (
+                                             <>
+                                                 <p className="text-xl text-slate-300 mb-6 max-w-2xl mx-auto">
+                                                     Non ci sono sfide fisiche oggi! Seleziona le <strong>2 persone</strong> che vuoi salvare. Chi riceve più preferenze ottiene l'immunità dal falò.
+                                                 </p>
+                                                 
+                                                 {myPlayer.status === 'eliminated' ? (
+                                                     <div className="text-2xl font-black text-red-500 mb-8 bg-red-900/40 p-4 rounded-xl inline-block">SEI ELIMINATO, NON PUOI VOTARE</div>
+                                                 ) : lobby.challengeData.votes?.[user.uid] ? (
+                                                     <div className="text-2xl font-black text-green-400 mb-8 bg-green-900/40 p-4 rounded-xl inline-block flex items-center justify-center gap-2 max-w-sm mx-auto">
+                                                         <CheckCircle/> Preferenze Registrate!
+                                                     </div>
+                                                 ) : (
+                                                     <div className="mb-8">
+                                                         <div className="bg-slate-800 p-6 rounded-3xl border-4 border-pink-500 shadow-[0_0_40px_rgba(236,72,153,0.4)] relative mb-4">
+                                                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-pink-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Seleziona 2 Giocatori</div>
+                                                             <div className="text-pink-300 font-bold mb-4">Selezionati: {popularitySelections.length}/2</div>
+                                                             
+                                                             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                                                                 {activePlayers
+                                                                     .filter(p => p.uid !== user.uid)
+                                                                     .map(p => {
+                                                                         const isSelected = popularitySelections.includes(p.uid);
+                                                                         const isDisabled = !isSelected && popularitySelections.length >= 2;
+                                                                         
+                                                                         return (
+                                                                             <button 
+                                                                                 key={p.uid}
+                                                                                 onClick={() => {
+                                                                                     if (isSelected) setPopularitySelections(prev => prev.filter(id => id !== p.uid));
+                                                                                     else if (popularitySelections.length < 2) setPopularitySelections(prev => [...prev, p.uid]);
+                                                                                 }}
+                                                                                 disabled={isDisabled}
+                                                                                 className={`p-3 rounded-2xl flex flex-col items-center border-2 transition-all ${isSelected ? 'bg-pink-900 border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-110 z-10' : isDisabled ? 'opacity-30 border-transparent bg-slate-800' : 'bg-slate-900 border-slate-700 hover:border-pink-500 hover:bg-slate-800'}`}
+                                                                             >
+                                                                                 <img src={p.character.img} className={`w-16 h-16 rounded-full mb-2 object-cover ${isSelected ? 'border-2 border-pink-400' : ''}`}/>
+                                                                                 <span className="text-xs font-bold text-center leading-tight w-full">{p.name}</span>
+                                                                             </button>
+                                                                         )
+                                                                     })
+                                                                 }
+                                                             </div>
+                                                         </div>
+                                                         
+                                                         <button 
+                                                             onClick={submitPopularityVote}
+                                                             disabled={popularitySelections.length !== 2}
+                                                             className={`px-12 py-4 rounded-xl font-black text-xl transition-all shadow-lg ${popularitySelections.length === 2 ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:scale-105 animate-bounce' : 'bg-slate-700 text-slate-500'}`}
+                                                         >
+                                                             <Heart size={24} className="inline mr-2" fill="currentColor"/> CONFERMA VOTI
+                                                         </button>
+                                                     </div>
+                                                 )}
+
+                                                 {isHost && (
+                                                     <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700 max-w-sm mx-auto">
+                                                         <div className="text-sm font-bold text-slate-400 mb-2">Pannello Host</div>
+                                                         <div className="text-yellow-400 font-mono font-bold mb-4">
+                                                             Voti ricevuti: {Object.keys(lobby.challengeData.votes || {}).length} / {activePlayers.length}
+                                                         </div>
+                                                         <button onClick={resolvePopularityVote} className="w-full bg-green-600 hover:bg-green-500 text-white font-black py-2 rounded-lg shadow flex items-center justify-center gap-2">
+                                                             <Award/> CALCOLA RISULTATI
+                                                         </button>
+                                                     </div>
+                                                 )}
+                                             </>
+                                         ) : lobby.challengeData.stage === 'revealing' ? (
+                                             <div className="flex flex-col items-center justify-center min-h-[50vh]">
+                                                 <h3 className="text-2xl font-bold mb-8 text-white uppercase tracking-widest bg-pink-900/40 px-6 py-2 rounded-full border border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.3)]">Risultati: Dal Meno Popolare</h3>
+                                                 <div className="flex flex-wrap justify-center gap-4">
+                                                     {lobby.challengeData.popularityResults.map((result, idx) => {
+                                                         const p = lobby.players.find(pl => pl.uid === result.uid);
+                                                         if (!p) return null;
+                                                         const isRevealed = idx <= lobby.challengeData.revealIndex;
+                                                         const maxScore = lobby.challengeData.popularityResults[lobby.challengeData.popularityResults.length - 1].score;
+                                                         const isTop = result.score === maxScore && result.score > 0;
+                                                         
+                                                         return (
+                                                             <div key={p.uid} className={`relative flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-500 ${isRevealed ? (isTop && lobby.challengeData.revealIndex === lobby.challengeData.popularityResults.length - 1 ? 'border-pink-400 bg-pink-900/60 scale-125 shadow-[0_0_20px_rgba(236,72,153,0.8)] z-10 mx-4' : 'border-slate-500 bg-slate-800 scale-100 opacity-90') : 'border-slate-700 bg-slate-900 opacity-50 scale-90'}`}>
+                                                                 <img src={p.character.img} className={`w-14 h-14 md:w-20 md:h-20 rounded-full mb-2 object-cover ${isRevealed ? 'grayscale-0 border-2 border-white/20' : 'grayscale'}`}/>
+                                                                 <div className="font-bold text-xs md:text-sm text-center truncate w-20 md:w-24">{p.name}</div>
+                                                                 {isRevealed ? (
+                                                                     <div className={`mt-2 text-xl md:text-3xl font-black ${isTop && lobby.challengeData.revealIndex === lobby.challengeData.popularityResults.length - 1 ? 'text-pink-400 drop-shadow-md' : 'text-slate-300'}`}>
+                                                                         {result.score}
+                                                                     </div>
+                                                                 ) : (
+                                                                     <div className="mt-2 text-xl md:text-3xl font-black text-slate-600">?</div>
+                                                                 )}
+                                                                 {isRevealed && isTop && lobby.challengeData.revealIndex === lobby.challengeData.popularityResults.length - 1 && (
+                                                                     <div className="absolute -top-4 bg-pink-600 text-white text-[10px] font-black px-3 py-1 rounded-full border border-pink-400 animate-pulse shadow-lg">VINCITORE</div>
+                                                                 )}
+                                                             </div>
+                                                         )
+                                                     })}
+                                                 </div>
+                                                 {isHost && lobby.challengeData.revealIndex < lobby.challengeData.popularityResults.length - 1 && (
+                                                     <div className="mt-12 text-pink-400 font-bold animate-pulse text-lg">Clicca AVANTI in alto a destra per svelare il prossimo!</div>
+                                                 )}
+                                             </div>
+                                         ) : lobby.challengeData.stage === 'nomination' ? (
+                                             <div className="text-center animate-in zoom-in w-full max-w-5xl">
+                                                 <h2 className="text-4xl md:text-5xl font-black text-red-500 mb-4 uppercase flex items-center justify-center gap-3 drop-shadow-lg">
+                                                     <Skull size={40}/> SCELTA DEI NOMINATI <Skull size={40}/>
+                                                 </h2>
+                                                 <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+                                                     COLPO DI SCENA! Il vincitore dell'immunità deve scegliere fino a <span className="font-bold text-yellow-400 bg-black/50 px-2 py-1 rounded">4 BERSAGLI</span>. Solo loro potranno essere eliminati al falò!
+                                                 </p>
+
+                                                 {lobby.challengeData.decider === user.uid ? (
+                                                     <div className="bg-slate-800 p-8 rounded-3xl border-4 border-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.4)] relative">
+                                                         <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Tocca a te! Seleziona fino a 4 giocatori.</div>
+                                                         <div className="text-indigo-300 font-bold mb-4">Selezionati: {nominationSelections.length} / {Math.min(4, activePlayers.length - lobby.challengeData.winner.length)}</div>
+                                                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6">
+                                                             {activePlayers
+                                                                 .filter(p => !lobby.challengeData.winner.includes(p.uid))
+                                                                 .map(p => {
+                                                                     const isSelected = nominationSelections.includes(p.uid);
+                                                                     const numToPick = Math.min(4, activePlayers.length - lobby.challengeData.winner.length);
+                                                                     const isDisabled = !isSelected && nominationSelections.length >= numToPick;
+
+                                                                     return (
+                                                                     <button
+                                                                         key={p.uid}
+                                                                         onClick={() => {
+                                                                             if (isSelected) setNominationSelections(prev => prev.filter(id => id !== p.uid));
+                                                                             else if (nominationSelections.length < numToPick) setNominationSelections(prev => [...prev, p.uid]);
+                                                                         }}
+                                                                         disabled={isDisabled}
+                                                                         className={`bg-slate-900 p-3 rounded-2xl flex flex-col items-center border-2 transition-all shadow-lg ${isSelected ? 'border-red-500 bg-red-900/50 scale-110' : isDisabled ? 'opacity-30 border-transparent' : 'border-slate-700 hover:border-indigo-400'}`}
+                                                                     >
+                                                                         <img src={p.character.img} className={`w-16 h-16 rounded-full mb-2 object-cover ${isSelected ? 'border-2 border-red-500' : ''}`}/>
+                                                                         <span className="text-xs font-bold text-center leading-tight w-full">{p.name}</span>
+                                                                     </button>
+                                                                     )
+                                                                 })
+                                                             }
+                                                         </div>
+                                                         <button
+                                                             onClick={() => submitPopularityNomination(nominationSelections)}
+                                                             disabled={nominationSelections.length < Math.min(4, activePlayers.length - lobby.challengeData.winner.length)}
+                                                             className={`px-12 py-4 rounded-xl font-black text-xl transition-all shadow-lg ${nominationSelections.length === Math.min(4, activePlayers.length - lobby.challengeData.winner.length) ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white hover:scale-105 animate-bounce' : 'bg-slate-700 text-slate-500'}`}
+                                                         >
+                                                             <Skull size={24} className="inline mr-2"/> CONFERMA BERSAGLI
+                                                         </button>
+                                                     </div>
+                                                 ) : (
+                                                     <div className="flex flex-col items-center">
+                                                         <img src={lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.character.img} className="w-32 h-32 rounded-full border-4 border-indigo-500 object-cover mb-4 animate-pulse"/>
+                                                         <div className="text-2xl font-black text-indigo-300 bg-indigo-900/40 p-6 rounded-2xl border-2 border-indigo-500 inline-block shadow-lg">
+                                                             <span className="opacity-80">In attesa che</span> {lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.name} <span className="opacity-80">scelga i bersagli...</span>
+                                                         </div>
+                                                     </div>
+                                                 )}
+                                             </div>
+                                         ) : null}
+                                    </div>
+                                ) : lobby.challengeData.stage === 'rolling' ? (
                                 <div className="text-center animate-pulse w-full max-w-4xl">
                                     <h2 className="text-3xl font-bold mb-4 uppercase flex items-center justify-center gap-3">
                                         {lobby.challengeData.type === 'sudden_death' && <AlertOctagon size={40} className="text-red-600"/>}
