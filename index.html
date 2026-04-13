@@ -1031,6 +1031,18 @@
                 }));
             }
 
+            // --- NUOVA LOGICA: MASTERMIND POPOLARITÀ ---
+            if (lobby.config.theme === 'Popolarità') {
+                const botPlayers = currentPlayers.filter(p => p.isBot);
+                botPlayers.sort(() => Math.random() - 0.5);
+                // Scegliamo i 2 bot che saranno i "boss" sociali di questa stagione
+                const mastermindIds = botPlayers.slice(0, 2).map(b => b.uid);
+                currentPlayers = currentPlayers.map(p => ({
+                    ...p,
+                    isSocialMastermind: mastermindIds.includes(p.uid)
+                }));
+            }
+
             // --- SISTEMA INVENTARIO MULTIPLO ---
             const advantageConfig = lobby.config.advantages || { idol: 1, extraVote: 1, advantage: 1, voteSteal: 1, spyDrone: 1, mutiny: 1, safety: 1, immunitySteal: 1, legacy: 1 };
             
@@ -1267,6 +1279,32 @@
                  }
 
                  botsToAct.forEach(bot => {
+                     // --- LOGICA BOT MASTERMIND (I 2 BOT FORTI) ---
+                     if (bot.isSocialMastermind) {
+                         const possibleTargets = updatedPlayers.filter(p => p.status === 'active' && p.uid !== bot.uid);
+                         if (possibleTargets.length === 0) return;
+                         const target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
+                         const targetIdx = updatedPlayers.findIndex(p => p.uid === target.uid);
+
+                         // 60% probabilità di boostare se stessi, 40% probabilità di affossare un umano
+                         if (Math.random() > 0.4 || activeHumans.length === 0) {
+                             const newVal = Math.min(10, (updatedPlayers[targetIdx].relationships[bot.uid] || 0) + 3);
+                             updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [bot.uid]: newVal };
+                             newLogs.push(`✨ ${bot.name} ha usato il suo fascino su ${target.name}! (+3 Relazione)`);
+                         } else {
+                             const humanVictim = activeHumans[Math.floor(Math.random() * activeHumans.length)];
+                             if (humanVictim.uid !== target.uid) {
+                                 const currentRel = updatedPlayers[targetIdx].relationships[humanVictim.uid] || 0;
+                                 updatedPlayers[targetIdx].relationships = {
+                                     ...updatedPlayers[targetIdx].relationships,
+                                     [humanVictim.uid]: Math.max(-10, currentRel - 3)
+                                 };
+                                 newLogs.push(`🐍 ${bot.name} ha convinto ${target.name} a voltare le spalle a ${humanVictim.name}! (-3 Relazione)`);
+                             }
+                         }
+                         return; // Il mastermind ha agito, salta la logica normale
+                     }
+
                      if (rumorBots.some(b => b.uid === bot.uid)) {
                          const humanTarget = activeHumans[Math.floor(Math.random() * activeHumans.length)];
                          const possibleListeners = updatedPlayers.filter(p => p.status === 'active' && p.uid !== bot.uid && p.uid !== humanTarget.uid);
@@ -1731,6 +1769,8 @@
               if (!isHost || lobby.phase !== 'challenge' || lobby.challengeData?.type !== 'popularity_vote' || lobby.challengeData?.stage !== 'voting') return;
               
               const bots = lobby.players.filter(p => p.status === 'active' && p.isBot);
+              const activeCount = lobby.players.filter(p => p.status === 'active').length;
+              const numVotesAllowed = activeCount <= 3 ? 1 : 2;
               
               bots.forEach(bot => {
                   if (!lobby.challengeData.votes || !lobby.challengeData.votes[bot.uid]) {
@@ -1740,7 +1780,7 @@
                           validTargets.sort(() => Math.random() - 0.5);
                           validTargets.sort((a, b) => (bot.relationships[b.uid] || 0) - (bot.relationships[a.uid] || 0));
                           
-                          const votes = validTargets.slice(0, 2).map(p => p.uid);
+                          const votes = validTargets.slice(0, numVotesAllowed).map(p => p.uid);
                           
                           await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                               [`challengeData.votes.${bot.uid}`]: votes
@@ -1837,7 +1877,7 @@
                       validTargets.sort(() => Math.random() - 0.5);
                       validTargets.sort((a, b) => (deciderPlayer.relationships[a.uid] || 0) - (deciderPlayer.relationships[b.uid] || 0));
 
-                      const numToPick = Math.min(4, validTargets.length);
+                      const numToPick = Math.min(3, validTargets.length);
                       const chosenTargets = validTargets.slice(0, numToPick).map(p => p.uid);
                       const targetNames = chosenTargets.map(id => lobby.players.find(p => p.uid === id)?.name).join(", ");
 
@@ -2046,7 +2086,9 @@
           };
 
           const submitPopularityVote = async () => {
-              if (popularitySelections.length !== 2) return;
+              const activeCount = lobby.players.filter(p => p.status === 'active').length;
+              const maxAllowed = activeCount <= 3 ? 1 : 2;
+              if (popularitySelections.length !== maxAllowed) return;
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   [`challengeData.votes.${user.uid}`]: popularitySelections
               });
@@ -4582,7 +4624,7 @@
                                          {lobby.challengeData.stage === 'voting' ? (
                                              <>
                                                  <p className="text-xl text-slate-300 mb-6 max-w-2xl mx-auto">
-                                                     Non ci sono sfide fisiche oggi! Seleziona le <strong>2 persone</strong> che vuoi salvare. Chi riceve più preferenze ottiene l'immunità dal falò.
+                                                     Non ci sono sfide fisiche oggi! Seleziona {activePlayers.length <= 3 ? 'la' : 'le'} <strong>{activePlayers.length <= 3 ? '1 persona' : '2 persone'}</strong> che vuoi salvare. Chi riceve più preferenze ottiene l'immunità dal falò.
                                                  </p>
                                                  
                                                  {myPlayer.status === 'eliminated' ? (
@@ -4594,22 +4636,23 @@
                                                  ) : (
                                                      <div className="mb-8">
                                                          <div className="bg-slate-800 p-6 rounded-3xl border-4 border-pink-500 shadow-[0_0_40px_rgba(236,72,153,0.4)] relative mb-4">
-                                                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-pink-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Seleziona 2 Giocatori</div>
-                                                             <div className="text-pink-300 font-bold mb-4">Selezionati: {popularitySelections.length}/2</div>
+                                                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-pink-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Seleziona {activePlayers.length <= 3 ? '1 Giocatore' : '2 Giocatori'}</div>
+                                                             <div className="text-pink-300 font-bold mb-4">Selezionati: {popularitySelections.length}/{activePlayers.length <= 3 ? 1 : 2}</div>
                                                              
                                                              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
                                                                  {activePlayers
                                                                      .filter(p => p.uid !== user.uid)
                                                                      .map(p => {
                                                                          const isSelected = popularitySelections.includes(p.uid);
-                                                                         const isDisabled = !isSelected && popularitySelections.length >= 2;
+                                                                         const maxAllowed = activePlayers.length <= 3 ? 1 : 2;
+                                                                         const isDisabled = !isSelected && popularitySelections.length >= maxAllowed;
                                                                          
                                                                          return (
                                                                              <button 
                                                                                  key={p.uid}
                                                                                  onClick={() => {
                                                                                      if (isSelected) setPopularitySelections(prev => prev.filter(id => id !== p.uid));
-                                                                                     else if (popularitySelections.length < 2) setPopularitySelections(prev => [...prev, p.uid]);
+                                                                                     else if (popularitySelections.length < maxAllowed) setPopularitySelections(prev => [...prev, p.uid]);
                                                                                  }}
                                                                                  disabled={isDisabled}
                                                                                  className={`p-3 rounded-2xl flex flex-col items-center border-2 transition-all ${isSelected ? 'bg-pink-900 border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-110 z-10' : isDisabled ? 'opacity-30 border-transparent bg-slate-800' : 'bg-slate-900 border-slate-700 hover:border-pink-500 hover:bg-slate-800'}`}
@@ -4625,8 +4668,8 @@
                                                          
                                                          <button 
                                                              onClick={submitPopularityVote}
-                                                             disabled={popularitySelections.length !== 2}
-                                                             className={`px-12 py-4 rounded-xl font-black text-xl transition-all shadow-lg ${popularitySelections.length === 2 ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:scale-105 animate-bounce' : 'bg-slate-700 text-slate-500'}`}
+                                                             disabled={popularitySelections.length !== (activePlayers.length <= 3 ? 1 : 2)}
+                                                             className={`px-12 py-4 rounded-xl font-black text-xl transition-all shadow-lg ${popularitySelections.length === (activePlayers.length <= 3 ? 1 : 2) ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:scale-105 animate-bounce' : 'bg-slate-700 text-slate-500'}`}
                                                          >
                                                              <Heart size={24} className="inline mr-2" fill="currentColor"/> CONFERMA VOTI
                                                          </button>
@@ -4684,19 +4727,19 @@
                                                      <Skull size={40}/> SCELTA DEI NOMINATI <Skull size={40}/>
                                                  </h2>
                                                  <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-                                                     COLPO DI SCENA! Il vincitore dell'immunità deve scegliere fino a <span className="font-bold text-yellow-400 bg-black/50 px-2 py-1 rounded">4 BERSAGLI</span>. Solo loro potranno essere eliminati al falò!
+                                                     COLPO DI SCENA! Il vincitore dell'immunità deve scegliere fino a <span className="font-bold text-yellow-400 bg-black/50 px-2 py-1 rounded">3 BERSAGLI</span>. Solo loro potranno essere eliminati al falò!
                                                  </p>
 
                                                  {lobby.challengeData.decider === user.uid ? (
                                                      <div className="bg-slate-800 p-8 rounded-3xl border-4 border-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.4)] relative">
-                                                         <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Tocca a te! Seleziona fino a 4 giocatori.</div>
-                                                         <div className="text-indigo-300 font-bold mb-4">Selezionati: {nominationSelections.length} / {Math.min(4, activePlayers.length - lobby.challengeData.winner.length)}</div>
+                                                         <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Tocca a te! Seleziona fino a 3 giocatori.</div>
+                                                         <div className="text-indigo-300 font-bold mb-4">Selezionati: {nominationSelections.length} / {Math.min(3, activePlayers.length - lobby.challengeData.winner.length)}</div>
                                                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6">
                                                              {activePlayers
                                                                  .filter(p => !lobby.challengeData.winner.includes(p.uid))
                                                                  .map(p => {
                                                                      const isSelected = nominationSelections.includes(p.uid);
-                                                                     const numToPick = Math.min(4, activePlayers.length - lobby.challengeData.winner.length);
+                                                                     const numToPick = Math.min(3, activePlayers.length - lobby.challengeData.winner.length);
                                                                      const isDisabled = !isSelected && nominationSelections.length >= numToPick;
 
                                                                      return (
@@ -4718,8 +4761,8 @@
                                                          </div>
                                                          <button
                                                              onClick={() => submitPopularityNomination(nominationSelections)}
-                                                             disabled={nominationSelections.length < Math.min(4, activePlayers.length - lobby.challengeData.winner.length)}
-                                                             className={`px-12 py-4 rounded-xl font-black text-xl transition-all shadow-lg ${nominationSelections.length === Math.min(4, activePlayers.length - lobby.challengeData.winner.length) ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white hover:scale-105 animate-bounce' : 'bg-slate-700 text-slate-500'}`}
+                                                             disabled={nominationSelections.length < Math.min(3, activePlayers.length - lobby.challengeData.winner.length)}
+                                                             className={`px-12 py-4 rounded-xl font-black text-xl transition-all shadow-lg ${nominationSelections.length === Math.min(3, activePlayers.length - lobby.challengeData.winner.length) ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white hover:scale-105 animate-bounce' : 'bg-slate-700 text-slate-500'}`}
                                                          >
                                                              <Skull size={24} className="inline mr-2"/> CONFERMA BERSAGLI
                                                          </button>
