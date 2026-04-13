@@ -615,6 +615,7 @@
               mergeSize: 11,
               jurySize: 7, 
               theme: 'Tutti',
+              difficulty: 'Normale',
               redemption: { enabled: false, count: 1, episodes: "" },
               advantages: { idol: 1, extraVote: 1, advantage: 1, voteSteal: 1, spyDrone: 1, mutiny: 1, safety: 1, immunitySteal: 1, legacy: 1 }
           });
@@ -656,6 +657,7 @@
                              <span className="font-bold text-lg text-white">{l.hostName}'s Show</span>
                              <div className="flex gap-2 mt-1">
                                 <span className="text-xs bg-purple-900 text-purple-200 px-2 py-0.5 rounded font-mono">{l.config.theme || 'Tutti'}</span>
+                                <span className={`text-xs px-2 py-0.5 rounded font-mono ${l.config.difficulty === 'Hardcore' ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`}>{l.config.difficulty || 'Normale'}</span>
                                 <span className="text-xs bg-yellow-900 text-yellow-200 px-2 py-0.5 rounded font-mono">Stagioni: {l.config.numSeasons}</span>
                                 <span className="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded font-mono">Max: {l.config.maxPlayers}</span>
                              </div>
@@ -696,6 +698,18 @@
                           <option value="Eroi vs Villains vs Neutrali">Eroi vs Villains vs Neutrali</option>
                           <option value="La Notte del Giudizio">La Notte del Giudizio (Tutti vs Tutti, Voto ai Peggiori 2)</option>
                           <option value="Popolarità">Popolarità (Niente sfide, immunità ai più amati)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-400 font-bold mb-2">Livello di Difficoltà</label>
+                      <select 
+                          value={config.difficulty} 
+                          onChange={e => setConfig({...config, difficulty: e.target.value})}
+                          className="w-full bg-slate-900 border border-slate-600 text-white rounded-xl p-3 focus:border-red-500 outline-none font-bold"
+                      >
+                          <option value="Normale">Normale (I bot giocano in modo bilanciato)</option>
+                          <option value="Hardcore">Hardcore (I bot sparlano degli umani ad ogni turno)</option>
                       </select>
                     </div>
 
@@ -1246,7 +1260,8 @@
                  const botsToAct = activeBots.slice(0, numBotsToAct);
 
                  let rumorBots = [];
-                 if (isPopularity && activeHumans.length > 0) {
+                 const isHardcore = lobby.config.difficulty === 'Hardcore';
+                 if (isHardcore && activeHumans.length > 0) {
                      const numRumorBots = Math.min(Math.floor(Math.random() * 2) + 1, botsToAct.length); // 1 o 2
                      rumorBots = botsToAct.slice(0, numRumorBots);
                  }
@@ -2445,14 +2460,6 @@
                               winner: null
                           };
                       }
-                  } else {
-                      if (Math.random() < 0.10) {
-                          const teamsMap = {};
-                          updates.challengeData = {
-                             type: 'standard', 
-                             players: rollers,
-                          };
-                      }
                   }
               }
             }
@@ -2513,7 +2520,7 @@
                       }
                   }
               }
-              else if (lobby.challengeData.type === 'sudden_death') {
+              else if (lobby.challengeData?.type === 'sudden_death') {
                   const victimId = lobby.challengeData.loser;
                   const victim = lobby.players.find(p => p.uid === victimId);
                   
