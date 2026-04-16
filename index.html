@@ -397,7 +397,7 @@
           const [lobbyData, setLobbyData] = useState(null);
           const [errorMsg, setErrorMsg] = useState('');
           const [muted, setMuted] = useState(false);
-          const [topCharacters, setTopCharacters] = useState([]);
+          const [topCharacters, setTopCharacters] = useState(null); // Modificato: null = caricamento, [] = vuoto
 
           const toggleMute = () => {
               isGlobalMuted = !isGlobalMuted;
@@ -477,7 +477,7 @@
 
           // FETCH GLOBAL STATS (TOP 10 PRESENZE)
           useEffect(() => {
-              if (!user || !db) return; // Aggiunto !user qui per aspettare l'autenticazione
+              if (!user || !db) return; // Aspetta l'autenticazione
               const statsRef = doc(db, 'artifacts', appId, 'public', 'data', 'global_stats', 'character_usage');
               const unsub = onSnapshot(statsRef, (docSnap) => {
                   if (docSnap.exists()) {
@@ -487,10 +487,15 @@
                           .sort((a, b) => b.count - a.count)
                           .slice(0, 10);
                       setTopCharacters(sorted);
+                  } else {
+                      setTopCharacters([]); // Documento non esiste ancora, mostra lista vuota
                   }
-              }, (error) => console.error("Errore fetch global stats:", error));
+              }, (error) => {
+                  console.error("Errore fetch global stats:", error);
+                  setTopCharacters([]); // In caso di errore smetti di caricare
+              });
               return () => unsub();
-          }, [user]); // Aggiunto user come dipendenza
+          }, [user]); 
 
           // SYNC LOBBY
           useEffect(() => {
@@ -945,8 +950,10 @@
                       <p className="text-xs text-slate-400 text-center mb-6 uppercase tracking-widest font-bold">Top 10 Maggior Numero di Round</p>
                       
                       <div className="space-y-3">
-                          {topCharacters.length === 0 ? (
+                          {topCharacters === null ? (
                               <div className="text-center text-slate-500 text-sm italic py-8">Classifica in caricamento...</div>
+                          ) : topCharacters.length === 0 ? (
+                              <div className="text-center text-slate-500 text-sm italic py-8">Nessun dato registrato. Gioca la prima partita!</div>
                           ) : (
                               topCharacters.map((char, index) => {
                                   const rosterData = ROSTER.find(r => r.name === char.name);
@@ -2267,7 +2274,16 @@
                       validTargets.sort(() => Math.random() - 0.5);
                       validTargets.sort((a, b) => (deciderPlayer.relationships[a.uid] || 0) - (deciderPlayer.relationships[b.uid] || 0));
 
-                      const numToPick = Math.min(4, validTargets.length);
+                      const activeCount = lobby.players.filter(p => p.status === 'active').length;
+                      let targetNumToPick = 2;
+                      if (activeCount >= 60) targetNumToPick = 10;
+                      else if (activeCount >= 40) targetNumToPick = 8;
+                      else if (activeCount >= 30) targetNumToPick = 6;
+                      else if (activeCount >= 18) targetNumToPick = 5;
+                      else if (activeCount >= 10) targetNumToPick = 4;
+                      else if (activeCount >= 6) targetNumToPick = 3;
+
+                      const numToPick = Math.min(targetNumToPick, validTargets.length);
                       const chosenTargets = validTargets.slice(0, numToPick).map(p => p.uid);
                       const targetNames = chosenTargets.map(id => lobby.players.find(p => p.uid === id)?.name).join(", ");
 
@@ -2970,9 +2986,20 @@
                           const hasTwist = Math.random() < 0.5;
 
                           if (hasTwist) {
+                               const activeCountForTwist = updatedPlayersTemp.filter(p => p.status === 'active').length;
+                               let twistNumToPick = 2;
+                               if (activeCountForTwist >= 60) twistNumToPick = 10;
+                               else if (activeCountForTwist >= 40) twistNumToPick = 8;
+                               else if (activeCountForTwist >= 30) twistNumToPick = 6;
+                               else if (activeCountForTwist >= 18) twistNumToPick = 5;
+                               else if (activeCountForTwist >= 10) twistNumToPick = 4;
+                               else if (activeCountForTwist >= 6) twistNumToPick = 3;
+
+                               const finalMax = Math.min(twistNumToPick, updatedPlayersTemp.filter(p => p.status === 'active' && !winners.includes(p.uid)).length);
+
                                const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [
                                    `💖 RISULTATI POPOLARITÀ! ${winnerStr} ${winnerNames.toUpperCase()} con ${maxVotes} voti! Ottengono l'immunità.`,
-                                   `🚨 COLPO DI SCENA! Il vincitore dell'immunità deciderà i nominati per il falò!`
+                                   `🚨 COLPO DI SCENA! Il vincitore dell'immunità deciderà i ${finalMax} nominati per il falò!`
                                ]);
                                updates = {
                                    players: updatedPlayers,
@@ -5234,55 +5261,71 @@
                                                  <h2 className="text-4xl md:text-5xl font-black text-red-500 mb-4 uppercase flex items-center justify-center gap-3 drop-shadow-lg">
                                                      <Skull size={40}/> SCELTA DEI NOMINATI <Skull size={40}/>
                                                  </h2>
-                                                 <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-                                                     COLPO DI SCENA! Il vincitore dell'immunità deve scegliere fino a <span className="font-bold text-yellow-400 bg-black/50 px-2 py-1 rounded">4 BERSAGLI</span>. Solo loro potranno essere eliminati al falò!
-                                                 </p>
+                                                 {(() => {
+                                                     const activeCount = activePlayers.length;
+                                                     let baseNumToPick = 2;
+                                                     if (activeCount >= 60) baseNumToPick = 10;
+                                                     else if (activeCount >= 40) baseNumToPick = 8;
+                                                     else if (activeCount >= 30) baseNumToPick = 6;
+                                                     else if (activeCount >= 18) baseNumToPick = 5;
+                                                     else if (activeCount >= 10) baseNumToPick = 4;
+                                                     else if (activeCount >= 6) baseNumToPick = 3;
+                                                     
+                                                     const maxToPick = Math.min(baseNumToPick, activePlayers.length - lobby.challengeData.winner.length);
+                                                     
+                                                     return (
+                                                         <>
+                                                             <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+                                                                 COLPO DI SCENA! Il vincitore dell'immunità deve scegliere fino a <span className="font-bold text-yellow-400 bg-black/50 px-2 py-1 rounded">{maxToPick} BERSAGLI</span>. Solo loro potranno essere eliminati al falò!
+                                                             </p>
 
-                                                 {lobby.challengeData.decider === user.uid ? (
-                                                     <div className="bg-slate-800 p-8 rounded-3xl border-4 border-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.4)] relative">
-                                                         <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Tocca a te! Seleziona fino a 4 giocatori.</div>
-                                                         <div className="text-indigo-300 font-bold mb-4">Selezionati: {nominationSelections.length} / {Math.min(4, activePlayers.length - lobby.challengeData.winner.length)}</div>
-                                                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6">
-                                                             {activePlayers
-                                                                 .filter(p => !lobby.challengeData.winner.includes(p.uid))
-                                                                 .map(p => {
-                                                                     const isSelected = nominationSelections.includes(p.uid);
-                                                                     const numToPick = Math.min(4, activePlayers.length - lobby.challengeData.winner.length);
-                                                                     const isDisabled = !isSelected && nominationSelections.length >= numToPick;
+                                                             {lobby.challengeData.decider === user.uid ? (
+                                                                 <div className="bg-slate-800 p-8 rounded-3xl border-4 border-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.4)] relative">
+                                                                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Tocca a te! Seleziona fino a {maxToPick} giocatori.</div>
+                                                                     <div className="text-indigo-300 font-bold mb-4">Selezionati: {nominationSelections.length} / {maxToPick}</div>
+                                                                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6">
+                                                                         {activePlayers
+                                                                             .filter(p => !lobby.challengeData.winner.includes(p.uid))
+                                                                             .map(p => {
+                                                                                 const isSelected = nominationSelections.includes(p.uid);
+                                                                                 const isDisabled = !isSelected && nominationSelections.length >= maxToPick;
 
-                                                                     return (
+                                                                                 return (
+                                                                                 <button
+                                                                                     key={p.uid}
+                                                                                     onClick={() => {
+                                                                                         if (isSelected) setNominationSelections(prev => prev.filter(id => id !== p.uid));
+                                                                                         else if (nominationSelections.length < maxToPick) setNominationSelections(prev => [...prev, p.uid]);
+                                                                                     }}
+                                                                                     disabled={isDisabled}
+                                                                                     className={`bg-slate-900 p-3 rounded-2xl flex flex-col items-center border-2 transition-all shadow-lg ${isSelected ? 'border-red-500 bg-red-900/50 scale-110' : isDisabled ? 'opacity-30 border-transparent' : 'border-slate-700 hover:border-indigo-400'}`}
+                                                                                 >
+                                                                                     <img src={p.character.img} className={`w-16 h-16 rounded-full mb-2 object-cover ${isSelected ? 'border-2 border-red-500' : ''}`}/>
+                                                                                     <span className="text-xs font-bold text-center leading-tight w-full">{p.name}</span>
+                                                                                 </button>
+                                                                                 )
+                                                                             })
+                                                                         }
+                                                                     </div>
                                                                      <button
-                                                                         key={p.uid}
-                                                                         onClick={() => {
-                                                                             if (isSelected) setNominationSelections(prev => prev.filter(id => id !== p.uid));
-                                                                             else if (nominationSelections.length < numToPick) setNominationSelections(prev => [...prev, p.uid]);
-                                                                         }}
-                                                                         disabled={isDisabled}
-                                                                         className={`bg-slate-900 p-3 rounded-2xl flex flex-col items-center border-2 transition-all shadow-lg ${isSelected ? 'border-red-500 bg-red-900/50 scale-110' : isDisabled ? 'opacity-30 border-transparent' : 'border-slate-700 hover:border-indigo-400'}`}
+                                                                         onClick={() => submitPopularityNomination(nominationSelections)}
+                                                                         disabled={nominationSelections.length < maxToPick}
+                                                                         className={`px-12 py-4 rounded-xl font-black text-xl transition-all shadow-lg ${nominationSelections.length === maxToPick ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white hover:scale-105 animate-bounce' : 'bg-slate-700 text-slate-500'}`}
                                                                      >
-                                                                         <img src={p.character.img} className={`w-16 h-16 rounded-full mb-2 object-cover ${isSelected ? 'border-2 border-red-500' : ''}`}/>
-                                                                         <span className="text-xs font-bold text-center leading-tight w-full">{p.name}</span>
+                                                                         <Skull size={24} className="inline mr-2"/> CONFERMA BERSAGLI
                                                                      </button>
-                                                                     )
-                                                                 })
-                                                             }
-                                                         </div>
-                                                         <button
-                                                             onClick={() => submitPopularityNomination(nominationSelections)}
-                                                             disabled={nominationSelections.length < Math.min(4, activePlayers.length - lobby.challengeData.winner.length)}
-                                                             className={`px-12 py-4 rounded-xl font-black text-xl transition-all shadow-lg ${nominationSelections.length === Math.min(4, activePlayers.length - lobby.challengeData.winner.length) ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white hover:scale-105 animate-bounce' : 'bg-slate-700 text-slate-500'}`}
-                                                         >
-                                                             <Skull size={24} className="inline mr-2"/> CONFERMA BERSAGLI
-                                                         </button>
-                                                     </div>
-                                                 ) : (
-                                                     <div className="flex flex-col items-center">
-                                                         <img src={lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.character.img} className="w-32 h-32 rounded-full border-4 border-indigo-500 object-cover mb-4 animate-pulse"/>
-                                                         <div className="text-2xl font-black text-indigo-300 bg-indigo-900/40 p-6 rounded-2xl border-2 border-indigo-500 inline-block shadow-lg">
-                                                             <span className="opacity-80">In attesa che</span> {lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.name} <span className="opacity-80">scelga i bersagli...</span>
-                                                         </div>
-                                                     </div>
-                                                 )}
+                                                                 </div>
+                                                             ) : (
+                                                                 <div className="flex flex-col items-center">
+                                                                     <img src={lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.character.img} className="w-32 h-32 rounded-full border-4 border-indigo-500 object-cover mb-4 animate-pulse"/>
+                                                                     <div className="text-2xl font-black text-indigo-300 bg-indigo-900/40 p-6 rounded-2xl border-2 border-indigo-500 inline-block shadow-lg">
+                                                                         <span className="opacity-80">In attesa che</span> {lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.name} <span className="opacity-80">scelga i bersagli...</span>
+                                                                     </div>
+                                                                 </div>
+                                                             )}
+                                                         </>
+                                                     );
+                                                 })()}
                                              </div>
                                          ) : null}
                                     </div>
