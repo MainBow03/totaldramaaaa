@@ -371,6 +371,15 @@
           "Vipere Velenose", "Iene Spietate", "Tarantole Tossiche", "Pipistrelli Predatori"
         ];
 
+        // NUOVA LISTA COMPLETA PER LA MODALITÀ CUSTOM
+        const ALL_AVAILABLE_TEAMS = [
+          "Marmotte Urlanti", "Carpe Assassine", "Criceti Radioattivi", "Avvoltoi Volanti",
+          "Tigri Selvaggi", "Orsi Polari", "Lupi Mannari", "Serpenti A Sonagli",
+          "Avvoltoi Malvagi", "Corvi Cruenti", "Draghi Diabolici", "Piedini Rosa",
+          "Vipere Velenose", "Iene Spietate", "Tarantole Tossiche", "Pipistrelli Predatori",
+          "Brains", "Beauties", "Brawns", "Eroi", "Villains", "Neutrali"
+        ];
+
         const BRAINS = ["Marinette", "Kowalski", "Conan", "Anais", "Peridot", "Dr Doofenshmirtz", "Corvina GO", "Corvina TT", "Velma", "Stewie", "Perla", "Wanda", "Shinobu", "Tails", "Gwen Tennyson", "Gommarosa", "Doraemon", "Azula", "Hiro", "Hiccup"];
         const BEAUTIES = ["Heartfixer", "Gwen", "Heather", "Rias", "Penny", "Stellarubia GO", "Fred", "Anastasia", "Ellis", "Tengen", "Zuko", "Ariana Grande", "Poison Ivy", "Simba", "Leon", "Rena Rouge", "Shizuka", "Sdentato"];
         const BRAWNS = ["Kagami", "Alejandro", "Lightning", "Bowser", "Brago", "Garnet", "Nicole", "Johnny Bravo", "Robin TT", "Hunter", "Tom", "Tanjiro", "Superboy", "Kratos", "Po", "Argos", "Baki", "Sephiroth", "Clark", "Legoshi"];
@@ -743,6 +752,7 @@
                           <option value="Eroi vs Villains vs Neutrali">Eroi vs Villains vs Neutrali</option>
                           <option value="La Notte del Giudizio">La Notte del Giudizio (Tutti vs Tutti, Voto ai Peggiori 2)</option>
                           <option value="Popolarità">Popolarità (Niente sfide, immunità ai più amati)</option>
+                          <option value="Custom">Custom (Crea Team e scegli Bot manualmente)</option>
                       </select>
                     </div>
 
@@ -979,6 +989,12 @@
         const LobbyRoom = ({ lobby, user, lobbyId, onLeave }) => {
           const isHost = lobby.hostId === user.uid;
 
+          // STATI PER LA MODALITÀ CUSTOM
+          const [showCustomModal, setShowCustomModal] = useState(false);
+          const [customTeams, setCustomTeams] = useState([]);
+          const [selectedCustomTeam, setSelectedCustomTeam] = useState("");
+          const [customAssignments, setCustomAssignments] = useState({});
+
           const selectCharacter = async (char) => {
             if (lobby.players.some(p => p.character?.name === char.name)) return;
             const updatedPlayers = lobby.players.map(p => p.uid === user.uid ? { ...p, character: char } : p);
@@ -1166,6 +1182,138 @@
             });
           };
 
+          // --- LOGICA MODALITÀ CUSTOM ---
+          const initCustomSetup = () => {
+              const initialTeams = ALL_AVAILABLE_TEAMS.slice(0, lobby.config.numTeams);
+              setCustomTeams(initialTeams);
+              setSelectedCustomTeam(initialTeams[0]);
+              
+              const initialAssignments = {};
+              // Assegna tutti gli umani attuali al primo team per evitare che restino fuori
+              lobby.players.forEach(p => {
+                  initialAssignments[p.uid] = initialTeams[0];
+              });
+              setCustomAssignments(initialAssignments);
+              setShowCustomModal(true);
+          };
+
+          const handleCustomTeamNameChange = (index, newName) => {
+              if (customTeams.includes(newName)) return; // Evita nomi duplicati
+              const oldName = customTeams[index];
+              const newTeams = [...customTeams];
+              newTeams[index] = newName;
+              setCustomTeams(newTeams);
+              
+              if (selectedCustomTeam === oldName) setSelectedCustomTeam(newName);
+              
+              const newAssignments = {...customAssignments};
+              Object.keys(newAssignments).forEach(k => {
+                  if (newAssignments[k] === oldName) newAssignments[k] = newName;
+              });
+              setCustomAssignments(newAssignments);
+          };
+
+          const togglePlayerAssignment = (id) => {
+              const newAssignments = {...customAssignments};
+              const isHuman = lobby.players.some(p => p.uid === id);
+
+              if (newAssignments[id]) {
+                  if (isHuman) {
+                      // Gli umani non possono essere rimossi, solo spostati nel team attualmente selezionato
+                      newAssignments[id] = selectedCustomTeam;
+                  } else {
+                      // I bot possono essere rimossi
+                      delete newAssignments[id];
+                  }
+              } else {
+                  // Aggiungi un bot al team selezionato
+                  const totalAssigned = Object.keys(newAssignments).length;
+                  if (totalAssigned < lobby.config.maxPlayers) {
+                      newAssignments[id] = selectedCustomTeam;
+                  }
+              }
+              setCustomAssignments(newAssignments);
+          };
+
+          const startCustomSeason = async () => {
+              const totalAssigned = Object.keys(customAssignments).length;
+              if (totalAssigned !== lobby.config.maxPlayers) return;
+
+              let finalPlayers = [];
+              const usedNames = new Set();
+
+              // 1. Inserisci Giocatori Umani
+              lobby.players.forEach(p => {
+                  let charObj = p.character;
+                  // Assegna un personaggio casuale se l'umano non l'ha scelto
+                  if (!charObj) {
+                      const available = ROSTER.filter(r => !usedNames.has(r.name) && !Object.keys(customAssignments).includes(r.name));
+                      charObj = available[Math.floor(Math.random() * available.length)];
+                  }
+                  usedNames.add(charObj.name);
+                  finalPlayers.push({
+                      ...p,
+                      character: charObj,
+                      team: customAssignments[p.uid]
+                  });
+              });
+
+              // 2. Inserisci i Bot scelti manualmente
+              Object.entries(customAssignments).forEach(([id, teamName]) => {
+                  if (!lobby.players.find(p => p.uid === id)) {
+                      const charData = ROSTER.find(r => r.name === id);
+                      const botId = `bot_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+                      finalPlayers.push({
+                          uid: botId,
+                          name: charData.name,
+                          character: charData,
+                          isBot: true,
+                          status: 'active',
+                          team: teamName,
+                          relationships: {},
+                          alliances: [],
+                          diceRoll: null,
+                          immunityWins: 0,
+                          totalVotesReceived: 0,
+                          nextRollNerf: false 
+                      });
+                  }
+              });
+
+              finalPlayers.sort(() => Math.random() - 0.5); // Mescola per non far capire subito chi è umano e chi no
+
+              // 3. Distribuzione Vantaggi (identica a startSeason)
+              const advantageConfig = lobby.config.advantages || { idol: 1, extraVote: 1, advantage: 1, voteSteal: 1, spyDrone: 1, mutiny: 1, safety: 1, immunitySteal: 1, legacy: 1 };
+              let itemPool = [];
+              Object.entries(advantageConfig).forEach(([key, count]) => {
+                  for(let i=0; i<count; i++) itemPool.push(key);
+              });
+              itemPool.sort(() => Math.random() - 0.5);
+              const totalCrates = finalPlayers.length;
+              let availableIndices = Array.from({length: totalCrates}, (_, i) => i).sort(() => Math.random() - 0.5);
+              let itemDistribution = {};
+              for (let i=0; i<itemPool.length && availableIndices.length > 0; i++) {
+                  itemDistribution[availableIndices.pop()] = itemPool[i];
+              }
+              const initialCrates = Array.from({length: totalCrates}, (_, i) => ({ id: i, owner: null }));
+
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  players: finalPlayers,
+                  status: 'playing',
+                  phase: 'idol_hunt', 
+                  idolData: {
+                      active: true,
+                      itemDistribution,
+                      inventory: { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} },
+                      activeEffects: { legacyDesignations: {} },
+                      crates: initialCrates,
+                      stage: 'selection'
+                  },
+                  round: 0,
+                  logs: arrayUnion(`--- CACCIA AI VANTAGGI (Inizia la ricerca delle casse!) ---`)
+              });
+          };
+
           return (
             <div className="flex flex-col h-screen overflow-hidden">
               <header className="bg-slate-800 p-4 border-b border-slate-700 flex justify-between items-center z-10 flex-shrink-0">
@@ -1190,13 +1338,143 @@
                     ))}
                   </div>
                   {isHost && (
-                    <button onClick={startSeason} className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl font-bold shadow-lg">
-                      INIZIA STAGIONE 1
-                    </button>
+                    lobby.config.theme === 'Custom' ? (
+                        <button onClick={initCustomSetup} className="w-full mt-4 bg-orange-600 hover:bg-orange-500 text-white py-3 rounded-xl font-bold shadow-lg flex flex-col items-center">
+                            <span>CONFIGURA CUSTOM</span>
+                            <span className="text-[10px] font-normal">Crea Team & Scegli Bot</span>
+                        </button>
+                    ) : (
+                        <button onClick={startSeason} className="w-full mt-4 bg-green-600 hover:bg-green-500 text-white py-3 rounded-xl font-bold shadow-lg">
+                            INIZIA STAGIONE 1
+                        </button>
+                    )
                   )}
                 </div>
 
-                <div className="flex-1 p-4 overflow-y-auto bg-slate-900">
+                <div className="flex-1 p-4 overflow-y-auto bg-slate-900 relative">
+                   {/* MODALE CONFIGURAZIONE CUSTOM */}
+                   {showCustomModal && (
+                       <div className="absolute inset-0 bg-slate-950/95 z-50 flex flex-col p-6 animate-in zoom-in">
+                           <div className="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                               <div>
+                                   <h2 className="text-3xl font-black text-orange-500">CONFIGURAZIONE CUSTOM</h2>
+                                   <p className="text-slate-400">Scegli i nomi delle squadre e popola il roster (Assegnati: {Object.keys(customAssignments).length} / {lobby.config.maxPlayers})</p>
+                               </div>
+                               <div className="flex gap-4">
+                                   <button onClick={() => setShowCustomModal(false)} className="px-6 py-2 bg-slate-800 text-white rounded-lg font-bold hover:bg-slate-700">ANNULLA</button>
+                                   <button 
+                                       onClick={startCustomSeason}
+                                       disabled={Object.keys(customAssignments).length !== lobby.config.maxPlayers}
+                                       className="px-6 py-2 bg-green-600 disabled:bg-slate-700 text-white rounded-lg font-black shadow-lg hover:bg-green-500 transition-colors"
+                                   >
+                                       CONFERMA E INIZIA
+                                   </button>
+                               </div>
+                           </div>
+
+                           <div className="flex flex-1 gap-6 min-h-0">
+                               {/* PANNELLO SQUADRE (SINISTRA) */}
+                               <div className="w-1/3 flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-2">
+                                   <h3 className="font-bold text-yellow-400 sticky top-0 bg-slate-950 py-2 z-10">I Tuoi Team</h3>
+                                   {customTeams.map((teamName, idx) => {
+                                       const isSelected = selectedCustomTeam === teamName;
+                                       const teamMembers = Object.entries(customAssignments).filter(([id, t]) => t === teamName);
+                                       
+                                       return (
+                                           <div 
+                                               key={idx} 
+                                               onClick={() => setSelectedCustomTeam(teamName)}
+                                               className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${isSelected ? 'border-orange-500 bg-orange-900/20 shadow-[0_0_15px_rgba(249,115,22,0.3)]' : 'border-slate-700 bg-slate-900 hover:border-slate-500'}`}
+                                           >
+                                               <select 
+                                                   value={teamName}
+                                                   onChange={(e) => handleCustomTeamNameChange(idx, e.target.value)}
+                                                   onClick={e => e.stopPropagation()}
+                                                   className="w-full bg-black/50 border border-slate-600 rounded p-2 text-sm font-bold text-white mb-3 outline-none"
+                                               >
+                                                   {ALL_AVAILABLE_TEAMS.map(name => (
+                                                       <option key={name} value={name} disabled={customTeams.includes(name) && name !== teamName}>{name}</option>
+                                                   ))}
+                                               </select>
+                                               
+                                               <div className="text-xs text-slate-400 mb-2">Membri ({teamMembers.length}):</div>
+                                               <div className="flex flex-wrap gap-2">
+                                                   {teamMembers.map(([id]) => {
+                                                       const isHuman = lobby.players.find(p => p.uid === id);
+                                                       let charData = null;
+                                                       if (isHuman) charData = isHuman.character;
+                                                       else charData = ROSTER.find(r => r.name === id);
+                                                       
+                                                       return (
+                                                           <div key={id} className={`w-8 h-8 rounded-full border-2 overflow-hidden ${isHuman ? 'border-green-400' : 'border-slate-500'}`} title={isHuman ? isHuman.name : id}>
+                                                               {charData ? <img src={charData.img} className="w-full h-full object-cover"/> : <div className="w-full h-full bg-slate-600 flex items-center justify-center text-[8px] font-bold">TU</div>}
+                                                           </div>
+                                                       );
+                                                   })}
+                                               </div>
+                                           </div>
+                                       );
+                                   })}
+                               </div>
+
+                               {/* PANNELLO ROSTER (DESTRA) */}
+                               <div className="flex-1 flex flex-col bg-slate-900 rounded-xl border border-slate-700 p-4 min-h-0">
+                                   <div className="flex justify-between items-center mb-4">
+                                       <h3 className="font-bold text-yellow-400">Roster Disponibile</h3>
+                                       <div className="text-xs bg-orange-600/30 text-orange-300 border border-orange-500 px-3 py-1 rounded-full">
+                                           Clicca un personaggio per aggiungerlo o rimuoverlo dal team <strong className="text-white">{selectedCustomTeam}</strong>
+                                       </div>
+                                   </div>
+                                   <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                       <div className="grid grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3 pr-2">
+                                           {/* Mostra prima gli umani (obbligatori) */}
+                                           {lobby.players.map(p => (
+                                               <button 
+                                                   key={p.uid}
+                                                   onClick={() => togglePlayerAssignment(p.uid)}
+                                                   className={`relative rounded-lg overflow-hidden border-2 aspect-[3/4] transition-all ${customAssignments[p.uid] === selectedCustomTeam ? 'border-orange-500 ring-2 ring-orange-500 scale-105 shadow-[0_0_10px_rgba(249,115,22,0.8)]' : 'border-green-600 opacity-60'}`}
+                                               >
+                                                   {p.character ? <img src={p.character.img} className="w-full h-full object-cover"/> : <div className="w-full h-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-400">No Char</div>}
+                                                   <div className="absolute inset-x-0 bottom-0 bg-green-600 text-[9px] font-black py-0.5 text-center text-white">{p.name} (Umano)</div>
+                                                   {customAssignments[p.uid] && customAssignments[p.uid] !== selectedCustomTeam && (
+                                                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-xs font-bold text-center p-1 leading-tight border-2 border-transparent">In {customAssignments[p.uid]}</div>
+                                                   )}
+                                               </button>
+                                           ))}
+
+                                           {/* Poi il resto del roster (Bot opzionali) */}
+                                           {ROSTER.map(char => {
+                                               const isHumanChar = lobby.players.some(p => p.character?.name === char.name);
+                                               if (isHumanChar) return null; // Nascondi i pg già scelti dagli umani per evitare cloni visivi
+
+                                               const assignedTeam = customAssignments[char.name];
+                                               const isSelectedForActiveTeam = assignedTeam === selectedCustomTeam;
+                                               const isDisabled = !assignedTeam && Object.keys(customAssignments).length >= lobby.config.maxPlayers;
+
+                                               return (
+                                                   <button 
+                                                       key={char.name}
+                                                       onClick={() => togglePlayerAssignment(char.name)}
+                                                       disabled={isDisabled}
+                                                       className={`relative rounded-lg overflow-hidden border-2 aspect-[3/4] transition-all ${isSelectedForActiveTeam ? 'border-orange-500 ring-2 ring-orange-500 scale-105 shadow-[0_0_10px_rgba(249,115,22,0.8)] z-10' : assignedTeam ? 'border-slate-500 opacity-40' : isDisabled ? 'border-slate-800 opacity-20 cursor-not-allowed' : 'border-slate-700 hover:border-slate-400'}`}
+                                                   >
+                                                       <img src={char.img} className="w-full h-full object-cover"/>
+                                                       {assignedTeam && !isSelectedForActiveTeam && (
+                                                           <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-[10px] font-bold text-center p-1 leading-tight text-slate-300">In {assignedTeam}</div>
+                                                       )}
+                                                       {isSelectedForActiveTeam && (
+                                                           <div className="absolute top-1 right-1 bg-orange-500 rounded-full p-1"><CheckCircle size={12} className="text-white"/></div>
+                                                       )}
+                                                   </button>
+                                               )
+                                           })}
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+                   )}
+
                    <h3 className="text-xl font-bold mb-4 text-center text-yellow-400 flex-shrink-0">SCEGLI IL TUO PERSONAGGIO</h3>
                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
                      {ROSTER.filter(char => {
@@ -1322,6 +1600,8 @@
           
           const [popularitySelections, setPopularitySelections] = useState([]);
           const [nominationSelections, setNominationSelections] = useState([]);
+
+          const [isProcessing, setIsProcessing] = useState(false);
 
           // --- FUNZIONE PER AGGIORNARE LE STATISTICHE GLOBALI ---
           const incrementActivePlayersStats = async (playersToCount) => {
@@ -2364,7 +2644,16 @@
             }));
 
             const numTeams = newConfig.numTeams;
-            const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : DEFAULT_TEAM_NAMES;
+            let currentTeamNames = DEFAULT_TEAM_NAMES;
+            if (lobby.config.theme === 'Villain Edition') currentTeamNames = VILLAIN_TEAM_NAMES;
+            else if (lobby.config.theme === 'Custom') {
+                // Recupera i nomi scelti custom per mantenerli nella Stagione 2
+                currentTeamNames = [...new Set(lobby.players.map(p => p.team).filter(t => t && t !== 'MERGE'))];
+                // Nel caso assurdo che aumentino il numero di team tra S1 e S2, aggiungi team extra dalla lista
+                while(currentTeamNames.length < numTeams) {
+                    currentTeamNames.push(ALL_AVAILABLE_TEAMS.find(t => !currentTeamNames.includes(t)) || "Team Extra");
+                }
+            }
             
             nextPlayers.sort(() => Math.random() - 0.5);
             
@@ -2493,13 +2782,15 @@
           };
 
           const advanceGame = async () => {
-            if (!isHost) return;
+            if (!isHost || isProcessing) return;
+            setIsProcessing(true);
 
             // --- FIX: Ritorno al menu a fine gioco ---
             if (lobby.phase === 'game_over') {
                 try {
                     await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId));
                 } catch(e) { console.error("Errore chiusura lobby:", e); }
+                setIsProcessing(false);
                 return; 
             }
 
@@ -2644,11 +2935,10 @@
               if (lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'revealing') {
                   const { popularityResults, revealIndex } = lobby.challengeData;
                   if (revealIndex < popularityResults.length - 1) {
-                      const nextIndex = revealIndex + 1;
                       updates = {
-                          [`challengeData.revealIndex`]: nextIndex
+                          [`challengeData.revealIndex`]: increment(1)
                       };
-                      if (nextIndex === popularityResults.length - 1) {
+                      if (revealIndex + 1 === popularityResults.length - 1) {
                          playSound('victory');
                       } else {
                          playSound('roll');
@@ -2988,7 +3278,7 @@
                   }
               } 
               else if (data.revealedCount < data.safe.length) {
-                 updates = { [`ceremonyData.revealedCount`]: data.revealedCount + 1 };
+                 updates = { [`ceremonyData.revealedCount`]: increment(1) };
               } 
               else if (!data.finalReveal) {
                   let victimsIds = Array.isArray(data.eliminated) ? [...data.eliminated] : [data.eliminated].filter(Boolean);
@@ -3173,7 +3463,7 @@
                     }
                 }
                 else if (jd.revealedCount < jd.jurors.length) {
-                    updates = { [`juryData.revealedCount`]: jd.revealedCount + 1 };
+                    updates = { [`juryData.revealedCount`]: increment(1) };
                 } else {
                     const winner = lobby.players.find(p => p.uid === jd.winnerId);
                     const loser = lobby.players.find(p => p.uid === (jd.winnerId === jd.finalist1 ? jd.finalist2 : jd.finalist1));
@@ -3220,7 +3510,17 @@
                 }
             }
 
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
+            try {
+                if (Object.keys(updates).length > 0) {
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
+                }
+            } catch (e) {
+                console.error("Errore advanceGame:", e);
+            }
+            
+            setTimeout(() => {
+                setIsProcessing(false);
+            }, 600);
           };
 
           const resolveFinalRound = async () => {
@@ -3894,11 +4194,17 @@
                      currentTeamNames = ["Brains", "Beauties", "Brawns"];
                  } else if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') {
                      currentTeamNames = ["Eroi", "Villains", "Neutrali"];
+                 } else if (lobby.config.theme === 'Custom') {
+                     // MODIFICA: in Custom ignoriamo i preset e prendiamo i team che l'Host ha effettivamente generato!
+                     currentTeamNames = [...new Set(lobby.players.map(p => p.team).filter(t => t && t !== 'MERGE'))];
                  }
                  
-                 if (lobby.config.numTeams > 0) {
+                 if (lobby.config.theme === 'Custom') {
+                     currentTeamNames.forEach(t => groups[t] = []);
+                 } else if (lobby.config.numTeams > 0) {
                      currentTeamNames.slice(0, lobby.config.numTeams).forEach(t => groups[t] = []);
                  }
+                 
                  activePlayers.forEach(p => { 
                      if (p.team) {
                          if (!groups[p.team]) groups[p.team] = []; 
@@ -3907,7 +4213,7 @@
                  });
              }
              return groups;
-          }, [activePlayers, isMerge, lobby.config.numTeams, lobby.config.theme]);
+          }, [activePlayers, isMerge, lobby.config.numTeams, lobby.config.theme, lobby.players]);
 
           const pendingVotesCount = useMemo(() => {
               if (lobby.phase !== 'voting') return 0;
@@ -4128,8 +4434,8 @@
                                <div className="grid grid-cols-2 gap-4 mb-6">
                                    <div className="bg-slate-800 p-2 rounded">
                                        <div className="text-xs uppercase">Amicizia</div>
-                                       <div className={`text-xl font-bold ${(selectedPlayer.relationships?.[user.uid] || 0) === 15 ? 'text-pink-500' : (selectedPlayer.relationships?.[user.uid] || 0) > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                           {(selectedPlayer.relationships?.[user.uid] || 0) === 15 ? "❤️ 15" : (selectedPlayer.relationships?.[user.uid] || 0)}
+                                       <div className={`text-xl font-bold ${(selectedPlayer.relationships?.[user.uid] || 0) >= 11 ? 'text-pink-500' : (selectedPlayer.relationships?.[user.uid] || 0) > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                           {(selectedPlayer.relationships?.[user.uid] || 0) >= 11 ? `❤️ ${selectedPlayer.relationships?.[user.uid] || 0}` : (selectedPlayer.relationships?.[user.uid] || 0)}
                                        </div>
                                    </div>
                                    <div className="bg-slate-800 p-2 rounded">
@@ -4170,7 +4476,7 @@
                                        <button onClick={() => handleInteraction('suckup')} className="w-full bg-yellow-600 py-3 rounded font-bold flex justify-center gap-2 hover:bg-yellow-500"><Award/> Leccapiedi (60%)</button>
 
                                        {(() => {
-                                           const isEngaged = Object.values(myPlayer.relationships || {}).some(v => v === 15);
+                                           const isEngaged = Object.values(myPlayer.relationships || {}).some(v => v >= 11);
                                            return (
                                                <button 
                                                    onClick={() => handleInteraction('flirt')} 
@@ -4387,10 +4693,10 @@
                         {isHost && lobby.phase !== 'final_showdown' && lobby.phase !== 'season_setup' && lobby.phase !== 'redemption' && (
                             <button 
                                 onClick={advanceGame} 
-                                disabled={(lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')}
-                                className={`${((lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-4 py-1 rounded shadow text-sm flex items-center gap-2 transition-all`}
+                                disabled={isProcessing || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')}
+                                className={`${(isProcessing || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-4 py-1 rounded shadow text-sm flex items-center gap-2 transition-all`}
                             >
-                            {lobby.phase === 'voting' && pendingVotesCount > 0 
+                            {isProcessing ? 'ATTENDI...' : lobby.phase === 'voting' && pendingVotesCount > 0 
                                 ? `ATTESA VOTI (UMANI: ${pendingVotesCount})` 
                                 : lobby.phase === 'social' && pendingReadyCount > 0
                                     ? `ATTESA GIOCATORI (${pendingReadyCount})`
@@ -4409,7 +4715,7 @@
                                                             : lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'revealing'
                                                                 ? (lobby.challengeData.revealIndex < lobby.challengeData.popularityResults.length - 1 ? 'SVELA POSIZIONE' : 'PROCLAMA VINCITORI')
                                                                 : lobby.phase === 'game_over' ? 'CHIUDI LOBBY' : 'AVANTI'} 
-                            {!(lobby.phase === 'voting' && pendingVotesCount > 0) && !(lobby.phase === 'social' && pendingReadyCount > 0) && !(lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') && !(lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) && !(lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) && <ArrowRight size={16} />}
+                            {!(isProcessing || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0)) && <ArrowRight size={16} />}
                             </button>
                         )}
                      </div>
