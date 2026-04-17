@@ -60,6 +60,74 @@
             margin-left: -15px;
             margin-bottom: -15px;
         }
+
+        /* --- STILI COSMETICI AVANZATI --- */
+        .cosmetic-ponytail {
+            position: relative !important;
+            overflow: visible !important; /* Permette alla coda di uscire dai bordi */
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.8) !important;
+            border: 2px solid #f472b6 !important;
+        }
+        /* Mantiene l'immagine rotonda anche se togliamo overflow-hidden al padre */
+        .cosmetic-ponytail img {
+            border-radius: inherit; 
+        }
+        /* La coda di cavallo rosa */
+        .cosmetic-ponytail::after {
+            content: '';
+            position: absolute;
+            top: -15%;
+            right: -15%;
+            width: 45%;
+            height: 70%;
+            background: linear-gradient(135deg, #fbcfe8 0%, #ec4899 40%, #9d174d 100%);
+            border-radius: 0 100% 50% 100%; 
+            transform-origin: top left;
+            z-index: 30;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.4);
+            pointer-events: none;
+            border: 2px solid #fdf2f8;
+            animation: ponytailSwing 2s ease-in-out infinite alternate;
+        }
+        /* Il fermacapelli / elastico */
+        .cosmetic-ponytail::before {
+            content: '';
+            position: absolute;
+            top: -12%;
+            right: -5%;
+            width: 25%;
+            height: 25%;
+            background: #fdf2f8;
+            border: 2px solid #db2777;
+            border-radius: 50%;
+            z-index: 31;
+            pointer-events: none;
+        }
+        @keyframes ponytailSwing {
+            0% { transform: rotate(10deg); }
+            100% { transform: rotate(40deg); }
+        }
+
+        /* Effetto Fuoco per Mi Brucia la Mano */
+        .cosmetic-fire {
+            position: relative !important;
+            border: 2px solid #ef4444 !important;
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.7) !important;
+        }
+        .cosmetic-fire::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0; height: 60%;
+            background: linear-gradient(to top, rgba(239, 68, 68, 0.9), rgba(249, 115, 22, 0.6), transparent);
+            border-radius: inherit;
+            pointer-events: none;
+            animation: firePulse 0.6s infinite alternate;
+            z-index: 20;
+        }
+        @keyframes firePulse {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white">
@@ -159,6 +227,23 @@
           { name: "Azione", bg: "https://images.unsplash.com/photo-1478720568477-152d9b164e63?q=80&w=2000&auto=format&fit=crop", theme: "Cinema" },
           { name: "World Tour", bg: "https://images.unsplash.com/photo-1559586616-361e18714958?q=80&w=2070&auto=format&fit=crop", theme: "Aereo" }
         ];
+
+        // --- SISTEMA COSMETICI ---
+        const getCosmeticClasses = (cosmeticId) => {
+            if (!cosmeticId) return '';
+            const cosmetics = {
+                'campione': 'ring-4 ring-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.9)] animate-pulse', // Bagliore dorato
+                'veterano': 'ring-4 ring-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.9)] animate-pulse', // Bagliore smeraldo
+                'pugnalatore': 'ring-4 ring-red-600 shadow-[0_0_20px_rgba(220,38,38,0.9)] animate-pulse', // Bagliore rosso sangue
+                'sopravvissuto': 'ring-4 ring-orange-500 shadow-[0_0_25px_rgba(249,115,22,1)] animate-pulse', // Bagliore di fuoco
+                'dolcezza': 'cosmetic-ponytail', // Usa il CSS personalizzato per la coda
+                'mvp': 'ring-4 ring-cyan-400 shadow-[0_0_25px_rgba(34,211,238,0.9)] animate-pulse', // Aura Ciano Neon
+                'idolo': 'ring-4 ring-fuchsia-500 shadow-[0_0_25px_rgba(217,70,239,0.9)] animate-pulse', // Aura Magenta
+                'agente007': 'ring-2 ring-offset-2 ring-offset-slate-900 ring-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.9)] border-dashed animate-pulse', // Aura Radar Spia
+                'mibrucialamano': 'cosmetic-fire' // Fiamma custom
+            };
+            return cosmetics[cosmeticId] || '';
+        };
 
         // AGGIUNTE LE FRASI (SPEECHES) AI PERSONAGGI PRINCIPALI
         const ROSTER = [
@@ -398,8 +483,11 @@
           const [errorMsg, setErrorMsg] = useState('');
           const [muted, setMuted] = useState(false);
           const [topCharacters, setTopCharacters] = useState(null);
+          
+          // STATO COSMETICO EQUIPAGGIATO
+          const [equippedCosmetic, setEquippedCosmetic] = useState(() => localStorage.getItem('td_equipped_cosmetic') || null);
 
-          // --- GESTIONE ACHIEVEMENTS (LOCAL STORAGE) ---
+          // --- GESTIONE ACHIEVEMENTS E COSMETICI (LOCAL STORAGE) ---
           const [achievements, setAchievements] = useState(() => {
               const defaultAchievements = {
                   pugnalatore: { progress: 0, unlocked: false },
@@ -407,7 +495,10 @@
                   campione: { progress: 0, unlocked: false },
                   veterano: { progress: 0, unlocked: false },
                   mvp: { progress: 0, unlocked: false },
-                  idolo: { progress: 0, unlocked: false }
+                  idolo: { progress: 0, unlocked: false },
+                  agente007: { progress: 0, unlocked: false },
+                  dolcezza: { progress: 0, unlocked: false },
+                  mibrucialamano: { progress: 0, unlocked: false }
               };
               try {
                   const saved = localStorage.getItem('td_achievements');
@@ -431,6 +522,22 @@
                   localStorage.setItem('td_achievements', JSON.stringify(nextState));
                   return nextState;
               });
+          };
+
+          const toggleEquipCosmetic = async (cosmeticId) => {
+              const newCosmetic = equippedCosmetic === cosmeticId ? null : cosmeticId;
+              setEquippedCosmetic(newCosmetic);
+              localStorage.setItem('td_equipped_cosmetic', newCosmetic || '');
+
+              // Se siamo in una lobby, aggiorniamo Firebase così gli altri lo vedono in tempo reale
+              if (currentLobbyId && user && db && lobbyData) {
+                  const updatedPlayers = lobbyData.players.map(p => 
+                      p.uid === user.uid ? { ...p, equippedCosmetic: newCosmetic } : p
+                  );
+                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', currentLobbyId), {
+                      players: updatedPlayers
+                  });
+              }
           };
 
           const toggleMute = () => {
@@ -578,7 +685,8 @@
                 diceRoll: null,
                 immunityWins: 0,
                 totalVotesReceived: 0,
-                nextRollNerf: false 
+                nextRollNerf: false,
+                equippedCosmetic: equippedCosmetic // SALVA IL COSMETICO SU FIREBASE
               }],
               round: 0,
               phase: 'setup',
@@ -624,7 +732,8 @@
                 diceRoll: null,
                 immunityWins: 0,
                 totalVotesReceived: 0,
-                nextRollNerf: false 
+                nextRollNerf: false,
+                equippedCosmetic: equippedCosmetic // SALVA IL COSMETICO SU FIREBASE
               })
             });
             setCurrentLobbyId(lobbyId);
@@ -655,6 +764,8 @@
                   onCreate={createLobby} onJoin={joinLobby} errorMsg={errorMsg}
                   topCharacters={topCharacters}
                   achievements={achievements}
+                  equippedCosmetic={equippedCosmetic}
+                  toggleEquipCosmetic={toggleEquipCosmetic}
                 />
               )}
               {currentView === 'lobby' && lobbyData && (
@@ -699,7 +810,7 @@
             </div>
           </div>
         );
-        const BrowserScreen = ({ user, nickname, lobbies, onCreate, onJoin, errorMsg, topCharacters, achievements }) => {
+        const BrowserScreen = ({ user, nickname, lobbies, onCreate, onJoin, errorMsg, topCharacters, achievements, equippedCosmetic, toggleEquipCosmetic }) => {
           const [showConfig, setShowConfig] = useState(false);
           const [showAchievementsModal, setShowAchievementsModal] = useState(false);
           const [config, setConfig] = useState({ 
@@ -1055,8 +1166,18 @@
                                      </span>
                                  </div>
                                  <p className="text-sm text-slate-400 mb-3">Vinci un'intera stagione.</p>
-                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
-                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.campione?.unlocked ? 'bg-yellow-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.campione?.progress || 0) / 1) * 100}%` }}></div>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.campione?.unlocked ? 'bg-yellow-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.campione?.progress || 0) / 1) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.campione?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('campione')}
+                                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'campione' ? 'bg-yellow-500 text-black border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.8)]' : 'bg-slate-800 text-yellow-500 border-yellow-500 hover:bg-slate-700'}`}
+                                         >
+                                             {equippedCosmetic === 'campione' ? 'EQUIPAGGIATO' : 'INDOSSA AURA'}
+                                         </button>
+                                     )}
                                  </div>
                               </div>
 
@@ -1071,8 +1192,18 @@
                                      </span>
                                  </div>
                                  <p className="text-sm text-slate-400 mb-3">Vinci 5 stagioni in totale.</p>
-                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
-                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.veterano?.unlocked ? 'bg-emerald-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.veterano?.progress || 0) / 5) * 100}%` }}></div>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.veterano?.unlocked ? 'bg-emerald-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.veterano?.progress || 0) / 5) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.veterano?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('veterano')}
+                                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'veterano' ? 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]' : 'bg-slate-800 text-emerald-500 border-emerald-500 hover:bg-slate-700'}`}
+                                         >
+                                             {equippedCosmetic === 'veterano' ? 'EQUIPAGGIATO' : 'INDOSSA AURA'}
+                                         </button>
+                                     )}
                                  </div>
                               </div>
 
@@ -1087,8 +1218,18 @@
                                      </span>
                                  </div>
                                  <p className="text-sm text-slate-400 mb-3">Elimina 5 giocatori che fanno parte della tua alleanza.</p>
-                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
-                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.pugnalatore?.unlocked ? 'bg-red-500' : 'bg-slate-500'}`} style={{ width: `${((achievements.pugnalatore?.progress || 0) / 5) * 100}%` }}></div>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.pugnalatore?.unlocked ? 'bg-red-500' : 'bg-slate-500'}`} style={{ width: `${((achievements.pugnalatore?.progress || 0) / 5) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.pugnalatore?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('pugnalatore')}
+                                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'pugnalatore' ? 'bg-red-500 text-white border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.8)]' : 'bg-slate-800 text-red-500 border-red-500 hover:bg-slate-700'}`}
+                                         >
+                                             {equippedCosmetic === 'pugnalatore' ? 'EQUIPAGGIATO' : 'INDOSSA AURA'}
+                                         </button>
+                                     )}
                                  </div>
                               </div>
 
@@ -1103,8 +1244,18 @@
                                      </span>
                                  </div>
                                  <p className="text-sm text-slate-400 mb-3">Vinci 10 spareggi (tie-breaker) al falò.</p>
-                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
-                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.sopravvissuto?.unlocked ? 'bg-orange-500' : 'bg-slate-500'}`} style={{ width: `${((achievements.sopravvissuto?.progress || 0) / 10) * 100}%` }}></div>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.sopravvissuto?.unlocked ? 'bg-orange-500' : 'bg-slate-500'}`} style={{ width: `${((achievements.sopravvissuto?.progress || 0) / 10) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.sopravvissuto?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('sopravvissuto')}
+                                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'sopravvissuto' ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_10px_rgba(249,115,22,0.8)]' : 'bg-slate-800 text-orange-500 border-orange-500 hover:bg-slate-700'}`}
+                                         >
+                                             {equippedCosmetic === 'sopravvissuto' ? 'EQUIPAGGIATO' : 'INDOSSA AURA'}
+                                         </button>
+                                     )}
                                  </div>
                               </div>
 
@@ -1119,8 +1270,18 @@
                                      </span>
                                  </div>
                                  <p className="text-sm text-slate-400 mb-3">Ottieni il maggior numero di immunità vinte in una stagione per 2 volte.</p>
-                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
-                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.mvp?.unlocked ? 'bg-blue-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.mvp?.progress || 0) / 2) * 100}%` }}></div>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.mvp?.unlocked ? 'bg-blue-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.mvp?.progress || 0) / 2) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.mvp?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('mvp')}
+                                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'mvp' ? 'bg-blue-500 text-black border-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.8)]' : 'bg-slate-800 text-blue-500 border-blue-500 hover:bg-slate-700'}`}
+                                         >
+                                             {equippedCosmetic === 'mvp' ? 'EQUIPAGGIATO' : 'INDOSSA AURA'}
+                                         </button>
+                                     )}
                                  </div>
                               </div>
 
@@ -1135,8 +1296,96 @@
                                      </span>
                                  </div>
                                  <p className="text-sm text-slate-400 mb-3">Salvati con l'Idolo dell'Immunità 1 volta.</p>
-                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
-                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.idolo?.unlocked ? 'bg-purple-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.idolo?.progress || 0) / 1) * 100}%` }}></div>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.idolo?.unlocked ? 'bg-purple-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.idolo?.progress || 0) / 1) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.idolo?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('idolo')}
+                                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'idolo' ? 'bg-purple-500 text-white border-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.8)]' : 'bg-slate-800 text-purple-400 border-purple-400 hover:bg-slate-700'}`}
+                                         >
+                                             {equippedCosmetic === 'idolo' ? 'EQUIPAGGIATO' : 'INDOSSA AURA'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+                              
+                              {/* ACHIEVEMENT: AGENTE 007 */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.agente007?.unlocked ? 'border-indigo-400 bg-indigo-900/20 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.agente007?.unlocked ? 'text-indigo-400' : 'text-slate-300'}`}>
+                                         <Eye size={20} className={achievements.agente007?.unlocked ? 'text-indigo-400' : 'text-slate-500'}/> Agente 007
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-indigo-400 font-bold">
+                                         {achievements.agente007?.progress || 0} / 6
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Usa il Drone Spia 6 volte.</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.agente007?.unlocked ? 'bg-indigo-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.agente007?.progress || 0) / 6) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.agente007?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('agente007')}
+                                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'agente007' ? 'bg-indigo-500 text-white border-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.8)]' : 'bg-slate-800 text-indigo-400 border-indigo-400 hover:bg-slate-700'}`}
+                                         >
+                                             {equippedCosmetic === 'agente007' ? 'EQUIPAGGIATO' : 'INDOSSA RADAR'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: HEY DOLCEZZA */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.dolcezza?.unlocked ? 'border-pink-400 bg-pink-900/20 shadow-[0_0_15px_rgba(244,114,182,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.dolcezza?.unlocked ? 'text-pink-400' : 'text-slate-300'}`}>
+                                         <Heart size={20} className={achievements.dolcezza?.unlocked ? 'text-pink-400' : 'text-slate-500'}/> Hey dolcezza
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-pink-400 font-bold">
+                                         {achievements.dolcezza?.progress || 0} / 30
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Ottieni il fidanzamento con 30 persone.</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.dolcezza?.unlocked ? 'bg-pink-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.dolcezza?.progress || 0) / 30) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.dolcezza?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('dolcezza')}
+                                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'dolcezza' ? 'bg-pink-500 text-white border-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.8)]' : 'bg-slate-800 text-pink-500 border-pink-500 hover:bg-slate-700'}`}
+                                         >
+                                             {equippedCosmetic === 'dolcezza' ? 'EQUIPAGGIATO' : 'INDOSSA CODA'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: MI BRUCIA LA MANO */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.mibrucialamano?.unlocked ? 'border-red-600 bg-red-900/20 shadow-[0_0_15px_rgba(220,38,38,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.mibrucialamano?.unlocked ? 'text-red-600' : 'text-slate-300'}`}>
+                                         <Flame size={20} className={achievements.mibrucialamano?.unlocked ? 'text-red-600' : 'text-slate-500'}/> Mi brucia la mano
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-red-600 font-bold">
+                                         {achievements.mibrucialamano?.progress || 0} / 250
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Vota 250 volte ai falò di eliminazione.</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.mibrucialamano?.unlocked ? 'bg-red-600' : 'bg-slate-500'}`} style={{ width: `${((achievements.mibrucialamano?.progress || 0) / 250) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.mibrucialamano?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('mibrucialamano')}
+                                             className={`text-xs font-bold px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'mibrucialamano' ? 'bg-red-600 text-white border-red-500 shadow-[0_0_10px_rgba(220,38,38,0.8)]' : 'bg-slate-800 text-red-500 border-red-500 hover:bg-slate-700'}`}
+                                         >
+                                             {equippedCosmetic === 'mibrucialamano' ? 'EQUIPAGGIATO' : 'INDOSSA FIAMME'}
+                                         </button>
+                                     )}
                                  </div>
                               </div>
 
@@ -1497,7 +1746,7 @@
                   <div className="space-y-2">
                     {lobby.players.map(p => (
                       <div key={p.uid} className="bg-slate-800 p-2 rounded flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-slate-700 overflow-hidden flex-shrink-0">
+                        <div className={`w-8 h-8 rounded-full bg-slate-700 overflow-hidden flex-shrink-0 ${getCosmeticClasses(p.equippedCosmetic)}`}>
                            {p.character ? <img src={p.character.img} className="w-full h-full object-cover" /> : <div className="animate-pulse bg-slate-600 w-full h-full"/>}
                         </div>
                         <div className="truncate text-sm font-bold">{p.name}</div>
@@ -2042,6 +2291,7 @@
               const resultString = `🎯 DATI DRONE SU ${target.name.toUpperCase()}:\n\n❤️ Migliore Alleato:\n${highest > 0 ? bestFriend : 'Nessuno'}\n\n💔 Peggior Nemico:\n${lowest < 0 ? worstEnemy : 'Nessuno'}\n\n🤝 Alleanze segrete:\n${(target.alliances || []).length > 0 ? 'Sì' : 'No'}`;
               
               setSpyDroneResult(resultString);
+              updateAchievement('agente007', 1, 6);
               
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   [`idolData.inventory.spyDrones.${user.uid}`]: lobby.idolData.inventory.spyDrones[user.uid] - 1
@@ -4399,6 +4649,8 @@
                       updatedPlayers[myIdx].alliances = [...new Set(p2Allies)];
 
                       msg = `😍 Incredibile! Hai flirtato con ${targetName} ed è andata alla grande! Ora siete FIDANZATI e Alleati! (Relazione +15)`;
+                      
+                      updateAchievement('dolcezza', 1, 30);
                   } else {
                       const currentRel = updatedPlayers[targetIdx].relationships[user.uid] || 0;
                       updatedPlayers[targetIdx].relationships = { 
@@ -4657,6 +4909,8 @@
                       }
                   });
               }
+
+              updateAchievement('mibrucialamano', 1, 250);
 
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
               setUseExtraVote(false);
@@ -5312,7 +5566,7 @@
                                                      if (p.uid !== user.uid) setSelectedPlayer(p);
                                                  }}
                                                  disabled={p.status === 'eliminated' || p.status === 'perm_eliminated'}
-                                                 className={`relative rounded-lg overflow-hidden border-2 aspect-[3/4] transition-all ${(p.status === 'eliminated' || p.status === 'perm_eliminated') ? 'opacity-30 grayscale cursor-not-allowed border-slate-800' : `${colors.border} hover:border-yellow-400 hover:scale-105 hover:shadow-xl hover:z-10`}`}
+                                                 className={`relative rounded-lg overflow-hidden border-2 aspect-[3/4] transition-all ${(p.status === 'eliminated' || p.status === 'perm_eliminated') ? 'opacity-30 grayscale cursor-not-allowed border-slate-800' : `${colors.border} hover:border-yellow-400 hover:scale-105 hover:shadow-xl hover:z-10`} ${getCosmeticClasses(p.equippedCosmetic)}`}
                                              >
                                                  <img src={p.character.img} className="w-full h-full object-cover"/>
                                                  
