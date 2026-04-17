@@ -93,7 +93,7 @@
           Heart, Users, Play, LogOut, MessageSquare, Skull, 
           Trophy, Crown, UserPlus, Shield, Swords, Flame, 
           AlertTriangle, ArrowRight, Dices, Send, X, Vote, ListOrdered, Coffee, ChevronDown, Award, CheckCircle, Undo2,
-          Package, Gem, Lock, Unlock, Target, Users2, AlertOctagon, Shuffle, Gavel, Zap, Hammer, UserMinus, Mic, Eye, RefreshCw, DoorOpen, Link, Volume2, VolumeX, Scroll
+          Package, Gem, Lock, Unlock, Target, Users2, AlertOctagon, Shuffle, Gavel, Zap, Hammer, UserMinus, Mic, Eye, RefreshCw, DoorOpen, Link, Volume2, VolumeX, Scroll, Ghost
         } from 'lucide-react';
 
         // --- TUE CHIAVI FIREBASE INSERITE ---
@@ -757,6 +757,7 @@
                           <option value="Eroi vs Villains vs Neutrali">Eroi vs Villains vs Neutrali</option>
                           <option value="La Notte del Giudizio">La Notte del Giudizio (Tutti vs Tutti, Voto ai Peggiori 2)</option>
                           <option value="Popolarità">Popolarità (Niente sfide, immunità ai più amati)</option>
+                          <option value="Ghost Island">Ghost Island (Gli eliminati lottano per tornare al Merge)</option>
                           <option value="Custom">Custom (Crea Team e scegli Bot manualmente)</option>
                       </select>
                     </div>
@@ -1560,7 +1561,14 @@
           const myPlayer = lobby.players.find(p => p.uid === user.uid);
           const activePlayers = lobby.players.filter(p => p.status === 'active');
           const currentSeason = SEASON_CONFIG[lobby.currentSeasonIndex] || SEASON_CONFIG[0];
-          const isMerge = (lobby.config.theme === 'La Notte del Giudizio' || lobby.config.theme === 'Popolarità') ? true : (activePlayers.length <= (lobby.config.mergeSize || (lobby.config.maxPlayers / 2))); 
+          
+          // Calcoliamo quanti team DIVERSI hanno ancora almeno un giocatore attivo
+          const uniqueActiveTeams = [...new Set(activePlayers.map(p => p.team).filter(t => t && t.toUpperCase() !== 'MERGE'))];
+          
+          // La fusione avviene se: è un tema speciale, SIAMO ARRIVATI AL NUMERO PREVISTO, oppure È RIMASTA UNA SOLA SQUADRA
+          const isMerge = (lobby.config.theme === 'La Notte del Giudizio' || lobby.config.theme === 'Popolarità') 
+              ? true 
+              : (activePlayers.length <= (lobby.config.mergeSize || (lobby.config.maxPlayers / 2)) || uniqueActiveTeams.length < 2); 
 
           // --- SFONDO VILLAIN EDITION ---
           // Immagine cupa e nebbiosa perfetta per il tema villain, presa dal web per funzionare in multiplayer!
@@ -2410,6 +2418,27 @@
               });
           }, [lobby.redemptionData, isHost, lobby.phase]);
 
+          // --- BOT GHOST ISLAND LOGIC ---
+          useEffect(() => {
+              if (!isHost || lobby.phase !== 'ghost_island' || !lobby.ghostIslandData || lobby.ghostIslandData.stage !== 'rolling') return;
+              
+              const { candidates, rolls } = lobby.ghostIslandData;
+
+              candidates.forEach(uid => {
+                  const p = lobby.players.find(x => x.uid === uid);
+                  if (p && p.isBot && !rolls[uid]) {
+                      const timer = setTimeout(async () => {
+                          const maxFaces = 10;
+                          const r = Math.floor(Math.random() * maxFaces) + 1;
+                          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                              [`ghostIslandData.rolls.${uid}`]: r
+                          });
+                      }, 1000 + Math.random() * 2000);
+                      return () => clearTimeout(timer);
+                  }
+              });
+          }, [lobby.ghostIslandData, isHost, lobby.phase]);
+
 
           const sendChat = async (e) => {
             e.preventDefault();
@@ -2569,6 +2598,14 @@
              const roll = Math.floor(Math.random() * maxFaces) + 1;
              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   [`redemptionData.rolls.${user.uid}`]: roll
+             });
+          };
+
+          const handleGhostIslandRoll = async () => {
+             playSound('roll');
+             const roll = Math.floor(Math.random() * 10) + 1;
+             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`ghostIslandData.rolls.${user.uid}`]: roll
              });
           };
 
@@ -2864,7 +2901,7 @@
                       };
                   }
               } else {
-                  updates = { phase: 'challenge', logs: arrayUnion(`--- SFIDA EPISODIO ${lobby.round} ---`) };
+                  updates = { phase: 'challenge', twistData: null, logs: arrayUnion(`--- SFIDA EPISODIO ${lobby.round} ---`) };
                   if (isMerge) {
                       const rand = Math.random();
                       
@@ -3070,6 +3107,17 @@
                             isRedemptionEpisode = redemptionConfig.episodes.includes(nextRound);
                        }
                   }
+                  
+                  // CONTROLLO GHOST ISLAND PER SUDDEN DEATH
+                  const alreadyMerged = lobby.players.some(p => p.status === 'active' && p.team === 'MERGE');
+                  const nextActiveCount = updatedPlayers.filter(p => p.status === 'active').length;
+                  const nextUniqueTeams = [...new Set(updatedPlayers.filter(p => p.status === 'active' && p.team !== 'MERGE').map(p => p.team))];
+                  const willBeMerge = lobby.config.theme === 'La Notte del Giudizio' || lobby.config.theme === 'Popolarità' || nextActiveCount <= (lobby.config.mergeSize || (lobby.config.maxPlayers / 2)) || nextUniqueTeams.length < 2;
+                  const currentGhosts = updatedPlayers.filter(p => p.status === 'eliminated');
+
+                  if (willBeMerge) {
+                      updatedPlayers = updatedPlayers.map(p => p.status === 'active' ? { ...p, team: 'MERGE' } : p);
+                  }
 
                   updates = {
                       players: updatedPlayers,
@@ -3077,7 +3125,25 @@
                       logs: arrayUnion(`${victim.name} è ELIMINATO DIRETTAMENTE dallo show!`, ...newLogs)
                   };
 
-                  if (isRedemptionEpisode) {
+                  if (lobby.config.theme === 'Ghost Island' && !alreadyMerged && willBeMerge && currentGhosts.length > 0) {
+                      if (currentGhosts.length > 2) {
+                          updates = { ...updates, phase: 'ghost_island', ghostIslandData: { stage: 'rolling', candidates: currentGhosts.map(g => g.uid), rolls: {}, isMergeReturn: true }, round: nextRound, players: updatedPlayers, votes: {}, extraVotes: {}, immunity: [], diceRoll: null, losingTeam: null, ceremonyData: null, challengeData: null, twistData: null, logs: arrayUnion(...newLogs, `--- SFIDA FINALE GHOST ISLAND ---`, `I ${currentGhosts.length} fantasmi si sfidano per gli ultimi 2 posti nella Fusione!`) };
+                      } else {
+                          currentGhosts.forEach(g => {
+                              const idx = updatedPlayers.findIndex(p => p.uid === g.uid);
+                              updatedPlayers[idx].status = 'active';
+                              updatedPlayers[idx].team = 'MERGE';
+                              updatedPlayers[idx].immunityWins = 0;
+                              newLogs.push(`👻 GHOST ISLAND: ${g.name} è sopravvissuto e RIENTRA in gioco per la Fusione!`);
+                          });
+                          updates = { ...updates, phase: 'episode_start', round: nextRound, players: updatedPlayers, votes: {}, extraVotes: {}, immunity: [], diceRoll: null, losingTeam: null, ceremonyData: null, challengeData: null, twistData: { type: 'ghost_island_return', returnees: currentGhosts.map(g => g.uid) }, logs: arrayUnion(...newLogs) };
+                          incrementActivePlayersStats(updatedPlayers.filter(p => p.status === 'active'));
+                      }
+                  }
+                  else if (lobby.config.theme === 'Ghost Island' && !willBeMerge && currentGhosts.length >= 3) {
+                      updates = { ...updates, phase: 'ghost_island', ghostIslandData: { stage: 'rolling', candidates: currentGhosts.map(p => p.uid), rolls: {} }, round: nextRound, players: updatedPlayers, votes: {}, extraVotes: {}, immunity: [], diceRoll: null, losingTeam: null, ceremonyData: null, challengeData: null, twistData: null, logs: arrayUnion(...newLogs, `--- FASE GHOST ISLAND ---`, `Gli eliminati lottano per non svanire per sempre!`) };
+                  }
+                  else if (isRedemptionEpisode) {
                        updates = {
                            ...updates,
                            phase: 'redemption',
@@ -3425,7 +3491,80 @@
                       updates.rankings = arrayUnion(...rankingEntries);
                   }
 
-                  if (isRedemptionEpisode) {
+                  // CONTROLLO GHOST ISLAND PER ELIMINAZIONE NORMALE
+                  const alreadyMerged = lobby.players.some(p => p.status === 'active' && p.team === 'MERGE');
+                  const nextActiveCount = updatedPlayers.filter(p => p.status === 'active').length;
+                  const nextUniqueTeams = [...new Set(updatedPlayers.filter(p => p.status === 'active' && p.team !== 'MERGE').map(p => p.team))];
+                  const willBeMerge = lobby.config.theme === 'La Notte del Giudizio' || lobby.config.theme === 'Popolarità' || nextActiveCount <= (lobby.config.mergeSize || (lobby.config.maxPlayers / 2)) || nextUniqueTeams.length < 2;
+                  const currentGhosts = updatedPlayers.filter(p => p.status === 'eliminated');
+
+                  if (willBeMerge) {
+                      updatedPlayers = updatedPlayers.map(p => p.status === 'active' ? { ...p, team: 'MERGE' } : p);
+                  }
+
+                  if (lobby.config.theme === 'Ghost Island' && !alreadyMerged && willBeMerge && currentGhosts.length > 0) {
+                      if (currentGhosts.length > 2) {
+                          updates = {
+                            ...updates,
+                            phase: 'ghost_island',
+                            ghostIslandData: { stage: 'rolling', candidates: currentGhosts.map(g => g.uid), rolls: {}, isMergeReturn: true },
+                            round: nextRound,
+                            players: updatedPlayers,
+                            votes: {},
+                            extraVotes: {}, 
+                            immunity: nextImmunities,
+                            diceRoll: null,
+                            losingTeam: null,
+                            ceremonyData: null,
+                            challengeData: null,
+                            twistData: null, 
+                            logs: arrayUnion(...newLogs, `--- SFIDA FINALE GHOST ISLAND ---`, `I ${currentGhosts.length} fantasmi si sfidano per gli ultimi 2 posti nella Fusione!`)
+                          };
+                      } else {
+                          currentGhosts.forEach(g => {
+                              const idx = updatedPlayers.findIndex(p => p.uid === g.uid);
+                              updatedPlayers[idx].status = 'active';
+                              updatedPlayers[idx].team = 'MERGE';
+                              updatedPlayers[idx].immunityWins = 0;
+                              newLogs.push(`👻 COLPO DI SCENA! ${g.name} è sopravvissuto a Ghost Island e RIENTRA in gioco per la Fusione!`);
+                          });
+                          updates = {
+                            ...updates,
+                            phase: 'episode_start',
+                            round: nextRound,
+                            players: updatedPlayers,
+                            votes: {},
+                            extraVotes: {}, 
+                            immunity: nextImmunities,
+                            diceRoll: null,
+                            losingTeam: null,
+                            ceremonyData: null,
+                            challengeData: null,
+                            twistData: { type: 'ghost_island_return', returnees: currentGhosts.map(g => g.uid) }, 
+                            logs: arrayUnion(...newLogs)
+                          };
+                          incrementActivePlayersStats(updatedPlayers.filter(p => p.status === 'active'));
+                      }
+                  }
+                  else if (lobby.config.theme === 'Ghost Island' && !willBeMerge && currentGhosts.length >= 3) {
+                      updates = {
+                        ...updates,
+                        phase: 'ghost_island',
+                        ghostIslandData: { stage: 'rolling', candidates: currentGhosts.map(p => p.uid), rolls: {} },
+                        round: nextRound,
+                        players: updatedPlayers,
+                        votes: {},
+                        extraVotes: {}, 
+                        immunity: nextImmunities,
+                        diceRoll: null,
+                        losingTeam: null,
+                        ceremonyData: null,
+                        challengeData: null,
+                        twistData: null, 
+                        logs: arrayUnion(...newLogs, `--- FASE GHOST ISLAND ---`, `Gli eliminati si preparano ad affrontare il loro destino!`)
+                      };
+                  }
+                  else if (isRedemptionEpisode) {
                       updates = {
                         ...updates,
                         phase: 'redemption',
@@ -3534,6 +3673,60 @@
                          updates.logs = arrayUnion(`GIOCO FINITO! ${winner.name} è il campione!`);
                          playSound('victory');
                     }
+                }
+            }
+
+            else if (lobby.phase === 'ghost_island') {
+                const { candidates, rolls, isMergeReturn } = lobby.ghostIslandData;
+                const allRolled = candidates.every(c => rolls[c]);
+                if (!allRolled) return;
+
+                let minRoll = 999;
+                let losers = [];
+                candidates.forEach(c => {
+                    if(rolls[c] < minRoll) { minRoll = rolls[c]; losers = [c]; }
+                    else if(rolls[c] === minRoll) { losers.push(c); }
+                });
+
+                if (losers.length === 1) {
+                    const loserId = losers[0];
+                    const loser = lobby.players.find(p => p.uid === loserId);
+
+                    let updatedPlayers = lobby.players.map(p =>
+                        p.uid === loserId ? { ...p, status: 'perm_eliminated' } : p
+                    );
+
+                    if (isMergeReturn) {
+                        const returnees = candidates.filter(uid => uid !== loserId);
+                        returnees.forEach(uid => {
+                            const idx = updatedPlayers.findIndex(p => p.uid === uid);
+                            updatedPlayers[idx].status = 'active';
+                            updatedPlayers[idx].team = 'MERGE';
+                            updatedPlayers[idx].immunityWins = 0;
+                        });
+
+                        updates = {
+                            players: updatedPlayers,
+                            phase: 'episode_start',
+                            ghostIslandData: null,
+                            twistData: { type: 'ghost_island_return', returnees: returnees },
+                            logs: arrayUnion(`☠️ GHOST ISLAND: ${loser.name} svanisce definitivamente!`, `👻 I fantasmi sopravvissuti RIENTRANO in gioco per la Fusione!`)
+                        };
+                        incrementActivePlayersStats(updatedPlayers.filter(p => p.status === 'active'));
+                    } else {
+                        updates = {
+                            players: updatedPlayers,
+                            phase: 'episode_start',
+                            ghostIslandData: null,
+                            logs: arrayUnion(`☠️ GHOST ISLAND: ${loser.name} ha fatto il punteggio più basso (${minRoll}) ed è SVANITO DEFINITIVAMENTE!`)
+                        };
+                    }
+                } else {
+                    updates = {
+                        [`ghostIslandData.rolls`]: {},
+                        [`ghostIslandData.candidates`]: losers,
+                        logs: arrayUnion(`Pareggio a ${minRoll} su Ghost Island! Spareggio tra i peggiori.`)
+                    };
                 }
             }
 
@@ -4702,6 +4895,7 @@
                         {lobby.phase === 'final_showdown' && "GRAN FINALE"}
                         {lobby.phase === 'season_setup' && "SETUP STAGIONE"}
                         {lobby.phase === 'redemption' && "REDEMPTION TIME"}
+                        {lobby.phase === 'ghost_island' && "GHOST ISLAND"}
                      </div>
                      
                      <div className="flex items-center gap-4">
@@ -4720,8 +4914,8 @@
                         {isHost && lobby.phase !== 'final_showdown' && lobby.phase !== 'season_setup' && lobby.phase !== 'redemption' && (
                             <button 
                                 onClick={advanceGame} 
-                                disabled={isProcessing || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')}
-                                className={`${(isProcessing || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-4 py-1 rounded shadow text-sm flex items-center gap-2 transition-all`}
+                                disabled={isProcessing || (lobby.phase === 'ghost_island' && Object.keys(lobby.ghostIslandData?.rolls || {}).length < lobby.ghostIslandData?.candidates.length) || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')}
+                                className={`${(isProcessing || (lobby.phase === 'ghost_island' && Object.keys(lobby.ghostIslandData?.rolls || {}).length < lobby.ghostIslandData?.candidates.length) || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-4 py-1 rounded shadow text-sm flex items-center gap-2 transition-all`}
                             >
                             {isProcessing ? 'ATTENDI...' : lobby.phase === 'voting' && pendingVotesCount > 0 
                                 ? `ATTESA VOTI (UMANI: ${pendingVotesCount})` 
@@ -4741,8 +4935,9 @@
                                                             ? (lobby.ceremonyData?.finalReveal && !lobby.ceremonyData?.tieMatch ? 'FINISCI' : lobby.ceremonyData?.tieMatch ? 'SPAREGGIO' : 'RIVELA') 
                                                             : lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'revealing'
                                                                 ? (lobby.challengeData.revealIndex < lobby.challengeData.popularityResults.length - 1 ? 'SVELA POSIZIONE' : 'PROCLAMA VINCITORI')
+                                                                : lobby.phase === 'ghost_island' ? 'RISOLVI GHOST ISLAND' 
                                                                 : lobby.phase === 'game_over' ? 'CHIUDI LOBBY' : 'AVANTI'} 
-                            {!(isProcessing || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0)) && <ArrowRight size={16} />}
+                            {!(isProcessing || (lobby.phase === 'ghost_island' && Object.keys(lobby.ghostIslandData?.rolls || {}).length < lobby.ghostIslandData?.candidates.length) || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0)) && <ArrowRight size={16} />}
                             </button>
                         )}
                      </div>
@@ -4752,6 +4947,33 @@
 
                      {(lobby.phase === 'social' || lobby.phase === 'episode_start') && (
                          <div className="flex flex-col gap-6">
+                             {/* --- POPUP RITORNO GHOST ISLAND --- */}
+                             {lobby.twistData?.type === 'ghost_island_return' && (
+                                 <div className="bg-purple-950/90 text-white p-8 rounded-3xl mb-4 text-center shadow-[0_0_40px_rgba(168,85,247,0.6)] border-4 border-purple-500 animate-in zoom-in max-w-4xl mx-auto z-50 w-full relative overflow-hidden">
+                                     <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop')] bg-cover opacity-10 mix-blend-overlay"></div>
+                                     <div className="relative z-10">
+                                         <div className="flex items-center justify-center gap-4 mb-6">
+                                             <Ghost size={56} className="text-purple-400 animate-bounce"/>
+                                             <h2 className="text-4xl md:text-5xl font-black uppercase tracking-widest text-purple-300 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]">I FANTASMI TORNANO!</h2>
+                                             <Ghost size={56} className="text-purple-400 animate-bounce scale-x-[-1]"/>
+                                         </div>
+                                         <p className="text-xl text-slate-200 mb-8 font-bold">La Fusione è iniziata! I sopravvissuti di Ghost Island rientrano ufficialmente in gioco!</p>
+                                         <div className="flex flex-wrap justify-center gap-8 mb-4">
+                                             {lobby.twistData.returnees.map(uid => {
+                                                 const p = lobby.players.find(pl => pl.uid === uid) || { name: 'Sconosciuto', character: { img: '' } };
+                                                 return (
+                                                     <div key={uid} className="flex flex-col items-center">
+                                                         <img src={p.character.img} className="w-32 h-32 rounded-full border-4 border-purple-500 shadow-[0_0_25px_rgba(168,85,247,0.8)] object-cover mb-4"/>
+                                                         <div className="text-2xl font-black bg-black/60 px-6 py-2 rounded-xl border border-purple-500 text-purple-100">{p.name}</div>
+                                                     </div>
+                                                 )
+                                             })}
+                                         </div>
+                                         <div className="mt-6 text-purple-300 font-bold italic text-lg">"Pensavate di esservi sbarazzati di loro?" - Chris</div>
+                                     </div>
+                                 </div>
+                             )}
+
                              {/* --- PANNELLO VANTAGGI PERSONALI (SOCIAL) --- */}
                              {lobby.phase === 'social' && myPlayer?.status === 'active' && (
                                  <div className="flex flex-wrap justify-center gap-4 mb-2">
@@ -4828,10 +5050,18 @@
                                                  onClick={() => {
                                                      if (p.uid !== user.uid) setSelectedPlayer(p);
                                                  }}
-                                                 disabled={p.status === 'eliminated'}
-                                                 className={`relative rounded-lg overflow-hidden border-2 aspect-[3/4] transition-all ${p.status === 'eliminated' ? 'opacity-30 grayscale cursor-not-allowed border-slate-800' : `${colors.border} hover:border-yellow-400 hover:scale-105 hover:shadow-xl hover:z-10`}`}
+                                                 disabled={p.status === 'eliminated' || p.status === 'perm_eliminated'}
+                                                 className={`relative rounded-lg overflow-hidden border-2 aspect-[3/4] transition-all ${(p.status === 'eliminated' || p.status === 'perm_eliminated') ? 'opacity-30 grayscale cursor-not-allowed border-slate-800' : `${colors.border} hover:border-yellow-400 hover:scale-105 hover:shadow-xl hover:z-10`}`}
                                              >
                                                  <img src={p.character.img} className="w-full h-full object-cover"/>
+                                                 
+                                                 {p.status === 'perm_eliminated' && (
+                                                     <div className="absolute inset-0 bg-red-950/80 flex items-center justify-center flex-col z-20">
+                                                         <Skull size={32} className="text-red-500 drop-shadow-md mb-1"/>
+                                                         <span className="text-[9px] font-black text-red-400 bg-black/50 px-1 rounded border border-red-500/50">SVANITO</span>
+                                                     </div>
+                                                 )}
+
                                                  <div className={`absolute bottom-0 w-full bg-black/80 text-[10px] sm:text-xs font-bold py-1.5 truncate px-1 text-center text-white`}>
                                                      {p.name}
                                                  </div>
@@ -5059,6 +5289,49 @@
                          </div>
                      )}
 
+                     {lobby.phase === 'ghost_island' && lobby.ghostIslandData && (
+                         <div className="flex flex-col items-center justify-center min-h-[70vh] animate-in zoom-in">
+                             <div className="text-center mb-8">
+                                 <h1 className="text-5xl md:text-7xl font-black text-purple-500 mb-2 uppercase tracking-widest drop-shadow-[0_0_20px_rgba(168,85,247,0.6)]">Ghost Island</h1>
+                                 <p className="text-slate-300 text-xl font-bold bg-black/40 px-6 py-2 rounded-full border border-purple-500/30">
+                                     {lobby.ghostIslandData.isMergeReturn ? "Sfida finale! Il peggiore svanisce, gli altri tornano in gioco!" : "Chi fa il punteggio più basso svanisce per sempre!"}
+                                 </p>
+                             </div>
+
+                             <div className="flex flex-wrap gap-8 justify-center mb-12">
+                                 {lobby.ghostIslandData.candidates.map(uid => {
+                                     const p = lobby.players.find(x => x.uid === uid);
+                                     if (!p) return null;
+                                     const roll = lobby.ghostIslandData.rolls[uid];
+
+                                     return (
+                                         <div key={uid} className="bg-slate-900 p-6 rounded-3xl flex flex-col items-center border-4 border-purple-600/60 w-48 relative shadow-[0_0_30px_rgba(168,85,247,0.2)]">
+                                             <img src={p.character.img} className="w-32 h-32 rounded-full border-4 border-purple-500/50 object-cover mb-4 grayscale opacity-80"/>
+
+                                             <div className="text-xl font-bold mb-2 text-center leading-tight text-purple-200">{p.name}</div>
+
+                                             {roll ? (
+                                                 <div className="text-6xl font-black text-purple-400 bg-black/50 px-6 py-2 rounded-2xl animate-in zoom-in">{roll}</div>
+                                             ) : (
+                                                 <div className="text-slate-500 italic animate-pulse py-4 font-bold">Lancio...</div>
+                                             )}
+
+                                             {uid === user.uid && !roll && (
+                                                 <button onClick={handleGhostIslandRoll} className="absolute -bottom-5 bg-purple-600 px-6 py-3 rounded-full font-black shadow-[0_0_15px_rgba(168,85,247,0.8)] border-2 border-purple-300 hover:scale-110 transition text-white">LANCIA DADO</button>
+                                             )}
+                                         </div>
+                                     )
+                                 })}
+                             </div>
+                             
+                             {isHost && (
+                                 <div className="text-purple-400 font-bold animate-pulse mt-4 bg-purple-900/30 p-4 rounded-xl border border-purple-500/50">
+                                     Premi RISOLVI GHOST ISLAND per calcolare chi viene eliminato
+                                 </div>
+                             )}
+                         </div>
+                     )}
+
                     {lobby.phase === 'season_setup' && isHost && nextSeasonConfig && (
                         <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
                             <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border-2 border-yellow-500 max-w-lg w-full">
@@ -5236,8 +5509,16 @@
                                                          
                                                          return (
                                                              <div key={p.uid} className={`relative flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-500 ${isRevealed ? (isTop && lobby.challengeData.revealIndex === lobby.challengeData.popularityResults.length - 1 ? 'border-pink-400 bg-pink-900/60 scale-125 shadow-[0_0_20px_rgba(236,72,153,0.8)] z-10 mx-4' : 'border-slate-500 bg-slate-800 scale-100 opacity-90') : 'border-slate-700 bg-slate-900 opacity-50 scale-90'}`}>
-                                                                 <img src={p.character.img} className={`w-14 h-14 md:w-20 md:h-20 rounded-full mb-2 object-cover ${isRevealed ? 'grayscale-0 border-2 border-white/20' : 'grayscale'}`}/>
-                                                                 <div className="font-bold text-xs md:text-sm text-center truncate w-20 md:w-24">{p.name}</div>
+                                                                 {isRevealed ? (
+                                                                     <img src={p.character.img} className="w-14 h-14 md:w-20 md:h-20 rounded-full mb-2 object-cover border-2 border-white/20"/>
+                                                                 ) : (
+                                                                     <div className="w-14 h-14 md:w-20 md:h-20 rounded-full mb-2 bg-slate-800 border-2 border-slate-600 flex items-center justify-center">
+                                                                         <span className="text-2xl md:text-4xl font-black text-slate-600">?</span>
+                                                                     </div>
+                                                                 )}
+                                                                 <div className="font-bold text-xs md:text-sm text-center truncate w-20 md:w-24">
+                                                                     {isRevealed ? p.name : "????"}
+                                                                 </div>
                                                                  {isRevealed ? (
                                                                      <div className={`mt-2 text-xl md:text-3xl font-black ${isTop && lobby.challengeData.revealIndex === lobby.challengeData.popularityResults.length - 1 ? 'text-pink-400 drop-shadow-md' : 'text-slate-300'}`}>
                                                                          {result.score}
