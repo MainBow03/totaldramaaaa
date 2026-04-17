@@ -2590,7 +2590,7 @@
                         <div className="flex flex-col overflow-hidden w-full">
                             <div className="truncate text-sm font-bold leading-tight">{p.name}</div>
                             {(() => {
-                                const titleData = p.equippedTitle ? CHARACTER_TITLES[p.equippedTitle] : (p.character ? CHARACTER_TITLES[p.character.name] : null);
+                                const titleData = p.equippedTitle ? CHARACTER_TITLES[p.equippedTitle] : null;
                                 if (!p.isBot && titleData) {
                                     return (
                                         <div className={`truncate leading-tight ${titleData.style} !text-sm drop-shadow-none`}>
@@ -6438,7 +6438,7 @@
                                                          {p.name}
                                                      </div>
                                                      {(() => {
-                                                         const titleData = p.equippedTitle ? CHARACTER_TITLES[p.equippedTitle] : (p.character ? CHARACTER_TITLES[p.character.name] : null);
+                                                         const titleData = p.equippedTitle ? CHARACTER_TITLES[p.equippedTitle] : null;
                                                          if (!p.isBot && titleData) {
                                                              return (
                                                                  <div className={`truncate w-full leading-tight ${titleData.style} !text-[10px] sm:!text-xs drop-shadow-none`}>
@@ -7689,7 +7689,7 @@
                                                      <div className="font-black text-xl mt-2 px-4 py-1 rounded bg-black/50 text-center flex flex-col items-center leading-tight">
                                                          <div>{p.name} {isMe && "(TU)"}</div>
                                                          {(() => {
-                                                             const titleData = p.equippedTitle ? CHARACTER_TITLES[p.equippedTitle] : (p.character ? CHARACTER_TITLES[p.character.name] : null);
+                                                             const titleData = p.equippedTitle ? CHARACTER_TITLES[p.equippedTitle] : null;
                                                              if (!p.isBot && titleData) {
                                                                  return (
                                                                      <div className={`!text-xl mt-0.5 ${titleData.style} drop-shadow-none`}>
