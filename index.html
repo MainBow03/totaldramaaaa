@@ -397,7 +397,41 @@
           const [lobbyData, setLobbyData] = useState(null);
           const [errorMsg, setErrorMsg] = useState('');
           const [muted, setMuted] = useState(false);
-          const [topCharacters, setTopCharacters] = useState(null); // Modificato: null = caricamento, [] = vuoto
+          const [topCharacters, setTopCharacters] = useState(null);
+
+          // --- GESTIONE ACHIEVEMENTS (LOCAL STORAGE) ---
+          const [achievements, setAchievements] = useState(() => {
+              const defaultAchievements = {
+                  pugnalatore: { progress: 0, unlocked: false },
+                  sopravvissuto: { progress: 0, unlocked: false },
+                  campione: { progress: 0, unlocked: false },
+                  veterano: { progress: 0, unlocked: false },
+                  mvp: { progress: 0, unlocked: false },
+                  idolo: { progress: 0, unlocked: false }
+              };
+              try {
+                  const saved = localStorage.getItem('td_achievements');
+                  // Fonde i dati vecchi salvati con la nuova struttura, così non si perdono i progressi!
+                  return saved ? { ...defaultAchievements, ...JSON.parse(saved) } : defaultAchievements;
+              } catch(e) {
+                  return defaultAchievements;
+              }
+          });
+
+          const updateAchievement = (id, amount = 1, max = 1) => {
+              setAchievements(prev => {
+                  if (prev[id]?.unlocked) return prev;
+                  const newProgress = Math.min((prev[id]?.progress || 0) + amount, max);
+                  const unlocked = newProgress >= max;
+                  if (unlocked && (!prev[id] || !prev[id].unlocked)) {
+                      setTimeout(() => playSound('success'), 500);
+                      console.log(`🏆 Achievement Sbloccato: ${id}!`);
+                  }
+                  const nextState = { ...prev, [id]: { progress: newProgress, unlocked } };
+                  localStorage.setItem('td_achievements', JSON.stringify(nextState));
+                  return nextState;
+              });
+          };
 
           const toggleMute = () => {
               isGlobalMuted = !isGlobalMuted;
@@ -620,6 +654,7 @@
                   user={user} nickname={nickname} lobbies={lobbies} 
                   onCreate={createLobby} onJoin={joinLobby} errorMsg={errorMsg}
                   topCharacters={topCharacters}
+                  achievements={achievements}
                 />
               )}
               {currentView === 'lobby' && lobbyData && (
@@ -632,6 +667,7 @@
                 <GameRoom 
                   lobby={lobbyData} user={user} lobbyId={currentLobbyId} 
                   onLeave={() => { setCurrentLobbyId(null); setCurrentView('browser'); }}
+                  updateAchievement={updateAchievement}
                 />
               )}
             </div>
@@ -663,9 +699,9 @@
             </div>
           </div>
         );
-
-        const BrowserScreen = ({ user, nickname, lobbies, onCreate, onJoin, errorMsg, topCharacters }) => {
+        const BrowserScreen = ({ user, nickname, lobbies, onCreate, onJoin, errorMsg, topCharacters, achievements }) => {
           const [showConfig, setShowConfig] = useState(false);
+          const [showAchievementsModal, setShowAchievementsModal] = useState(false);
           const [config, setConfig] = useState({ 
               maxPlayers: 22, 
               numTeams: 2, 
@@ -948,7 +984,14 @@
                       <h3 className="text-2xl font-black text-yellow-400 mb-2 flex items-center justify-center gap-2 drop-shadow-lg">
                           <Trophy size={28} /> HALL OF FAME
                       </h3>
-                      <p className="text-xs text-slate-400 text-center mb-6 uppercase tracking-widest font-bold">Top 10 Maggior Numero di Round</p>
+                      <p className="text-xs text-slate-400 text-center mb-4 uppercase tracking-widest font-bold">Top 10 Maggior Numero di Round</p>
+                      
+                      <button 
+                          onClick={() => setShowAchievementsModal(true)}
+                          className="w-full bg-slate-900 border border-yellow-600 hover:bg-slate-800 text-yellow-500 font-bold py-2 rounded-xl mb-6 shadow-inner flex justify-center items-center gap-2 transition-colors"
+                      >
+                          <Award size={18}/> I TUOI TROFEI
+                      </button>
                       
                       <div className="space-y-3">
                           {topCharacters === null ? (
@@ -989,6 +1032,122 @@
                       </div>
                   </div>
               </div>
+
+              {/* MODALE ACHIEVEMENTS */}
+              {showAchievementsModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in">
+                      <div className="bg-slate-900 border-2 border-yellow-500 rounded-2xl max-w-lg w-full p-6 relative">
+                          <button onClick={() => setShowAchievementsModal(false)} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full text-slate-300 hover:text-white"><X size={20}/></button>
+                          
+                          <h2 className="text-2xl text-yellow-400 font-black mb-6 flex items-center gap-2">
+                              <Trophy size={28}/> BAKECA TROFEI
+                          </h2>
+                          
+                          <div className="space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+                              {/* ACHIEVEMENT: CAMPIONE DELL'ISOLA */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.campione?.unlocked ? 'border-yellow-400 bg-yellow-900/20 shadow-[0_0_15px_rgba(250,204,21,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.campione?.unlocked ? 'text-yellow-400' : 'text-slate-300'}`}>
+                                         <Crown size={20} className={achievements.campione?.unlocked ? 'text-yellow-400' : 'text-slate-500'}/> Campione dell'Isola
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-yellow-500 font-bold">
+                                         {achievements.campione?.progress || 0} / 1
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Vinci un'intera stagione.</p>
+                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
+                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.campione?.unlocked ? 'bg-yellow-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.campione?.progress || 0) / 1) * 100}%` }}></div>
+                                 </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: VETERANO */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.veterano?.unlocked ? 'border-emerald-400 bg-emerald-900/20 shadow-[0_0_15px_rgba(52,211,153,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.veterano?.unlocked ? 'text-emerald-400' : 'text-slate-300'}`}>
+                                         <Award size={20} className={achievements.veterano?.unlocked ? 'text-emerald-400' : 'text-slate-500'}/> Veterano
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-emerald-500 font-bold">
+                                         {achievements.veterano?.progress || 0} / 5
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Vinci 5 stagioni in totale.</p>
+                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
+                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.veterano?.unlocked ? 'bg-emerald-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.veterano?.progress || 0) / 5) * 100}%` }}></div>
+                                 </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: PUGNALATORE */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.pugnalatore?.unlocked ? 'border-red-500 bg-red-900/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.pugnalatore?.unlocked ? 'text-red-500' : 'text-slate-300'}`}>
+                                         <Skull size={20} className={achievements.pugnalatore?.unlocked ? 'text-red-500' : 'text-slate-500'}/> Pugnalatore
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-red-500 font-bold">
+                                         {achievements.pugnalatore?.progress || 0} / 5
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Elimina 5 giocatori che fanno parte della tua alleanza.</p>
+                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
+                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.pugnalatore?.unlocked ? 'bg-red-500' : 'bg-slate-500'}`} style={{ width: `${((achievements.pugnalatore?.progress || 0) / 5) * 100}%` }}></div>
+                                 </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: SOPRAVVISSUTO */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.sopravvissuto?.unlocked ? 'border-orange-500 bg-orange-900/20 shadow-[0_0_15px_rgba(249,115,22,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.sopravvissuto?.unlocked ? 'text-orange-500' : 'text-slate-300'}`}>
+                                         <Flame size={20} className={achievements.sopravvissuto?.unlocked ? 'text-orange-500' : 'text-slate-500'}/> Sopravvissuto
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-orange-500 font-bold">
+                                         {achievements.sopravvissuto?.progress || 0} / 10
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Vinci 10 spareggi (tie-breaker) al falò.</p>
+                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
+                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.sopravvissuto?.unlocked ? 'bg-orange-500' : 'bg-slate-500'}`} style={{ width: `${((achievements.sopravvissuto?.progress || 0) / 10) * 100}%` }}></div>
+                                 </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: MVP */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.mvp?.unlocked ? 'border-blue-400 bg-blue-900/20 shadow-[0_0_15px_rgba(96,165,250,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.mvp?.unlocked ? 'text-blue-400' : 'text-slate-300'}`}>
+                                         <Zap size={20} className={achievements.mvp?.unlocked ? 'text-blue-400' : 'text-slate-500'}/> M.V.P.
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-blue-400 font-bold">
+                                         {achievements.mvp?.progress || 0} / 2
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Ottieni il maggior numero di immunità vinte in una stagione per 2 volte.</p>
+                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
+                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.mvp?.unlocked ? 'bg-blue-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.mvp?.progress || 0) / 2) * 100}%` }}></div>
+                                 </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: IDOLO */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.idolo?.unlocked ? 'border-purple-400 bg-purple-900/20 shadow-[0_0_15px_rgba(192,132,252,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.idolo?.unlocked ? 'text-purple-400' : 'text-slate-300'}`}>
+                                         <Gem size={20} className={achievements.idolo?.unlocked ? 'text-purple-400' : 'text-slate-500'}/> Pensavi di esserti sbarazzato di me?
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-purple-400 font-bold">
+                                         {achievements.idolo?.progress || 0} / 1
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Salvati con l'Idolo dell'Immunità 1 volta.</p>
+                                 <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden">
+                                     <div className={`h-full rounded-full transition-all duration-1000 ${achievements.idolo?.unlocked ? 'bg-purple-400' : 'bg-slate-500'}`} style={{ width: `${((achievements.idolo?.progress || 0) / 1) * 100}%` }}></div>
+                                 </div>
+                              </div>
+
+                              <div className="p-4 border-2 border-dashed border-slate-700 bg-slate-800/50 rounded-xl text-center">
+                                  <Lock size={24} className="mx-auto text-slate-500 mb-2"/>
+                                  <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Altri trofei in arrivo...</p>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              )}
 
             </div>
           );
@@ -1556,7 +1715,7 @@
 
         // --- GAME LOGIC ---
 
-        const GameRoom = ({ lobby, user, lobbyId, onLeave }) => {
+        const GameRoom = ({ lobby, user, lobbyId, onLeave, updateAchievement }) => {
           const isHost = lobby.hostId === user.uid;
           const myPlayer = lobby.players.find(p => p.uid === user.uid);
           const activePlayers = lobby.players.filter(p => p.status === 'active');
@@ -1617,6 +1776,7 @@
           const [nominationSelections, setNominationSelections] = useState([]);
 
           const [isProcessing, setIsProcessing] = useState(false);
+          const processedAchievements = useRef(new Set()); // Riferimento per evitare conteggi doppi
 
           // --- FUNZIONE PER AGGIORNARE LE STATISTICHE GLOBALI ---
           const incrementActivePlayersStats = async (playersToCount) => {
@@ -1634,6 +1794,107 @@
                   }
               } catch(e) { console.error("Errore update stats", e); }
           };
+
+          // --- TRACKING ACHIEVEMENT: SOPRAVVISSUTO (Tie-Breaker) ---
+          const wasInTieBreak = useRef(false);
+
+          useEffect(() => {
+              if (lobby.phase === 'ceremony') {
+                  // Segna se l'utente finisce in un tie-breaker
+                  if (lobby.ceremonyData?.tieMatch?.candidates?.includes(user.uid)) {
+                      wasInTieBreak.current = true;
+                  }
+                  
+                  // Quando il falò finisce, controlla se era nel tie-break e non è stato eliminato
+                  if (lobby.ceremonyData?.finalReveal && wasInTieBreak.current) {
+                      const eliminated = Array.isArray(lobby.ceremonyData.eliminated) ? lobby.ceremonyData.eliminated : [lobby.ceremonyData.eliminated].filter(Boolean);
+                      
+                      if (!eliminated.includes(user.uid)) {
+                          const eventKey = `sopravvissuto_${lobbyId}_${lobby.round}`;
+                          if (!processedAchievements.current.has(eventKey)) {
+                              updateAchievement('sopravvissuto', 1, 10);
+                              processedAchievements.current.add(eventKey);
+                          }
+                      }
+                      wasInTieBreak.current = false; // Reset per il prossimo
+                  }
+              } else {
+                  wasInTieBreak.current = false;
+              }
+          }, [lobby.phase, lobby.ceremonyData, user.uid, lobbyId, updateAchievement]);
+
+          // --- TRACKING ACHIEVEMENTS: CAMPIONE, VETERANO & MVP ---
+          useEffect(() => {
+              // Controlla se la stagione è finita (o il gioco intero) e se ci sono vincitori
+              if ((lobby.phase === 'season_setup' || lobby.phase === 'game_over') && lobby.seasonWinners?.length > 0) {
+                  // Usa l'indice della stagione come chiave per non contarlo 2 volte
+                  const seasonIndex = lobby.phase === 'game_over' ? lobby.config.numSeasons - 1 : lobby.currentSeasonIndex - 1;
+                  const eventKey = `vittoria_stats_${lobbyId}_stagione_${seasonIndex}`;
+                  
+                  if (!processedAchievements.current.has(eventKey)) {
+                      // 1. Campione & Veterano
+                      const lastWinnerName = lobby.seasonWinners[lobby.seasonWinners.length - 1];
+                      if (myPlayer?.name === lastWinnerName) {
+                          updateAchievement('campione', 1, 1);
+                          updateAchievement('veterano', 1, 5);
+                      }
+
+                      // 2. M.V.P. (Maggior numero di immunità)
+                      const currentSeasonName = SEASON_CONFIG[seasonIndex]?.name;
+                      // Filtra la classifica globale solo per i giocatori di questa stagione specifica
+                      const currentSeasonRankings = lobby.rankings.filter(r => r.season === currentSeasonName);
+                      
+                      if (currentSeasonRankings.length > 0) {
+                          let maxImmunities = 0;
+                          // Trova il numero massimo di immunità
+                          currentSeasonRankings.forEach(r => {
+                              if ((r.immunities || 0) > maxImmunities) maxImmunities = r.immunities;
+                          });
+
+                          // Cerca le stats del giocatore umano in questa stagione
+                          const myRanking = currentSeasonRankings.find(r => r.name === myPlayer?.name);
+                          // Se esiste, se ha raggiunto il massimo e se il massimo è > 0 (per evitare che te lo dia se tutti hanno 0)
+                          if (myRanking && (myRanking.immunities || 0) === maxImmunities && maxImmunities > 0) {
+                              updateAchievement('mvp', 1, 2);
+                          }
+                      }
+
+                      processedAchievements.current.add(eventKey);
+                  }
+              }
+          }, [lobby.phase, lobby.seasonWinners, lobby.rankings, myPlayer?.name, lobbyId, lobby.currentSeasonIndex, lobby.config.numSeasons, updateAchievement]);
+
+          // --- TRACKING ACHIEVEMENT: PUGNALATORE & IDOLO ---
+          useEffect(() => {
+              if (!lobby || !user || !myPlayer) return;
+              
+              // Controlla se siamo alla fine della cerimonia (quando vengono rivelati gli eliminati)
+              if (lobby.phase === 'ceremony' && lobby.ceremonyData?.finalReveal) {
+                  // Crea una chiave unica per questo evento per evitare di contarlo 2 volte a causa dei re-render di React
+                  const eventKey = `ceremony_achievements_${lobbyId}_${lobby.round}`;
+                  if (processedAchievements.current.has(eventKey)) return;
+
+                  // 1. Pugnalatore
+                  const myVote = lobby.votes?.[user.uid];
+                  const victims = Array.isArray(lobby.ceremonyData.eliminated) 
+                      ? lobby.ceremonyData.eliminated 
+                      : [lobby.ceremonyData.eliminated].filter(Boolean);
+
+                  // Se io ho votato per la vittima, e la vittima è effettivamente uscita (non è stata salvata da idoli), 
+                  // E la vittima faceva parte della MIA lista alleanze (prima che venisse sbattuta fuori)
+                  if (myVote && victims.includes(myVote) && myPlayer.alliances?.includes(myVote)) {
+                      updateAchievement('pugnalatore', 1, 5); // Aggiunge 1 al progresso (max 5)
+                  }
+
+                  // 2. Idolo ("Pensavi di esserti sbarazzato di me?")
+                  if (lobby.ceremonyData.idolPlayedBy === user.uid) {
+                      updateAchievement('idolo', 1, 1);
+                  }
+                  
+                  processedAchievements.current.add(eventKey);
+              }
+          }, [lobby.phase, lobby.ceremonyData?.finalReveal, lobby.round, lobbyId, lobby.votes, myPlayer, user.uid, updateAchievement]);
+
 
           // Fix: Reset delle azioni al nuovo round sociale
           useEffect(() => {
