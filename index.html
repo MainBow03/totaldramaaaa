@@ -311,6 +311,53 @@
             100% { transform: rotate(360deg) scale(1); }
         }
 
+        /* Effetto Tre Moschettieri */
+        .cosmetic-moschettieri {
+            position: relative !important;
+            border: 2px solid #3b82f6 !important; /* Blue 500 */
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.6), inset 0 0 10px rgba(96, 165, 250, 0.4) !important;
+        }
+        .cosmetic-moschettieri::after {
+            content: '⚔️';
+            position: absolute;
+            bottom: -8px;
+            right: -8px;
+            font-size: 16px;
+            filter: drop-shadow(0 0 5px #eab308);
+            animation: clash 2s infinite alternate;
+            z-index: 10;
+            pointer-events: none;
+        }
+        @keyframes clash {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(15deg); }
+            100% { transform: scale(1) rotate(-10deg); }
+        }
+
+        /* Effetto Ineluttabile (Gemme dell'Infinito) */
+        .cosmetic-ineluttabile {
+            position: relative !important;
+            border: 2px solid #d946ef !important; /* Fuchsia 500 */
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.7) !important;
+            isolation: isolate;
+        }
+        .cosmetic-ineluttabile::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: inherit;
+            /* Colori delle Gemme dell'Infinito */
+            background: conic-gradient(from 0deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #a855f7, #ef4444);
+            z-index: -1;
+            animation: rotateInfinity 3s linear infinite;
+            filter: blur(4px);
+            opacity: 0.85;
+        }
+        @keyframes rotateInfinity {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* --- NUOVI STILI COSMETICI PREMIUM (Senza Lampeggio) --- */
         .cosmetic-campione {
             position: relative !important;
@@ -525,7 +572,9 @@
                 'cacciatoredivantaggi': 'cosmetic-diamond', // Effetto diamante ciano con stelline animate
                 'farfallasociale': 'cosmetic-butterfly', // Aura rosa con farfalle animate
                 'dramaqueen': 'cosmetic-toxic', // Bolle e veleno verde
-                'tiseioffeso': 'cosmetic-ice' // Fiocco di neve rotante
+                'tiseioffeso': 'cosmetic-ice', // Fiocco di neve rotante
+                'itremoschettieri': 'cosmetic-moschettieri', // Effetto spade incrociate
+                'ineluttabile': 'cosmetic-ineluttabile' // Aura stile Gemme dell'Infinito
             };
             return cosmetics[cosmeticId] || '';
         };
@@ -762,6 +811,8 @@
         const HEROES = ["Marinette", "Adrien", "Owen", "Lindsay", "Yoshi", "Luigi", "Zatch Bell", "Steven", "Ponygon", "Jake DC", "Finn", "Mortino", "Spongebob", "Sonic", "Robin TT", "Aang", "Rena Rouge", "Gommarosa", "Doraemon", "Shizuka", "Clark", "Hiro", "Hiccup", "Sdentato", "Gatto con gli stivali", "Megara", "Sypha"];
         const VILLAINS_LIST = ["Dr Eggman", "Chrysalis", "Heather", "Alejandro", "Bowser", "Vicky", "Stewie", "Fiore", "Shego", "Scar", "Yzma", "Malefica", "Ghostface", "Plankton", "Poison Ivy", "Argos", "Azula", "Sephiroth", "Helga", "Morte"];
         const NEUTRALS = ["Kratos", "Squiddi", "Mr Krab", "Zuko", "Bowser Jr", "Trixie", "Anastasia", "Re Ghiaccio", "Francine", "Dr Doofenshmirtz", "Vanessa", "Bart", "Brago", "Wario", "Waluigi", "Duncan", "Baki", "Legoshi"];
+
+        const FEMALES = ["Marinette", "Alya", "Rena Rouge", "Heartfixer", "Chrysalis", "Nathalie", "Kagami", "Gwen", "Julia", "Heather", "Courtney", "Lindsay", "Ran", "Rias", "Bayonetta", "Rosalinda", "Peach", "Daisy", "Pauline", "Tio", "Penny", "Perla", "Garnet", "Peridot", "Lapis", "Ametista", "Nicole", "Anais", "Lisa", "Marge", "Neera", "Candace", "Vanessa", "Isabella", "Nonnina", "Corvina GO", "Corvina TT", "Stellarubia GO", "Daphne", "Velma", "Francine", "Hayley", "Lois", "Leela", "Kim", "Tess", "Ashley", "Grett", "Fiore", "Ally", "Isabelle", "Anastasia", "Trixie", "Vicky", "Fiona", "Cake", "Gommarosa", "Marceline", "Zoey", "Rochelle", "Nezuko", "Shinobu", "Katara", "Toph", "Miss Martian", "Zatanna", "Draculaura", "Clawdeen", "Frankie", "Shego", "Ariana Grande", "Will", "Poison Ivy", "Malefica", "Yzma", "Aurora", "Gardevoir", "Roserade", "Clover", "Sam", "Gwen Tennyson", "Shizuka", "Helga", "Megara", "Sypha"];
 
         // --- TITOLI PERSONAGGI ---
         const CHARACTER_TITLES = {
@@ -1574,6 +1625,8 @@
                   farfallasociale: { progress: 0, unlocked: false },
                   dramaqueen: { progress: 0, unlocked: false },
                   tiseioffeso: { progress: 0, unlocked: false },
+                  itremoschettieri: { progress: 0, unlocked: false },
+                  ineluttabile: { progress: 0, unlocked: false },
                   title_Marinette: { progress: 0, unlocked: false }
               };
               
@@ -1598,6 +1651,20 @@
                       console.log(`🏆 Achievement Sbloccato: ${id}!`);
                   }
                   const nextState = { ...prev, [id]: { progress: newProgress, unlocked } };
+                  localStorage.setItem('td_achievements', JSON.stringify(nextState));
+                  return nextState;
+              });
+          };
+
+          const setAchievementProgress = (id, progress, max) => {
+              setAchievements(prev => {
+                  if (prev[id]?.unlocked) return prev;
+                  const unlocked = progress >= max;
+                  if (unlocked && (!prev[id] || !prev[id].unlocked)) {
+                      setTimeout(() => playSound('success'), 500);
+                      console.log(`🏆 Achievement Sbloccato: ${id}!`);
+                  }
+                  const nextState = { ...prev, [id]: { progress: progress, unlocked } };
                   localStorage.setItem('td_achievements', JSON.stringify(nextState));
                   return nextState;
               });
@@ -1877,6 +1944,7 @@
                   lobby={lobbyData} user={user} lobbyId={currentLobbyId} 
                   onLeave={() => { setCurrentLobbyId(null); setCurrentView('browser'); }}
                   updateAchievement={updateAchievement}
+                  setAchievementProgress={setAchievementProgress}
                 />
               )}
             </div>
@@ -1989,6 +2057,8 @@
                               const val = e.target.value;
                               if (val === 'Brains vs Beauties vs Brawns' || val === 'Eroi vs Villains vs Neutrali') {
                                   setConfig({...config, theme: val, numTeams: 3});
+                              } else if (val === 'Girly pop') {
+                                  setConfig({...config, theme: val, numTeams: 4});
                               } else if (val === 'La Notte del Giudizio' || val === 'Popolarità') {
                                   setConfig({...config, theme: val, numTeams: 1, mergeSize: config.maxPlayers});
                               } else {
@@ -1999,6 +2069,7 @@
                       >
                           <option value="Tutti">Tutti (Roster Completo)</option>
                           <option value="Villain Edition">Villain Edition (Solo Cattivi)</option>
+                          <option value="Girly pop">Girly pop (Girl Edition, 4 Team)</option>
                           <option value="Brains vs Beauties vs Brawns">Brains vs Beauties vs Brawns</option>
                           <option value="Eroi vs Villains vs Neutrali">Eroi vs Villains vs Neutrali</option>
                           <option value="La Notte del Giudizio">La Notte del Giudizio (Tutti vs Tutti, Voto ai Peggiori 2)</option>
@@ -2038,7 +2109,7 @@
                     <div>
                       <label className="block text-slate-400 font-bold mb-2">Squadre (2 - 8)</label>
                       <div className="flex items-center gap-4">
-                        <input type="range" min="2" max="8" value={config.numTeams} disabled={config.theme === 'Brains vs Beauties vs Brawns' || config.theme === 'Eroi vs Villains vs Neutrali' || config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità'} onChange={e => setConfig({...config, numTeams: parseInt(e.target.value)})} className="flex-1 accent-blue-500 disabled:opacity-50" />
+                        <input type="range" min="2" max="8" value={config.numTeams} disabled={config.theme === 'Brains vs Beauties vs Brawns' || config.theme === 'Eroi vs Villains vs Neutrali' || config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità' || config.theme === 'Girly pop'} onChange={e => setConfig({...config, numTeams: parseInt(e.target.value)})} className="flex-1 accent-blue-500 disabled:opacity-50" />
                         <span className="text-2xl font-bold w-12 text-center">{config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità' ? 1 : config.numTeams}</span>
                       </div>
                     </div>
@@ -2678,6 +2749,58 @@
                                   </div>
                               </div>
 
+                              {/* ACHIEVEMENT: I TRE MOSCHETTIERI */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.itremoschettieri?.unlocked ? 'border-blue-500 bg-blue-900/20 shadow-[0_0_20px_rgba(59,130,246,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                  <div className="flex justify-between items-center mb-2">
+                                      <span className={`font-black text-lg flex items-center gap-2 ${achievements.itremoschettieri?.unlocked ? 'text-blue-400 drop-shadow-[0_0_5px_rgba(59,130,246,0.8)]' : 'text-slate-300'}`}>
+                                          <Swords size={20} className={achievements.itremoschettieri?.unlocked ? 'text-blue-300' : 'text-slate-500'}/> I Tre Moschettieri
+                                      </span>
+                                      <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-blue-400 font-bold">
+                                          {achievements.itremoschettieri?.progress || 0} / 10
+                                      </span>
+                                  </div>
+                                  <p className="text-sm text-slate-400 mb-3">Fonda un'Alleanza a 3 (Trio) con successo per 10 volte.</p>
+                                  <div className="flex items-center justify-between mt-2">
+                                      <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                          <div className={`h-full rounded-full transition-all duration-1000 ${achievements.itremoschettieri?.unlocked ? 'bg-blue-500 shadow-[0_0_10px_#3b82f6]' : 'bg-slate-500'}`} style={{ width: `${((achievements.itremoschettieri?.progress || 0) / 10) * 100}%` }}></div>
+                                      </div>
+                                      {achievements.itremoschettieri?.unlocked && (
+                                          <button 
+                                              onClick={() => toggleEquipCosmetic('itremoschettieri')}
+                                              className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'itremoschettieri' ? 'bg-blue-500 text-black border-white shadow-[0_0_15px_rgba(59,130,246,1)]' : 'bg-slate-800 text-blue-400 border-blue-500 hover:bg-blue-900/50'}`}
+                                          >
+                                              {equippedCosmetic === 'itremoschettieri' ? 'EQUIPAGGIATO' : 'AURA SPADE'}
+                                          </button>
+                                      )}
+                                  </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: INELUTTABILE */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.ineluttabile?.unlocked ? 'border-fuchsia-500 bg-fuchsia-900/20 shadow-[0_0_15px_rgba(217,70,239,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.ineluttabile?.unlocked ? 'text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-yellow-400' : 'text-slate-300'}`}>
+                                         <Shield size={20} className={achievements.ineluttabile?.unlocked ? 'text-fuchsia-400' : 'text-slate-500'}/> Io, Sono, Ineluttabile.
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-fuchsia-400 font-bold">
+                                         {achievements.ineluttabile?.progress || 0} / 5
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Ricevi 0 voti per 5 volte di fila durante la fase Fusione (Merge).</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.ineluttabile?.unlocked ? 'bg-gradient-to-r from-fuchsia-500 to-yellow-400 shadow-[0_0_10px_#d946ef]' : 'bg-slate-500'}`} style={{ width: `${((achievements.ineluttabile?.progress || 0) / 5) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.ineluttabile?.unlocked && (
+                                         <button
+                                             onClick={() => toggleEquipCosmetic('ineluttabile')}
+                                             className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'ineluttabile' ? 'bg-fuchsia-500 text-white border-fuchsia-400 shadow-[0_0_15px_rgba(217,70,239,0.8)]' : 'bg-slate-800 text-fuchsia-400 border-fuchsia-500 hover:bg-fuchsia-900/50'}`}
+                                         >
+                                             {equippedCosmetic === 'ineluttabile' ? 'EQUIPAGGIATO' : 'AURA INFINITA'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+
                               <div className="p-4 border-2 border-dashed border-slate-700 bg-slate-800/50 rounded-xl text-center">
                                   <Lock size={24} className="mx-auto text-slate-500 mb-2"/>
                                   <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Altri trofei in arrivo...</p>
@@ -2765,6 +2888,7 @@
             // FUNZIONE FILTRO TEMA STAGIONE
             const themeFilter = (r) => {
                 if (lobby.config.theme === 'Villain Edition') return r.alignment === 'villain';
+                if (lobby.config.theme === 'Girly pop') return FEMALES.includes(r.name);
                 if (lobby.config.theme === 'Brains vs Beauties vs Brawns') return BRAINS.includes(r.name) || BEAUTIES.includes(r.name) || BRAWNS.includes(r.name);
                 if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') return HEROES.includes(r.name) || VILLAINS_LIST.includes(r.name) || NEUTRALS.includes(r.name);
                 return true; 
@@ -2873,7 +2997,7 @@
             }
 
             const numTeams = lobby.config.numTeams;
-            const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : DEFAULT_TEAM_NAMES;
+            const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : lobby.config.theme === 'Girly pop' ? ["Girly pop", "Amazzoni", "Yuri", "Dive"] : DEFAULT_TEAM_NAMES;
 
             if (lobby.config.theme === 'Brains vs Beauties vs Brawns') {
                 currentPlayers = currentPlayers.map(p => {
@@ -3249,6 +3373,7 @@
                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
                      {ROSTER.filter(char => {
                          if (lobby.config.theme === 'Villain Edition') return char.alignment === 'villain';
+                         if (lobby.config.theme === 'Girly pop') return FEMALES.includes(char.name);
                          if (lobby.config.theme === 'Brains vs Beauties vs Brawns') return BRAINS.includes(char.name) || BEAUTIES.includes(char.name) || BRAWNS.includes(char.name);
                          if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') return HEROES.includes(char.name) || VILLAINS_LIST.includes(char.name) || NEUTRALS.includes(char.name);
                          return true;
@@ -3318,7 +3443,7 @@
 
         // --- GAME LOGIC ---
 
-        const GameRoom = ({ lobby, user, lobbyId, onLeave, updateAchievement }) => {
+        const GameRoom = ({ lobby, user, lobbyId, onLeave, updateAchievement, setAchievementProgress }) => {
           const isHost = lobby.hostId === user.uid;
           const myPlayer = lobby.players.find(p => p.uid === user.uid);
           const activePlayers = lobby.players.filter(p => p.status === 'active');
@@ -3397,6 +3522,36 @@
                   }
               } catch(e) { console.error("Errore update stats", e); }
           };
+
+          // --- TRACKING ACHIEVEMENT: INELUTTABILE ---
+          const zeroVoteStreak = useRef(0);
+
+          useEffect(() => {
+              if (!lobby || !user || !myPlayer) return;
+
+              if (lobby.phase === 'ceremony' && lobby.ceremonyData?.finalReveal) {
+                  const eventKey = `ineluttabile_${lobbyId}_${lobby.round}`;
+                  if (processedAchievements.current.has(eventKey)) return;
+
+                  if (isMerge && myPlayer.status === 'active') {
+                      const myVotes = lobby.ceremonyData.voteCounts?.[user.uid] || 0;
+                      if (myVotes === 0) {
+                          zeroVoteStreak.current += 1;
+                          setAchievementProgress('ineluttabile', zeroVoteStreak.current, 5);
+                      } else {
+                          zeroVoteStreak.current = 0;
+                          setAchievementProgress('ineluttabile', 0, 5);
+                      }
+                  } else if (!isMerge) {
+                      zeroVoteStreak.current = 0;
+                      setAchievementProgress('ineluttabile', 0, 5);
+                  }
+
+                  // Non inseriamo eventKey nel Set globale qui, altrimenti blocca l'altro useEffect della cerimonia. 
+                  // Usiamo un Set locale per questo specifico achievement
+              }
+          }, [lobby.phase, lobby.ceremonyData?.finalReveal, lobby.round, lobbyId, myPlayer, user.uid, setAchievementProgress, isMerge]);
+
 
           // --- TRACKING ACHIEVEMENT: SOPRAVVISSUTO (Tie-Breaker) ---
           const wasInTieBreak = useRef(false);
@@ -4581,6 +4736,7 @@
             const numTeams = newConfig.numTeams;
             let currentTeamNames = DEFAULT_TEAM_NAMES;
             if (lobby.config.theme === 'Villain Edition') currentTeamNames = VILLAIN_TEAM_NAMES;
+            else if (lobby.config.theme === 'Girly pop') currentTeamNames = ["Girly pop", "Amazzoni", "Yuri", "Dive"];
             else if (lobby.config.theme === 'Custom') {
                 // Recupera i nomi scelti custom per mantenerli nella Stagione 2
                 currentTeamNames = [...new Set(lobby.players.map(p => p.team).filter(t => t && t !== 'MERGE'))];
@@ -5987,6 +6143,8 @@
                       updatedPlayers[thirdIdx].relationships[targetId] = (updatedPlayers[thirdIdx].relationships[targetId] || 0) + 3;
 
                       msg = `🤝 PATTO DI SANGUE! Hai formato una POTENTE Alleanza a 3 con ${targetName} e ${thirdName}! (Tutti +3 Relazione)`;
+                      
+                      updateAchievement('itremoschettieri', 1, 10); // <-- TRACKING PROGRESSO
                   } else {
                       updatedPlayers[targetIdx].relationships[user.uid] = (updatedPlayers[targetIdx].relationships[user.uid] || 0) - 1; 
                       updatedPlayers[thirdIdx].relationships[user.uid] = (updatedPlayers[thirdIdx].relationships[user.uid] || 0) - 1; 
@@ -6316,6 +6474,8 @@
                      currentTeamNames = ["Brains", "Beauties", "Brawns"];
                  } else if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') {
                      currentTeamNames = ["Eroi", "Villains", "Neutrali"];
+                 } else if (lobby.config.theme === 'Girly pop') {
+                     currentTeamNames = ["Girly pop", "Amazzoni", "Yuri", "Dive"];
                  } else if (lobby.config.theme === 'Custom') {
                      // MODIFICA: in Custom ignoriamo i preset e prendiamo i team che l'Host ha effettivamente generato!
                      currentTeamNames = [...new Set(lobby.players.map(p => p.team).filter(t => t && t !== 'MERGE'))];
@@ -6924,6 +7084,11 @@
                                     'Eroi': { bg: 'bg-blue-900/40', border: 'border-blue-500', text: 'text-blue-400' },
                                     'Villains': { bg: 'bg-red-900/40', border: 'border-red-500', text: 'text-red-400' },
                                     'Neutrali': { bg: 'bg-gray-700/40', border: 'border-gray-500', text: 'text-gray-300' },
+
+                                    'Girly pop': { bg: 'bg-pink-900/40', border: 'border-pink-400', text: 'text-pink-300' },
+                                    'Amazzoni': { bg: 'bg-emerald-900/40', border: 'border-emerald-400', text: 'text-emerald-300' },
+                                    'Yuri': { bg: 'bg-purple-900/40', border: 'border-purple-400', text: 'text-purple-300' },
+                                    'Dive': { bg: 'bg-rose-900/40', border: 'border-rose-400', text: 'text-rose-300' },
 
                                     'MERGE': { bg: 'bg-yellow-600/30', border: 'border-yellow-400', text: 'text-yellow-300' }
                                  };
