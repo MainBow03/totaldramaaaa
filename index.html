@@ -128,6 +128,284 @@
             0% { opacity: 0.7; }
             100% { opacity: 1; }
         }
+
+        /* Effetto Fiamma Suprema per Mano Incandescente */
+        .cosmetic-incandescente {
+            position: relative !important;
+            border: 2px solid #fde047 !important; /* Giallo brillante */
+            box-shadow: 0 0 30px rgba(249, 115, 22, 1), inset 0 0 20px rgba(250, 204, 21, 0.9) !important;
+        }
+        .cosmetic-incandescente::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: -2px; right: -2px; height: 85%;
+            background: linear-gradient(to top, rgba(255, 255, 255, 0.95), rgba(250, 204, 21, 0.8), rgba(239, 68, 68, 0.5), transparent);
+            border-radius: inherit;
+            pointer-events: none;
+            animation: superFirePulse 0.25s infinite alternate; /* Pulsazione più veloce e aggressiva */
+            z-index: 20;
+        }
+        @keyframes superFirePulse {
+            0% { opacity: 0.85; filter: brightness(1.2) contrast(1.1); transform: scaleY(1); }
+            100% { opacity: 1; filter: brightness(1.5) contrast(1.2); transform: scaleY(1.05); }
+        }
+
+        /* Effetto Ombra per Ladro di Palcoscenico (Senza lampeggio globale) */
+        .cosmetic-shadow {
+            position: relative !important;
+            border: 2px solid #020617 !important; /* Nero/Slate scurissimo */
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.9) !important;
+            isolation: isolate; /* Crea un nuovo contesto di stacking per non coprire altri elementi */
+        }
+        .cosmetic-shadow::after {
+            content: '';
+            position: absolute;
+            inset: -6px; /* Sborda leggermente per l'effetto ombra */
+            border-radius: inherit;
+            /* Gradiente conico nero/viola scuro che ruota */
+            background: conic-gradient(from 0deg, transparent, rgba(30, 27, 75, 0.8), rgba(0, 0, 0, 1), rgba(30, 27, 75, 0.8), transparent);
+            z-index: -1; /* Sta rigorosamente dietro l'immagine */
+            animation: rotateShadow 4s linear infinite;
+            filter: blur(3px); /* Ammorbidisce i bordi del gradiente */
+        }
+        @keyframes rotateShadow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Effetto Fantasma per Fantasma per Eccellenza */
+        .cosmetic-ghost {
+            position: relative !important;
+            border: 2px solid #2dd4bf !important; /* Teal 400 */
+            box-shadow: 0 0 20px rgba(45, 212, 191, 0.6) !important;
+            animation: floatGhost 3s ease-in-out infinite alternate !important;
+        }
+        .cosmetic-ghost::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(45, 212, 191, 0.4), transparent);
+            border-radius: inherit;
+            pointer-events: none;
+            z-index: 10;
+        }
+        @keyframes floatGhost {
+            0% { transform: translateY(0px); filter: hue-rotate(0deg); }
+            100% { transform: translateY(-4px); filter: hue-rotate(15deg); }
+        }
+
+        /* Effetto Diamante per Cacciatore di Vantaggi */
+        .cosmetic-diamond {
+            position: relative !important;
+            border: 2px solid #22d3ee !important; /* Cyan 400 */
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.6), inset 0 0 15px rgba(103, 232, 249, 0.5) !important;
+        }
+        .cosmetic-diamond::after {
+            content: '✨';
+            position: absolute;
+            top: -10px; right: -8px;
+            font-size: 16px;
+            color: #a5f3fc;
+            filter: drop-shadow(0 0 5px #22d3ee);
+            animation: twinkleStar 1.5s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .cosmetic-diamond::before {
+            content: '✦';
+            position: absolute;
+            bottom: -6px; left: -6px;
+            font-size: 14px;
+            color: #67e8f9;
+            filter: drop-shadow(0 0 5px #06b6d4);
+            animation: twinkleStar 2s ease-in-out infinite alternate-reverse;
+            pointer-events: none;
+            z-index: 10;
+        }
+        @keyframes twinkleStar {
+            0% { opacity: 0.4; transform: scale(0.7) rotate(0deg); }
+            100% { opacity: 1; transform: scale(1.3) rotate(20deg); filter: brightness(1.5); }
+        }
+
+        /* Effetto Farfalla per Farfalla Sociale */
+        .cosmetic-butterfly {
+            position: relative !important;
+            border: 2px solid #f472b6 !important; /* Pink 400 */
+            box-shadow: 0 0 15px rgba(244, 114, 182, 0.4), inset 0 0 10px rgba(244, 114, 182, 0.2) !important;
+        }
+        .cosmetic-butterfly::before {
+            content: '🦋';
+            position: absolute;
+            top: -10px; left: -10px;
+            font-size: 14px;
+            animation: flutter 3s ease-in-out infinite alternate;
+            z-index: 10;
+        }
+        .cosmetic-butterfly::after {
+            content: '🦋';
+            position: absolute;
+            bottom: -5px; right: -10px;
+            font-size: 12px;
+            animation: flutter 4s ease-in-out infinite alternate-reverse;
+            z-index: 10;
+        }
+        @keyframes flutter {
+            0% { transform: translate(0, 0) rotate(-10deg) scale(0.9); opacity: 0.8; }
+            50% { transform: translate(5px, -10px) rotate(10deg) scale(1.1); opacity: 1; }
+            100% { transform: translate(-5px, -5px) rotate(-5deg) scale(1); opacity: 0.8; }
+        }
+
+        /* Effetto Tossico per Drama Queen */
+        .cosmetic-toxic {
+            position: relative !important;
+            border: 2px solid #84cc16 !important; /* Lime 500 */
+            box-shadow: 0 0 15px rgba(132, 204, 22, 0.5), inset 0 0 10px rgba(132, 204, 22, 0.3) !important;
+        }
+        .cosmetic-toxic::after {
+            content: '🫧';
+            position: absolute;
+            bottom: -5px;
+            left: 5px;
+            font-size: 14px;
+            animation: floatBubbles 3s ease-in infinite;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .cosmetic-toxic::before {
+            content: '💧';
+            position: absolute;
+            top: -5px;
+            right: 5px;
+            font-size: 14px;
+            animation: floatBubbles 2.5s ease-in infinite 1s;
+            z-index: 10;
+            filter: hue-rotate(90deg);
+            pointer-events: none;
+        }
+        @keyframes floatBubbles {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 0.8; }
+            100% { transform: translateY(-30px) scale(1.2); opacity: 0; }
+        }
+
+        /* Effetto Ghiaccio per Ti Sei Offeso */
+        .cosmetic-ice {
+            position: relative !important;
+            border: 2px solid #38bdf8 !important; /* Sky 400 */
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.6), inset 0 0 15px rgba(186, 230, 253, 0.5) !important;
+        }
+        .cosmetic-ice::after {
+            content: '❄️';
+            position: absolute;
+            top: -10px;
+            right: -8px;
+            font-size: 16px;
+            animation: spinIce 4s linear infinite;
+            z-index: 10;
+            pointer-events: none;
+        }
+        @keyframes spinIce {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        /* --- NUOVI STILI COSMETICI PREMIUM (Senza Lampeggio) --- */
+        .cosmetic-campione {
+            position: relative !important;
+            box-shadow: 0 0 20px rgba(250, 204, 21, 0.5) !important;
+        }
+        .cosmetic-campione::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 10; /* Lo mantiene sopra l'immagine */
+            border-radius: inherit;
+            padding: 3px; /* Spessore bordo */
+            background: linear-gradient(45deg, #fef08a, #ca8a04, #fef08a, #a16207);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .cosmetic-veterano {
+            position: relative !important;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5) !important;
+        }
+        .cosmetic-veterano::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            border-radius: inherit;
+            border: 2px solid rgba(52, 211, 153, 0.8);
+            box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.4);
+            pointer-events: none;
+        }
+
+        .cosmetic-pugnalatore {
+            position: relative !important;
+            box-shadow: -5px 0 15px rgba(220, 38, 38, 0.5), 5px 0 15px rgba(220, 38, 38, 0.5) !important;
+        }
+        .cosmetic-pugnalatore::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            border-radius: inherit;
+            border-left: 3px solid #dc2626;
+            border-right: 3px solid #dc2626;
+            pointer-events: none;
+        }
+
+        .cosmetic-sopravvissuto {
+            position: relative !important;
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.7), 0 0 40px rgba(234, 88, 12, 0.3) !important;
+        }
+        .cosmetic-sopravvissuto::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            border-radius: inherit;
+            border: 2px solid #f97316;
+            pointer-events: none;
+        }
+
+        .cosmetic-mvp {
+            position: relative !important;
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.6) !important;
+        }
+        .cosmetic-mvp::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            border-radius: inherit;
+            border: 2px solid #22d3ee;
+            box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.3); /* Simula il doppio bordo hi-tech */
+            pointer-events: none;
+        }
+
+        .cosmetic-idolo {
+            position: relative !important;
+            box-shadow: 0 0 25px rgba(217, 70, 239, 0.5) !important;
+        }
+        .cosmetic-idolo::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            border-radius: inherit;
+            padding: 3px;
+            background: linear-gradient(135deg, #e879f9, #c026d3, #86198f);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white">
@@ -232,15 +510,22 @@
         const getCosmeticClasses = (cosmeticId) => {
             if (!cosmeticId) return '';
             const cosmetics = {
-                'campione': 'ring-4 ring-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.9)] animate-pulse', // Bagliore dorato
-                'veterano': 'ring-4 ring-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.9)] animate-pulse', // Bagliore smeraldo
-                'pugnalatore': 'ring-4 ring-red-600 shadow-[0_0_20px_rgba(220,38,38,0.9)] animate-pulse', // Bagliore rosso sangue
-                'sopravvissuto': 'ring-4 ring-orange-500 shadow-[0_0_25px_rgba(249,115,22,1)] animate-pulse', // Bagliore di fuoco
+                'campione': 'cosmetic-campione', // Gradiente oro rotante
+                'veterano': 'cosmetic-veterano', // Bordo smeraldo con luce interna
+                'pugnalatore': 'cosmetic-pugnalatore', // Lame laterali rosso sangue
+                'sopravvissuto': 'cosmetic-sopravvissuto', // Doppio bagliore di fuoco intenso
                 'dolcezza': 'cosmetic-bow', // Fiocco e cuoricino fluttuante
-                'mvp': 'ring-4 ring-cyan-400 shadow-[0_0_25px_rgba(34,211,238,0.9)] animate-pulse', // Aura Ciano Neon
-                'idolo': 'ring-4 ring-fuchsia-500 shadow-[0_0_25px_rgba(217,70,239,0.9)] animate-pulse', // Aura Magenta
-                'agente007': 'ring-2 ring-offset-2 ring-offset-slate-900 ring-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.9)] border-dashed animate-pulse', // Aura Radar Spia
-                'mibrucialamano': 'cosmetic-fire' // Fiamma custom
+                'mvp': 'cosmetic-mvp', // Doppio bordo neon tech
+                'idolo': 'cosmetic-idolo', // Gradiente magenta magico
+                'agente007': 'ring-2 ring-offset-2 ring-offset-slate-900 ring-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.9)] border-dashed animate-[pulse_3s_cubic-bezier(0.4,0,0.6,1)_infinite]', // L'UNICO LAMPEGGIANTE: Aura Radar Spia lenta
+                'mibrucialamano': 'cosmetic-fire', // Fiamma custom alla base
+                'manoincandescente': 'cosmetic-incandescente', // Fiamma bianca/gialla suprema
+                'ladrodipalcoscenico': 'cosmetic-shadow', // Aura oscura rotante posteriore
+                'fantasmadereccellenza': 'cosmetic-ghost', // Aura fluttuante color teal
+                'cacciatoredivantaggi': 'cosmetic-diamond', // Effetto diamante ciano con stelline animate
+                'farfallasociale': 'cosmetic-butterfly', // Aura rosa con farfalle animate
+                'dramaqueen': 'cosmetic-toxic', // Bolle e veleno verde
+                'tiseioffeso': 'cosmetic-ice' // Fiocco di neve rotante
             };
             return cosmetics[cosmeticId] || '';
         };
@@ -434,7 +719,12 @@
           { name: "Legoshi", img: "https://i.pinimg.com/736x/8e/9f/c6/8e9fc64c44965285cc70260c9ed10a35.jpg", speeches: ["Non voglio fare del male a nessuno, ma devo vincere...", "Ho superato i miei istinti, ora supererò anche questa finale."], isNew: true },
           { name: "Hiro", img: "https://i.pinimg.com/736x/72/6c/a0/726ca0e996a940ac1045763a32fe4247.jpg", speeches: ["Con un po' di ingegno e l'aiuto di Baymax, questa vittoria era assicurata!", "I miei calcoli prevedevano questa finale. Votatemi!"], isNew: true },
           { name: "Hiccup", img: "https://i.pinimg.com/1200x/58/07/c6/5807c6acb073c2c0a7ad088b2078d15b.jpg", speeches: ["Io e Sdentato abbiamo affrontato di peggio di un reality show!", "Dai draghi all'isola, ho imparato che la vera forza è l'amicizia."], isNew: true },
-          { name: "Sdentato", img: "https://i.pinimg.com/736x/02/74/a5/0274a5f38f22c7e4052f58d4deab1721.jpg", speeches: ["*Ruggito felice* (Traduzione: Datemi i soldi per comprare tutto il pesce!)", "*Fa le fusa* (Traduzione: Scegliete me come vincitore!)"], isNew: true }
+          { name: "Sdentato", img: "https://i.pinimg.com/736x/02/74/a5/0274a5f38f22c7e4052f58d4deab1721.jpg", speeches: ["*Ruggito felice* (Traduzione: Datemi i soldi per comprare tutto il pesce!)", "*Fa le fusa* (Traduzione: Scegliete me come vincitore!)"], isNew: true },
+          { name: "Helga", img: "https://i.pinimg.com/736x/5d/91/07/5d9107cc44b9bfa1bd4253479f6b3a25.jpg", alignment: 'villain', isNew: true },
+          { name: "Morte", img: "https://i.pinimg.com/1200x/73/31/5b/73315bdbf731c8bd7950793c9ee5979c.jpg", speeches: ["Corri, corri, gatito. Ma non puoi sfuggirmi.", "Io sono la Morte, e non gioco a nascondino. Ma posso vincere un reality show."], alignment: 'villain', isNew: true },
+          { name: "Gatto con gli stivali", img: "https://i.pinimg.com/736x/23/7f/73/237f732cfb2b93ce2734135db11e0d67.jpg", speeches: ["Chi osa sfidare il Gatto con gli stivali?!", "Per l'onore e per il premio... la vittoria sarà mia!"], isNew: true },
+          { name: "Megara", img: "https://i.pinimg.com/1200x/4f/fb/c6/4ffbc6aa593fad3aa05dcf13d51f2c8c.jpg", speeches: ["Non faccio la damigella in pericolo, so salvarmi da sola.", "Ho venduto la mia anima una volta, non lo farò certo in questo stupido show."], isNew: true },
+          { name: "Sypha", img: "https://i.pinimg.com/736x/68/b6/5a/68b65a3ba9d0f3bbc54a2ed7f89e2576.jpg", speeches: ["Non vi conviene far arrabbiare una Parlatrice.", "Con la mia magia difenderò i miei alleati... ma i soldi spettano a me!"], isNew: true }
         ];
 
         // Frasi fallback generiche per i bot che non ne hanno una specifica
@@ -465,12 +755,12 @@
           "Brains", "Beauties", "Brawns", "Eroi", "Villains", "Neutrali"
         ];
 
-        const BRAINS = ["Marinette", "Kowalski", "Conan", "Anais", "Peridot", "Dr Doofenshmirtz", "Corvina GO", "Corvina TT", "Velma", "Stewie", "Perla", "Wanda", "Shinobu", "Tails", "Gwen Tennyson", "Gommarosa", "Doraemon", "Azula", "Hiro", "Hiccup"];
-        const BEAUTIES = ["Heartfixer", "Gwen", "Heather", "Rias", "Penny", "Stellarubia GO", "Fred", "Anastasia", "Ellis", "Tengen", "Zuko", "Ariana Grande", "Poison Ivy", "Simba", "Leon", "Rena Rouge", "Shizuka", "Sdentato"];
-        const BRAWNS = ["Kagami", "Alejandro", "Lightning", "Bowser", "Brago", "Garnet", "Nicole", "Johnny Bravo", "Robin TT", "Hunter", "Tom", "Tanjiro", "Superboy", "Kratos", "Po", "Argos", "Baki", "Sephiroth", "Clark", "Legoshi"];
+        const BRAINS = ["Marinette", "Kowalski", "Conan", "Anais", "Peridot", "Dr Doofenshmirtz", "Corvina GO", "Corvina TT", "Velma", "Stewie", "Perla", "Wanda", "Shinobu", "Tails", "Gwen Tennyson", "Gommarosa", "Doraemon", "Azula", "Hiro", "Hiccup", "Sypha"];
+        const BEAUTIES = ["Heartfixer", "Gwen", "Heather", "Rias", "Penny", "Stellarubia GO", "Fred", "Anastasia", "Ellis", "Tengen", "Zuko", "Ariana Grande", "Poison Ivy", "Simba", "Leon", "Rena Rouge", "Shizuka", "Sdentato", "Helga", "Megara"];
+        const BRAWNS = ["Kagami", "Alejandro", "Lightning", "Bowser", "Brago", "Garnet", "Nicole", "Johnny Bravo", "Robin TT", "Hunter", "Tom", "Tanjiro", "Superboy", "Kratos", "Po", "Argos", "Baki", "Sephiroth", "Clark", "Legoshi", "Morte", "Gatto con gli stivali"];
 
-        const HEROES = ["Marinette", "Adrien", "Owen", "Lindsay", "Yoshi", "Luigi", "Zatch Bell", "Steven", "Ponygon", "Jake DC", "Finn", "Mortino", "Spongebob", "Sonic", "Robin TT", "Aang", "Rena Rouge", "Gommarosa", "Doraemon", "Shizuka", "Clark", "Hiro", "Hiccup", "Sdentato"];
-        const VILLAINS_LIST = ["Dr Eggman", "Chrysalis", "Heather", "Alejandro", "Bowser", "Vicky", "Stewie", "Fiore", "Shego", "Scar", "Yzma", "Malefica", "Ghostface", "Plankton", "Poison Ivy", "Argos", "Azula", "Sephiroth"];
+        const HEROES = ["Marinette", "Adrien", "Owen", "Lindsay", "Yoshi", "Luigi", "Zatch Bell", "Steven", "Ponygon", "Jake DC", "Finn", "Mortino", "Spongebob", "Sonic", "Robin TT", "Aang", "Rena Rouge", "Gommarosa", "Doraemon", "Shizuka", "Clark", "Hiro", "Hiccup", "Sdentato", "Gatto con gli stivali", "Megara", "Sypha"];
+        const VILLAINS_LIST = ["Dr Eggman", "Chrysalis", "Heather", "Alejandro", "Bowser", "Vicky", "Stewie", "Fiore", "Shego", "Scar", "Yzma", "Malefica", "Ghostface", "Plankton", "Poison Ivy", "Argos", "Azula", "Sephiroth", "Helga", "Morte"];
         const NEUTRALS = ["Kratos", "Squiddi", "Mr Krab", "Zuko", "Bowser Jr", "Trixie", "Anastasia", "Re Ghiaccio", "Francine", "Dr Doofenshmirtz", "Vanessa", "Bart", "Brago", "Wario", "Waluigi", "Duncan", "Baki", "Legoshi"];
 
         // --- TITOLI PERSONAGGI ---
@@ -508,7 +798,7 @@
                 style: "bg-gradient-to-r from-lime-500 via-green-500 to-emerald-600 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(34,197,94,0.4)] tracking-widest font-black text-[11px]"
             },
             "Nathalie": {
-                name: "Segretario",
+                name: "Segretaria",
                 style: "bg-gradient-to-r from-slate-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(59,130,246,0.4)] tracking-widest font-black text-[11px]"
             },
             "Luka": {
@@ -544,7 +834,7 @@
                 style: "bg-gradient-to-r from-green-500 via-emerald-400 to-teal-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(16,185,129,0.4)] tracking-widest font-black text-[11px]"
             },
             "Baby Soldato": {
-                name: "Puro",
+                name: "Puro di cuore",
                 style: "bg-gradient-to-r from-sky-200 via-blue-200 to-indigo-300 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(147,197,253,0.4)] tracking-widest font-black text-[11px]"
             },
             "Gwen": {
@@ -696,7 +986,7 @@
                 style: "bg-gradient-to-r from-blue-500 via-cyan-600 to-slate-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(59,130,246,0.4)] tracking-widest font-black text-[11px]"
             },
             "Gumball": {
-                name: "Imprevedibile",
+                name: "Pieno di Sorprese",
                 style: "bg-gradient-to-r from-sky-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(56,189,248,0.4)] tracking-widest font-black text-[11px]"
             },
             "Anais": {
@@ -808,7 +1098,7 @@
                 style: "bg-gradient-to-r from-blue-400 via-sky-300 to-blue-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(56,189,248,0.4)] tracking-widest font-black text-[11px]"
             },
             "Velma": {
-                name: "Cervellone",
+                name: "Cervellona",
                 style: "bg-gradient-to-r from-orange-500 via-red-500 to-amber-600 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(239,68,68,0.4)] tracking-widest font-black text-[11px]"
             },
             "Francine": {
@@ -902,6 +1192,10 @@
             "Wanda": {
                 name: "Charm",
                 style: "bg-gradient-to-r from-pink-400 via-rose-400 to-pink-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(244,114,182,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Pery": {
+                name: "Sono Fantastico",
+                style: "bg-gradient-to-r from-fuchsia-300 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(217,70,239,0.4)] tracking-widest font-black text-[11px]"
             },
             "Hazel": {
                 name: "Apprendista",
@@ -1222,6 +1516,26 @@
             "Sdentato": {
                 name: "Furia",
                 style: "bg-gradient-to-r from-slate-900 via-black to-blue-900 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] tracking-widest font-black text-[11px]"
+            },
+            "Helga": {
+                name: "Bionda Letale",
+                style: "bg-gradient-to-r from-yellow-300 via-yellow-500 to-slate-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(250,204,21,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Morte": {
+                name: "Fine Personificata",
+                style: "bg-gradient-to-r from-gray-500 via-red-600 to-black bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(220,38,38,0.5)] tracking-widest font-black text-[11px]"
+            },
+            "Gatto con gli stivali": {
+                name: "Spada felina",
+                style: "bg-gradient-to-r from-orange-400 via-amber-500 to-orange-600 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Megara": {
+                name: "Donna Libera",
+                style: "bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(217,70,239,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Sypha": {
+                name: "Voce degli Elementi",
+                style: "bg-gradient-to-r from-blue-400 via-amber-400 to-cyan-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(56,189,248,0.4)] tracking-widest font-black text-[11px]"
             }
         };
 
@@ -1253,6 +1567,13 @@
                   agente007: { progress: 0, unlocked: false },
                   dolcezza: { progress: 0, unlocked: false },
                   mibrucialamano: { progress: 0, unlocked: false },
+                  manoincandescente: { progress: 0, unlocked: false },
+                  ladrodipalcoscenico: { progress: 0, unlocked: false },
+                  fantasmadereccellenza: { progress: 0, unlocked: false },
+                  cacciatoredivantaggi: { progress: 0, unlocked: false },
+                  farfallasociale: { progress: 0, unlocked: false },
+                  dramaqueen: { progress: 0, unlocked: false },
+                  tiseioffeso: { progress: 0, unlocked: false },
                   title_Marinette: { progress: 0, unlocked: false }
               };
               
@@ -2173,6 +2494,188 @@
                                          </button>
                                      )}
                                  </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: MANO INCANDESCENTE (EVOLUZIONE) */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.manoincandescente?.unlocked ? 'border-amber-400 bg-amber-900/20 shadow-[0_0_20px_rgba(251,191,36,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.manoincandescente?.unlocked ? 'text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]' : 'text-slate-300'}`}>
+                                         <Flame size={20} className={achievements.manoincandescente?.unlocked ? 'text-white fill-amber-400' : 'text-slate-500'}/> Mano Incandescente
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-amber-400 font-bold">
+                                         {achievements.manoincandescente?.progress || 0} / 600
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Vota 600 volte ai falò. La tua mano fonde il metallo.</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.manoincandescente?.unlocked ? 'bg-gradient-to-r from-orange-500 to-yellow-300 shadow-[0_0_10px_#fef08a]' : 'bg-slate-500'}`} style={{ width: `${((achievements.manoincandescente?.progress || 0) / 600) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.manoincandescente?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('manoincandescente')}
+                                             className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'manoincandescente' ? 'bg-amber-400 text-black border-white shadow-[0_0_15px_rgba(251,191,36,1)]' : 'bg-slate-800 text-amber-400 border-amber-500 hover:bg-amber-900/50'}`}
+                                         >
+                                             {equippedCosmetic === 'manoincandescente' ? 'EQUIPAGGIATO' : 'FIAMMA SOLARE'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: LADRO DI PALCOSCENICO */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.ladrodipalcoscenico?.unlocked ? 'border-slate-900 bg-slate-950/80 shadow-[0_0_20px_rgba(0,0,0,0.8)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                  <div className="flex justify-between items-center mb-2">
+                                      <span className={`font-black text-lg flex items-center gap-2 ${achievements.ladrodipalcoscenico?.unlocked ? 'text-slate-300 drop-shadow-[0_0_5px_rgba(255,255,255,0.2)]' : 'text-slate-400'}`}>
+                                          <Ghost size={20} className={achievements.ladrodipalcoscenico?.unlocked ? 'text-slate-400' : 'text-slate-600'}/> Ladro di Palcoscenico
+                                      </span>
+                                      <span className="text-xs font-mono bg-black/80 px-2 py-1 rounded text-slate-300 font-bold border border-slate-800">
+                                          {achievements.ladrodipalcoscenico?.progress || 0} / 10
+                                      </span>
+                                  </div>
+                                  <p className="text-sm text-slate-500 mb-3">Ruba l'immunità a qualcuno usando il Ladro di Collane per 10 volte in totale.</p>
+                                  <div className="flex items-center justify-between mt-2">
+                                      <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-800 overflow-hidden mr-4 relative">
+                                          <div className={`h-full rounded-full transition-all duration-1000 ${achievements.ladrodipalcoscenico?.unlocked ? 'bg-gradient-to-r from-slate-700 to-slate-400 shadow-[0_0_10px_#94a3b8]' : 'bg-slate-600'}`} style={{ width: `${((achievements.ladrodipalcoscenico?.progress || 0) / 10) * 100}%` }}></div>
+                                      </div>
+                                      {achievements.ladrodipalcoscenico?.unlocked && (
+                                          <button 
+                                              onClick={() => toggleEquipCosmetic('ladrodipalcoscenico')}
+                                              className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'ladrodipalcoscenico' ? 'bg-slate-200 text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.5)]' : 'bg-slate-900 text-slate-300 border-slate-600 hover:bg-slate-800'}`}
+                                          >
+                                              {equippedCosmetic === 'ladrodipalcoscenico' ? 'EQUIPAGGIATO' : 'INDOSSA OMBRA'}
+                                          </button>
+                                      )}
+                                  </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: FANTASMA PER ECCELLENZA */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.fantasmadereccellenza?.unlocked ? 'border-teal-400 bg-teal-900/20 shadow-[0_0_20px_rgba(45,212,191,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                  <div className="flex justify-between items-center mb-2">
+                                      <span className={`font-black text-lg flex items-center gap-2 ${achievements.fantasmadereccellenza?.unlocked ? 'text-teal-400 drop-shadow-[0_0_5px_rgba(45,212,191,0.8)]' : 'text-slate-300'}`}>
+                                          <Ghost size={20} className={achievements.fantasmadereccellenza?.unlocked ? 'text-teal-300' : 'text-slate-500'}/> Fantasma per Eccellenza
+                                      </span>
+                                      <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-teal-400 font-bold">
+                                          {achievements.fantasmadereccellenza?.progress || 0} / 5
+                                      </span>
+                                  </div>
+                                  <p className="text-sm text-slate-400 mb-3">Ritorna in gioco vincendo a Ghost Island e raggiungi la finale (5 volte).</p>
+                                  <div className="flex items-center justify-between mt-2">
+                                      <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                          <div className={`h-full rounded-full transition-all duration-1000 ${achievements.fantasmadereccellenza?.unlocked ? 'bg-teal-400 shadow-[0_0_10px_#2dd4bf]' : 'bg-slate-500'}`} style={{ width: `${((achievements.fantasmadereccellenza?.progress || 0) / 5) * 100}%` }}></div>
+                                      </div>
+                                      {achievements.fantasmadereccellenza?.unlocked && (
+                                          <button 
+                                              onClick={() => toggleEquipCosmetic('fantasmadereccellenza')}
+                                              className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'fantasmadereccellenza' ? 'bg-teal-400 text-black border-white shadow-[0_0_15px_rgba(45,212,191,1)]' : 'bg-slate-800 text-teal-400 border-teal-500 hover:bg-teal-900/50'}`}
+                                          >
+                                              {equippedCosmetic === 'fantasmadereccellenza' ? 'EQUIPAGGIATO' : 'AURA SPETTRALE'}
+                                          </button>
+                                      )}
+                                  </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: CACCIATORE DI VANTAGGI */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.cacciatoredivantaggi?.unlocked ? 'border-cyan-400 bg-cyan-900/20 shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                  <div className="flex justify-between items-center mb-2">
+                                      <span className={`font-black text-lg flex items-center gap-2 ${achievements.cacciatoredivantaggi?.unlocked ? 'text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]' : 'text-slate-300'}`}>
+                                          <Package size={20} className={achievements.cacciatoredivantaggi?.unlocked ? 'text-cyan-300' : 'text-slate-500'}/> Cacciatore di Vantaggi
+                                      </span>
+                                      <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-cyan-400 font-bold">
+                                          {achievements.cacciatoredivantaggi?.progress || 0} / 20
+                                      </span>
+                                  </div>
+                                  <p className="text-sm text-slate-400 mb-3">Raccogli 20 casse di vantaggi segreti.</p>
+                                  <div className="flex items-center justify-between mt-2">
+                                      <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                          <div className={`h-full rounded-full transition-all duration-1000 ${achievements.cacciatoredivantaggi?.unlocked ? 'bg-cyan-400 shadow-[0_0_10px_#22d3ee]' : 'bg-slate-500'}`} style={{ width: `${((achievements.cacciatoredivantaggi?.progress || 0) / 20) * 100}%` }}></div>
+                                      </div>
+                                      {achievements.cacciatoredivantaggi?.unlocked && (
+                                          <button 
+                                              onClick={() => toggleEquipCosmetic('cacciatoredivantaggi')}
+                                              className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'cacciatoredivantaggi' ? 'bg-cyan-400 text-black border-white shadow-[0_0_15px_rgba(34,211,238,1)]' : 'bg-slate-800 text-cyan-400 border-cyan-500 hover:bg-cyan-900/50'}`}
+                                          >
+                                              {equippedCosmetic === 'cacciatoredivantaggi' ? 'EQUIPAGGIATO' : 'AURA DIAMANTE'}
+                                          </button>
+                                      )}
+                                  </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: FARFALLA SOCIALE */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.farfallasociale?.unlocked ? 'border-pink-400 bg-pink-900/20 shadow-[0_0_20px_rgba(244,114,182,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                  <div className="flex justify-between items-center mb-2">
+                                      <span className={`font-black text-lg flex items-center gap-2 ${achievements.farfallasociale?.unlocked ? 'text-pink-400 drop-shadow-[0_0_5px_rgba(244,114,182,0.8)]' : 'text-slate-300'}`}>
+                                          <Users2 size={20} className={achievements.farfallasociale?.unlocked ? 'text-pink-300' : 'text-slate-500'}/> Farfalla Sociale
+                                      </span>
+                                      <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-pink-400 font-bold">
+                                          {achievements.farfallasociale?.progress || 0} / 50
+                                      </span>
+                                  </div>
+                                  <p className="text-sm text-slate-400 mb-3">Stringi amicizia con successo per 50 volte.</p>
+                                  <div className="flex items-center justify-between mt-2">
+                                      <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                          <div className={`h-full rounded-full transition-all duration-1000 ${achievements.farfallasociale?.unlocked ? 'bg-pink-400 shadow-[0_0_10px_#f472b6]' : 'bg-slate-500'}`} style={{ width: `${((achievements.farfallasociale?.progress || 0) / 50) * 100}%` }}></div>
+                                      </div>
+                                      {achievements.farfallasociale?.unlocked && (
+                                          <button 
+                                              onClick={() => toggleEquipCosmetic('farfallasociale')}
+                                              className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'farfallasociale' ? 'bg-pink-400 text-black border-white shadow-[0_0_15px_rgba(244,114,182,1)]' : 'bg-slate-800 text-pink-400 border-pink-500 hover:bg-pink-900/50'}`}
+                                          >
+                                              {equippedCosmetic === 'farfallasociale' ? 'EQUIPAGGIATO' : 'AURA FARFALLE'}
+                                          </button>
+                                      )}
+                                  </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: DRAMA QUEEN */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.dramaqueen?.unlocked ? 'border-lime-500 bg-lime-900/20 shadow-[0_0_20px_rgba(132,204,22,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                  <div className="flex justify-between items-center mb-2">
+                                      <span className={`font-black text-lg flex items-center gap-2 ${achievements.dramaqueen?.unlocked ? 'text-lime-400 drop-shadow-[0_0_5px_rgba(132,204,22,0.8)]' : 'text-slate-300'}`}>
+                                          <MessageSquare size={20} className={achievements.dramaqueen?.unlocked ? 'text-lime-300' : 'text-slate-500'}/> Drama Queen
+                                      </span>
+                                      <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-lime-400 font-bold">
+                                          {achievements.dramaqueen?.progress || 0} / 20
+                                      </span>
+                                  </div>
+                                  <p className="text-sm text-slate-400 mb-3">Metti zizzania con successo per 20 volte.</p>
+                                  <div className="flex items-center justify-between mt-2">
+                                      <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                          <div className={`h-full rounded-full transition-all duration-1000 ${achievements.dramaqueen?.unlocked ? 'bg-lime-500 shadow-[0_0_10px_#84cc16]' : 'bg-slate-500'}`} style={{ width: `${((achievements.dramaqueen?.progress || 0) / 20) * 100}%` }}></div>
+                                      </div>
+                                      {achievements.dramaqueen?.unlocked && (
+                                          <button 
+                                              onClick={() => toggleEquipCosmetic('dramaqueen')}
+                                              className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'dramaqueen' ? 'bg-lime-500 text-black border-white shadow-[0_0_15px_rgba(132,204,22,1)]' : 'bg-slate-800 text-lime-400 border-lime-500 hover:bg-lime-900/50'}`}
+                                          >
+                                              {equippedCosmetic === 'dramaqueen' ? 'EQUIPAGGIATO' : 'AURA TOSSICA'}
+                                          </button>
+                                      )}
+                                  </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: TI SEI OFFESO? FATTI TUOI. */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.tiseioffeso?.unlocked ? 'border-sky-400 bg-sky-900/20 shadow-[0_0_20px_rgba(56,189,248,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                  <div className="flex justify-between items-center mb-2">
+                                      <span className={`font-black text-lg flex items-center gap-2 ${achievements.tiseioffeso?.unlocked ? 'text-sky-400 drop-shadow-[0_0_5px_rgba(56,189,248,0.8)]' : 'text-slate-300'}`}>
+                                          <UserMinus size={20} className={achievements.tiseioffeso?.unlocked ? 'text-sky-300' : 'text-slate-500'}/> Ti sei offeso? Fatti tuoi.
+                                      </span>
+                                      <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-sky-400 font-bold">
+                                          {achievements.tiseioffeso?.progress || 0} / 15
+                                      </span>
+                                  </div>
+                                  <p className="text-sm text-slate-400 mb-3">Fai offendere un bot mandandolo a rischio eliminazione (15 volte).</p>
+                                  <div className="flex items-center justify-between mt-2">
+                                      <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                          <div className={`h-full rounded-full transition-all duration-1000 ${achievements.tiseioffeso?.unlocked ? 'bg-sky-400 shadow-[0_0_10px_#38bdf8]' : 'bg-slate-500'}`} style={{ width: `${((achievements.tiseioffeso?.progress || 0) / 15) * 100}%` }}></div>
+                                      </div>
+                                      {achievements.tiseioffeso?.unlocked && (
+                                          <button 
+                                              onClick={() => toggleEquipCosmetic('tiseioffeso')}
+                                              className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'tiseioffeso' ? 'bg-sky-400 text-black border-white shadow-[0_0_15px_rgba(56,189,248,1)]' : 'bg-slate-800 text-sky-400 border-sky-500 hover:bg-sky-900/50'}`}
+                                          >
+                                              {equippedCosmetic === 'tiseioffeso' ? 'EQUIPAGGIATO' : 'AURA GLACIALE'}
+                                          </button>
+                                      )}
+                                  </div>
                               </div>
 
                               <div className="p-4 border-2 border-dashed border-slate-700 bg-slate-800/50 rounded-xl text-center">
@@ -3190,6 +3693,8 @@
               const target = lobby.players.find(p => p.uid === immunityStealTarget);
               if (!target) return;
 
+              updateAchievement('ladrodipalcoscenico', 1, 10);
+
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   [`immunity`]: [user.uid],
                   [`idolData.inventory.immunitySteals.${user.uid}`]: lobby.idolData.inventory.immunitySteals[user.uid] - 1,
@@ -3254,6 +3759,10 @@
                       [deciderPlayer.uid]: Math.max(-10, currentRel - 1)
                   };
                   logsToAdd.push(`💢 ${chosenTarget.name} se l'è presa per essere stato mandato a rischio da ${deciderPlayer.name}! (-1 Relaz)`);
+                  
+                  if (lobby.challengeData.decider === user.uid) {
+                      updateAchievement('tiseioffeso', 1, 15);
+                  }
               }
 
               const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, logsToAdd);
@@ -3911,6 +4420,10 @@
                           [deciderPlayer.uid]: Math.max(-10, currentRel - 1)
                       };
                       logsToAdd.push(`💢 ${targetPlayer.name} se l'è presa per essere stato mandato a rischio da ${deciderPlayer.name}! (-1 Relaz)`);
+                      
+                      if (lobby.challengeData.decider === user.uid) {
+                          updateAchievement('tiseioffeso', 1, 15);
+                      }
                   }
               });
 
@@ -3980,6 +4493,8 @@
               if (lobby.idolData.crates.find(c => c.id === crateId).owner !== null) return; 
 
               playSound('success');
+              
+              updateAchievement('cacciatoredivantaggi', 1, 20);
 
               const newCrates = lobby.idolData.crates.map(c => 
                    c.id === crateId ? { ...c, owner: user.uid } : c
@@ -4233,6 +4748,16 @@
               const mergeSize = lobby.config.mergeSize || (lobby.config.maxPlayers / 2);
               
               if (activePlayers.length <= 2) {
+                  // ---> TRACKING ACHIEVEMENT FANTASMA PER ECCELLENZA <---
+                  const meInFinale = activePlayers.find(p => p.uid === user.uid);
+                  if (meInFinale && meInFinale.ghostReturnee) {
+                      const eventKey = `ghost_finale_${lobbyId}_${lobby.currentSeasonIndex}`;
+                      if (!processedAchievements.current.has(eventKey)) {
+                          updateAchievement('fantasmadereccellenza', 1, 5);
+                          processedAchievements.current.add(eventKey);
+                      }
+                  }
+
                   if (Math.random() < 0.5) {
                       const finalists = activePlayers;
                       const jurySize = lobby.config.jurySize || 7;
@@ -4501,6 +5026,7 @@
                               updatedPlayers[idx].status = 'active';
                               updatedPlayers[idx].team = 'MERGE';
                               updatedPlayers[idx].immunityWins = 0;
+                              updatedPlayers[idx].ghostReturnee = true; // FLAG FANTASMA
                               newLogs.push(`👻 GHOST ISLAND: ${g.name} è sopravvissuto e RIENTRA in gioco per la Fusione!`);
                           });
                           updates = { ...updates, phase: 'episode_start', round: nextRound, players: updatedPlayers, votes: {}, extraVotes: {}, immunity: [], diceRoll: null, losingTeam: null, ceremonyData: null, challengeData: null, twistData: { type: 'ghost_island_return', returnees: currentGhosts.map(g => g.uid) }, logs: arrayUnion(...newLogs) };
@@ -4893,6 +5419,7 @@
                               updatedPlayers[idx].status = 'active';
                               updatedPlayers[idx].team = 'MERGE';
                               updatedPlayers[idx].immunityWins = 0;
+                              updatedPlayers[idx].ghostReturnee = true; // FLAG FANTASMA
                               newLogs.push(`👻 COLPO DI SCENA! ${g.name} è sopravvissuto a Ghost Island e RIENTRA in gioco per la Fusione!`);
                           });
                           updates = {
@@ -5070,6 +5597,7 @@
                             updatedPlayers[idx].status = 'active';
                             updatedPlayers[idx].team = 'MERGE';
                             updatedPlayers[idx].immunityWins = 0;
+                            updatedPlayers[idx].ghostReturnee = true; // FLAG FANTASMA
                         });
 
                         updates = {
@@ -5395,6 +5923,7 @@
                       const newVal = Math.min(5, (updatedPlayers[targetIdx].relationships[user.uid] || 0) + 1);
                       updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [user.uid]: newVal };
                       msg = `Hai stretto amicizia con ${updatedPlayers[targetIdx].name}.`;
+                      updateAchievement('farfallasociale', 1, 50); // <-- TRACKING PROGRESSO
                   } else msg = `${updatedPlayers[targetIdx].name} ti ha ignorato.`;
               } 
               else if (type === 'rumor') {
@@ -5411,6 +5940,7 @@
                               [victimId]: Math.max(-5, currentRel - 1) 
                           };
                           msg = `🤫 Pssst! Hai messo zizzania con successo. ${targetName} ora guarda male ${victim.name} (-1).`;
+                          updateAchievement('dramaqueen', 1, 20); // <-- TRACKING PROGRESSO DRAMA QUEEN
                       } else {
                           const currentRel = updatedPlayers[targetIdx].relationships[user.uid] || 0;
                           updatedPlayers[targetIdx].relationships = { 
@@ -5767,6 +6297,7 @@
               }
 
               updateAchievement('mibrucialamano', 1, 250);
+              updateAchievement('manoincandescente', 1, 600); // <-- AGGIUNTA PROGRESO MANO INCANDESCENTE
 
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
               setUseExtraVote(false);
