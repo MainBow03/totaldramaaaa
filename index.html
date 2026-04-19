@@ -61,536 +61,477 @@
             margin-bottom: -15px;
         }
 
-        /* --- STILI COSMETICI AVANZATI --- */
-        .cosmetic-bow {
-            position: relative !important;
-            overflow: visible !important; /* Permette al fiocco di uscire dai bordi */
-            box-shadow: 0 0 15px rgba(236, 72, 153, 0.8) !important;
-            border: 2px solid #f472b6 !important;
-        }
-        /* Mantiene l'immagine in primo piano */
-        .cosmetic-bow img {
-            border-radius: inherit; 
-            position: relative;
-            z-index: 2;
-        }
-        /* Fiocco in testa */
-        .cosmetic-bow::before {
-            content: '🎀';
-            position: absolute;
-            top: -12px;
-            right: -8px;
-            font-size: 22px;
-            z-index: 3;
-            transform: rotate(15deg);
-            animation: bowBounce 2s ease-in-out infinite;
-            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
-        }
-        /* Cuoricino fluttuante */
-        .cosmetic-bow::after {
-            content: '💖';
-            position: absolute;
-            top: 0;
-            left: -10px;
-            font-size: 14px;
-            z-index: 3;
-            animation: floatHeart 2.5s ease-in infinite;
-            filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5));
-        }
-        @keyframes bowBounce {
-            0%, 100% { transform: rotate(15deg) scale(1); }
-            50% { transform: rotate(5deg) scale(1.1); }
-        }
-        @keyframes floatHeart {
-            0% { transform: translateY(10px) scale(0); opacity: 0; }
-            20% { transform: translateY(0px) scale(1); opacity: 1; }
-            80% { transform: translateY(-25px) scale(1); opacity: 0.8; }
-            100% { transform: translateY(-35px) scale(0.5); opacity: 0; }
-        }
-
-        /* Effetto Fuoco per Mi Brucia la Mano */
-        .cosmetic-fire {
-            position: relative !important;
-            border: 2px solid #ef4444 !important;
-            box-shadow: 0 0 20px rgba(220, 38, 38, 0.7) !important;
-        }
-        .cosmetic-fire::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0; height: 60%;
-            background: linear-gradient(to top, rgba(239, 68, 68, 0.9), rgba(249, 115, 22, 0.6), transparent);
-            border-radius: inherit;
-            pointer-events: none;
-            animation: firePulse 0.6s infinite alternate;
-            z-index: 20;
-        }
-        @keyframes firePulse {
-            0% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-
-        /* Effetto Fiamma Suprema per Mano Incandescente */
-        .cosmetic-incandescente {
-            position: relative !important;
-            border: 2px solid #fde047 !important; /* Giallo brillante */
-            box-shadow: 0 0 30px rgba(249, 115, 22, 1), inset 0 0 20px rgba(250, 204, 21, 0.9) !important;
-        }
-        .cosmetic-incandescente::after {
-            content: '';
-            position: absolute;
-            bottom: -2px; left: -2px; right: -2px; height: 85%;
-            background: linear-gradient(to top, rgba(255, 255, 255, 0.95), rgba(250, 204, 21, 0.8), rgba(239, 68, 68, 0.5), transparent);
-            border-radius: inherit;
-            pointer-events: none;
-            animation: superFirePulse 0.25s infinite alternate; /* Pulsazione più veloce e aggressiva */
-            z-index: 20;
-        }
-        @keyframes superFirePulse {
-            0% { opacity: 0.85; filter: brightness(1.2) contrast(1.1); transform: scaleY(1); }
-            100% { opacity: 1; filter: brightness(1.5) contrast(1.2); transform: scaleY(1.05); }
-        }
-
-        /* Effetto Ombra per Ladro di Palcoscenico (Senza lampeggio globale) */
-        .cosmetic-shadow {
-            position: relative !important;
-            border: 2px solid #020617 !important; /* Nero/Slate scurissimo */
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.9) !important;
-            isolation: isolate; /* Crea un nuovo contesto di stacking per non coprire altri elementi */
-        }
-        .cosmetic-shadow::after {
-            content: '';
-            position: absolute;
-            inset: -6px; /* Sborda leggermente per l'effetto ombra */
-            border-radius: inherit;
-            /* Gradiente conico nero/viola scuro che ruota */
-            background: conic-gradient(from 0deg, transparent, rgba(30, 27, 75, 0.8), rgba(0, 0, 0, 1), rgba(30, 27, 75, 0.8), transparent);
-            z-index: -1; /* Sta rigorosamente dietro l'immagine */
-            animation: rotateShadow 4s linear infinite;
-            filter: blur(3px); /* Ammorbidisce i bordi del gradiente */
-        }
-        @keyframes rotateShadow {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Effetto Fantasma per Fantasma per Eccellenza */
-        .cosmetic-ghost {
-            position: relative !important;
-            border: 2px solid #2dd4bf !important; /* Teal 400 */
-            box-shadow: 0 0 20px rgba(45, 212, 191, 0.6) !important;
-            animation: floatGhost 3s ease-in-out infinite alternate !important;
-        }
-        .cosmetic-ghost::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to top, rgba(45, 212, 191, 0.4), transparent);
-            border-radius: inherit;
-            pointer-events: none;
-            z-index: 10;
-        }
-        @keyframes floatGhost {
-            0% { transform: translateY(0px); filter: hue-rotate(0deg); }
-            100% { transform: translateY(-4px); filter: hue-rotate(15deg); }
-        }
-
-        /* Effetto Diamante per Cacciatore di Vantaggi */
-        .cosmetic-diamond {
-            position: relative !important;
-            border: 2px solid #22d3ee !important; /* Cyan 400 */
-            box-shadow: 0 0 15px rgba(34, 211, 238, 0.6), inset 0 0 15px rgba(103, 232, 249, 0.5) !important;
-        }
-        .cosmetic-diamond::after {
-            content: '✨';
-            position: absolute;
-            top: -10px; right: -8px;
-            font-size: 16px;
-            color: #a5f3fc;
-            filter: drop-shadow(0 0 5px #22d3ee);
-            animation: twinkleStar 1.5s ease-in-out infinite alternate;
-            pointer-events: none;
-            z-index: 10;
-        }
-        .cosmetic-diamond::before {
-            content: '✦';
-            position: absolute;
-            bottom: -6px; left: -6px;
-            font-size: 14px;
-            color: #67e8f9;
-            filter: drop-shadow(0 0 5px #06b6d4);
-            animation: twinkleStar 2s ease-in-out infinite alternate-reverse;
-            pointer-events: none;
-            z-index: 10;
-        }
-        @keyframes twinkleStar {
-            0% { opacity: 0.4; transform: scale(0.7) rotate(0deg); }
-            100% { opacity: 1; transform: scale(1.3) rotate(20deg); filter: brightness(1.5); }
-        }
-
-        /* Effetto Farfalla per Farfalla Sociale */
-        .cosmetic-butterfly {
-            position: relative !important;
-            border: 2px solid #f472b6 !important; /* Pink 400 */
-            box-shadow: 0 0 15px rgba(244, 114, 182, 0.4), inset 0 0 10px rgba(244, 114, 182, 0.2) !important;
-        }
-        .cosmetic-butterfly::before {
-            content: '🦋';
-            position: absolute;
-            top: -10px; left: -10px;
-            font-size: 14px;
-            animation: flutter 3s ease-in-out infinite alternate;
-            z-index: 10;
-        }
-        .cosmetic-butterfly::after {
-            content: '🦋';
-            position: absolute;
-            bottom: -5px; right: -10px;
-            font-size: 12px;
-            animation: flutter 4s ease-in-out infinite alternate-reverse;
-            z-index: 10;
-        }
-        @keyframes flutter {
-            0% { transform: translate(0, 0) rotate(-10deg) scale(0.9); opacity: 0.8; }
-            50% { transform: translate(5px, -10px) rotate(10deg) scale(1.1); opacity: 1; }
-            100% { transform: translate(-5px, -5px) rotate(-5deg) scale(1); opacity: 0.8; }
-        }
-
-        /* Effetto Tossico per Drama Queen */
-        .cosmetic-toxic {
-            position: relative !important;
-            border: 2px solid #84cc16 !important; /* Lime 500 */
-            box-shadow: 0 0 15px rgba(132, 204, 22, 0.5), inset 0 0 10px rgba(132, 204, 22, 0.3) !important;
-        }
-        .cosmetic-toxic::after {
-            content: '🫧';
-            position: absolute;
-            bottom: -5px;
-            left: 5px;
-            font-size: 14px;
-            animation: floatBubbles 3s ease-in infinite;
-            z-index: 10;
-            pointer-events: none;
-        }
-        .cosmetic-toxic::before {
-            content: '💧';
-            position: absolute;
-            top: -5px;
-            right: 5px;
-            font-size: 14px;
-            animation: floatBubbles 2.5s ease-in infinite 1s;
-            z-index: 10;
-            filter: hue-rotate(90deg);
-            pointer-events: none;
-        }
-        @keyframes floatBubbles {
-            0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 0.8; }
-            100% { transform: translateY(-30px) scale(1.2); opacity: 0; }
-        }
-
-        /* Effetto Ghiaccio per Ti Sei Offeso */
-        .cosmetic-ice {
-            position: relative !important;
-            border: 2px solid #38bdf8 !important; /* Sky 400 */
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.6), inset 0 0 15px rgba(186, 230, 253, 0.5) !important;
-        }
-        .cosmetic-ice::after {
-            content: '❄️';
-            position: absolute;
-            top: -10px;
-            right: -8px;
-            font-size: 16px;
-            animation: spinIce 4s linear infinite;
-            z-index: 10;
-            pointer-events: none;
-        }
-        @keyframes spinIce {
-            0% { transform: rotate(0deg) scale(1); }
-            50% { transform: rotate(180deg) scale(1.2); }
-            100% { transform: rotate(360deg) scale(1); }
-        }
-
-        /* Effetto Tre Moschettieri */
-        .cosmetic-moschettieri {
-            position: relative !important;
-            border: 2px solid #3b82f6 !important; /* Blue 500 */
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.6), inset 0 0 10px rgba(96, 165, 250, 0.4) !important;
-        }
-        .cosmetic-moschettieri::after {
-            content: '⚔️';
-            position: absolute;
-            bottom: -8px;
-            right: -8px;
-            font-size: 16px;
-            filter: drop-shadow(0 0 5px #eab308);
-            animation: clash 2s infinite alternate;
-            z-index: 10;
-            pointer-events: none;
-        }
-        @keyframes clash {
-            0% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.2) rotate(15deg); }
-            100% { transform: scale(1) rotate(-10deg); }
-        }
-
-        /* Effetto Ineluttabile (Gemme dell'Infinito) */
-        .cosmetic-ineluttabile {
-            position: relative !important;
-            border: 2px solid #d946ef !important; /* Fuchsia 500 */
-            box-shadow: 0 0 15px rgba(217, 70, 239, 0.7) !important;
-            isolation: isolate;
-        }
-        .cosmetic-ineluttabile::after {
-            content: '';
-            position: absolute;
-            inset: -6px;
-            border-radius: inherit;
-            /* Colori delle Gemme dell'Infinito */
-            background: conic-gradient(from 0deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #a855f7, #ef4444);
-            z-index: -1;
-            animation: rotateInfinity 3s linear infinite;
-            filter: blur(4px);
-            opacity: 0.85;
-        }
-        @keyframes rotateInfinity {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* --- NUOVI STILI COSMETICI PREMIUM (SUPER FIGHI E ANIMATI) --- */
+        /* --- STILI COSMETICI AVANZATI & PREMIUM --- */
         
-        /* Campione: Corona d'alloro/Trofeo, riflesso oro e particelle rotanti */
+        /* Regola globale per permettere agli elementi 3D (corone, spade, emoji) di uscire dai bordi */
+        [class*="cosmetic-"] {
+            overflow: visible !important;
+            z-index: 10;
+        }
+        /* Mantiene la foto del personaggio con i bordi arrotondati correttamente sotto l'aura */
+        [class*="cosmetic-"] img {
+            border-radius: inherit;
+            position: relative;
+            z-index: 1; 
+        }
+
+        /* 1. Campione: Bordo dorato spesso, Corona gigante in cima al centro */
         .cosmetic-campione {
-            position: relative !important;
-            border: 2px solid #eab308 !important; /* Giallo Oro */
-            box-shadow: 0 0 20px rgba(234, 179, 8, 0.6) !important;
-            isolation: isolate;
+            border: 3px solid #fbbf24 !important;
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.8), inset 0 0 15px rgba(251, 191, 36, 0.5) !important;
         }
         .cosmetic-campione::before {
-            content: '🏆';
+            content: '👑';
             position: absolute;
-            top: -12px; left: -8px;
-            font-size: 18px;
-            z-index: 10;
-            animation: bounceTrophy 2s ease-in-out infinite;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
-        .cosmetic-campione::after {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: inherit;
-            background: conic-gradient(from 0deg, transparent, rgba(250, 204, 21, 0.8), transparent);
-            z-index: -1;
-            animation: rotateShadow 3s linear infinite;
-        }
-        @keyframes bounceTrophy {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px) scale(1.1); }
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 36px;
+            z-index: 20;
+            animation: crownFloat 2s ease-in-out infinite;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7));
         }
 
-        /* Veterano: Bordo smeraldo pulsante con stelline militari */
+        /* 2. Veterano: Bordo mimetico/smeraldo spesso, medaglia al valore */
         .cosmetic-veterano {
-            position: relative !important;
-            border: 2px solid #10b981 !important; /* Smeraldo */
-            box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.5), 0 0 15px rgba(16, 185, 129, 0.6) !important;
-        }
-        .cosmetic-veterano::after {
-            content: '⭐';
-            position: absolute;
-            bottom: -8px; right: -8px;
-            font-size: 16px;
-            z-index: 10;
-            animation: pulseStar 1.5s ease-in-out infinite alternate;
-            filter: drop-shadow(0 0 5px #10b981);
+            border: 3px solid #10b981 !important;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.7), inset 0 0 15px rgba(52, 211, 153, 0.5) !important;
         }
         .cosmetic-veterano::before {
-            content: '⭐';
+            content: '🎖️';
             position: absolute;
-            top: -8px; left: -8px;
-            font-size: 12px;
-            z-index: 10;
-            animation: pulseStar 2s ease-in-out infinite alternate-reverse;
-            filter: drop-shadow(0 0 5px #10b981);
-        }
-        @keyframes pulseStar {
-            0% { transform: scale(0.8); opacity: 0.7; }
-            100% { transform: scale(1.2) rotate(15deg); opacity: 1; }
+            bottom: -15px;
+            right: -10px;
+            font-size: 32px;
+            z-index: 20;
+            animation: pulseMedal 2s infinite;
         }
 
-        /* Pugnalatore: Lame che tagliano e gocce di sangue */
+        /* 3. Pugnalatore: Bordo rosso sangue, coltello enorme e gocce di sangue */
         .cosmetic-pugnalatore {
-            position: relative !important;
-            border: 2px solid #991b1b !important; /* Rosso Sangue */
-            box-shadow: inset 0 0 15px rgba(220, 38, 38, 0.6), 0 0 20px rgba(220, 38, 38, 0.8) !important;
+            border: 3px solid #991b1b !important;
+            box-shadow: 0 0 20px rgba(153, 27, 27, 0.8), inset 0 0 20px rgba(220, 38, 38, 0.6) !important;
         }
         .cosmetic-pugnalatore::before {
             content: '🔪';
             position: absolute;
-            top: 10%; left: -15px;
-            font-size: 18px;
-            z-index: 10;
+            top: 20%;
+            left: -20px;
+            font-size: 32px;
+            z-index: 20;
             transform: rotate(-45deg);
-            animation: stabLeft 2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
-            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.8));
+            animation: stab 1.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
         }
         .cosmetic-pugnalatore::after {
             content: '🩸';
             position: absolute;
-            bottom: -10px; right: -5px;
-            font-size: 14px;
-            z-index: 10;
-            animation: dripBlood 2.5s infinite;
+            bottom: -10px;
+            right: 0;
+            font-size: 24px;
+            z-index: 20;
+            animation: dripBlood 2s infinite;
         }
-        @keyframes stabLeft {
+
+        /* 4. Sopravvissuto: Bordo infuocato, fuoco alla base */
+        .cosmetic-sopravvissuto {
+            border: 3px solid #ea580c !important;
+            box-shadow: 0 0 25px rgba(234, 88, 12, 0.8), inset 0 0 20px rgba(249, 115, 22, 0.6) !important;
+        }
+        .cosmetic-sopravvissuto::before {
+            content: '🔥';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            z-index: 20;
+            animation: burn 1s infinite alternate;
+        }
+        .cosmetic-sopravvissuto::after {
+            content: '🩹';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 24px;
+            z-index: 20;
+            transform: rotate(25deg);
+        }
+
+        /* 5. Dolcezza: Bordo rosa, fiocco gigante, cuoricini */
+        .cosmetic-bow {
+            border: 3px solid #f472b6 !important;
+            box-shadow: 0 0 20px rgba(244, 114, 182, 0.8), inset 0 0 15px rgba(244, 114, 182, 0.4) !important;
+        }
+        .cosmetic-bow::before {
+            content: '🎀';
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            font-size: 34px;
+            z-index: 20;
+            transform: rotate(15deg);
+            animation: bowBounce 2s infinite;
+        }
+        .cosmetic-bow::after {
+            content: '💖';
+            position: absolute;
+            bottom: -10px;
+            left: -10px;
+            font-size: 24px;
+            z-index: 20;
+            animation: floatHeart 2.5s ease-in infinite;
+        }
+
+        /* 6. MVP: Bordo ciano neon tech, bagliore elettrico */
+        .cosmetic-mvp {
+            border: 3px solid #06b6d4 !important;
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.9), inset 0 0 15px rgba(34, 211, 238, 0.5) !important;
+        }
+        .cosmetic-mvp::before {
+            content: '⚡';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            font-size: 32px;
+            z-index: 20;
+            animation: shockMVP 0.5s infinite alternate;
+        }
+        .cosmetic-mvp::after {
+            content: '🏅';
+            position: absolute;
+            bottom: -12px;
+            right: -12px;
+            font-size: 28px;
+            z-index: 20;
+            filter: drop-shadow(0 0 5px #06b6d4);
+            animation: pulseMedal 3s infinite alternate;
+        }
+
+        /* 7. Idolo: Bordo magenta, Tiki */
+        .cosmetic-idolo {
+            border: 3px solid #d946ef !important;
+            box-shadow: 0 0 25px rgba(217, 70, 239, 0.8), inset 0 0 20px rgba(192, 38, 211, 0.6) !important;
+        }
+        .cosmetic-idolo::before {
+            content: '🗿';
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 34px;
+            z-index: 20;
+            animation: floatTiki 3s ease-in-out infinite;
+        }
+
+        /* 8. Agente 007: Radar verde e Pistola */
+        .cosmetic-agente007 {
+            border: 3px solid #22c55e !important;
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.8), inset 0 0 15px rgba(74, 222, 128, 0.5) !important;
+        }
+        .cosmetic-agente007::before {
+            content: '👁️‍🗨️';
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            font-size: 30px;
+            z-index: 20;
+            animation: blinkSpy 4s infinite;
+        }
+        .cosmetic-agente007::after {
+            content: '🔫';
+            position: absolute;
+            bottom: -12px;
+            left: -12px;
+            font-size: 26px;
+            z-index: 20;
+            transform: scaleX(-1);
+        }
+
+        /* 9. Mi Brucia la Mano: Bordo rosso infuocato */
+        .cosmetic-fire {
+            border: 3px solid #ef4444 !important;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.8) !important;
+        }
+        .cosmetic-fire::before {
+            content: '🔥';
+            position: absolute;
+            bottom: -18px;
+            right: -15px;
+            font-size: 34px;
+            z-index: 20;
+            animation: firePulse 0.5s infinite alternate;
+        }
+
+        /* 10. Mano Incandescente: Bordo giallo/bianco accecante */
+        .cosmetic-incandescente {
+            border: 3px solid #fef08a !important;
+            box-shadow: 0 0 35px rgba(250, 204, 21, 1), inset 0 0 25px rgba(253, 224, 71, 0.8) !important;
+        }
+        .cosmetic-incandescente::before {
+            content: '☀️';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            font-size: 38px;
+            z-index: 20;
+            animation: superFirePulse 0.2s infinite alternate;
+        }
+
+        /* 11. Ladro di Palcoscenico: Ombra rotante e maschera */
+        .cosmetic-shadow {
+            border: 3px solid #1e293b !important;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(15, 23, 42, 0.8) !important;
+        }
+        .cosmetic-shadow::before {
+            content: '🦹';
+            position: absolute;
+            bottom: -15px;
+            left: -15px;
+            font-size: 34px;
+            z-index: 20;
+            animation: floatGhost 3s infinite alternate;
+        }
+
+        /* 12. Fantasma: Teal aura, ghost */
+        .cosmetic-ghost {
+            border: 3px solid #2dd4bf !important;
+            box-shadow: 0 0 25px rgba(45, 212, 191, 0.8), inset 0 0 20px rgba(20, 184, 166, 0.5) !important;
+        }
+        .cosmetic-ghost::before {
+            content: '👻';
+            position: absolute;
+            top: -18px;
+            right: -15px;
+            font-size: 34px;
+            z-index: 20;
+            animation: floatGhost 2s ease-in-out infinite alternate;
+        }
+
+        /* 13. Cacciatore: Diamante e cassa */
+        .cosmetic-diamond {
+            border: 3px solid #22d3ee !important;
+            box-shadow: 0 0 25px rgba(34, 211, 238, 0.8), inset 0 0 15px rgba(103, 232, 249, 0.4) !important;
+        }
+        .cosmetic-diamond::before {
+            content: '💎';
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 34px;
+            z-index: 20;
+            animation: twinkleStar 1.5s infinite alternate;
+        }
+        .cosmetic-diamond::after {
+            content: '📦';
+            position: absolute;
+            bottom: -12px;
+            right: -12px;
+            font-size: 28px;
+            z-index: 20;
+            filter: drop-shadow(0 0 5px rgba(34,211,238,0.5));
+        }
+
+        /* 14. Farfalla: Farfalle animazione */
+        .cosmetic-butterfly {
+            border: 3px solid #f472b6 !important;
+            box-shadow: 0 0 25px rgba(244, 114, 182, 0.8), inset 0 0 15px rgba(251, 113, 133, 0.4) !important;
+        }
+        .cosmetic-butterfly::before {
+            content: '🦋';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            font-size: 34px;
+            z-index: 20;
+            animation: flutter 3s infinite alternate;
+        }
+        .cosmetic-butterfly::after {
+            content: '🌸';
+            position: absolute;
+            bottom: -12px;
+            right: -12px;
+            font-size: 26px;
+            z-index: 20;
+        }
+
+        /* 15. Drama Queen: Tossico */
+        .cosmetic-toxic {
+            border: 3px solid #84cc16 !important;
+            box-shadow: 0 0 25px rgba(132, 204, 22, 0.8), inset 0 0 20px rgba(101, 163, 13, 0.5) !important;
+        }
+        .cosmetic-toxic::before {
+            content: '🐍';
+            position: absolute;
+            bottom: -18px;
+            left: -15px;
+            font-size: 36px;
+            z-index: 20;
+            animation: floatBubbles 3s infinite;
+        }
+        .cosmetic-toxic::after {
+            content: '🎭';
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            font-size: 26px;
+            z-index: 20;
+            transform: rotate(15deg);
+        }
+
+        /* 16. Ti Sei Offeso: Ghiaccio */
+        .cosmetic-ice {
+            border: 3px solid #38bdf8 !important;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.8), inset 0 0 20px rgba(186, 230, 253, 0.4) !important;
+        }
+        .cosmetic-ice::before {
+            content: '❄️';
+            position: absolute;
+            top: -18px;
+            right: -15px;
+            font-size: 36px;
+            z-index: 20;
+            animation: spinIce 4s linear infinite;
+        }
+
+        /* 17. Moschettieri: Spade */
+        .cosmetic-moschettieri {
+            border: 3px solid #3b82f6 !important;
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.8), inset 0 0 15px rgba(96, 165, 250, 0.4) !important;
+        }
+        .cosmetic-moschettieri::before {
+            content: '⚔️';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 38px;
+            z-index: 20;
+            animation: clash 2s infinite alternate;
+        }
+
+        /* 18. Ineluttabile: Thanos */
+        .cosmetic-ineluttabile {
+            border: 3px solid #a855f7 !important;
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.9), inset 0 0 20px rgba(147, 51, 234, 0.7) !important;
+        }
+        .cosmetic-ineluttabile::before {
+            content: '🧤';
+            position: absolute;
+            top: -18px;
+            right: -18px;
+            font-size: 36px;
+            z-index: 20;
+            animation: rotateInfinity 4s infinite linear;
+        }
+
+        /* 19. Donne al Potere: Rossetto/Nails e Scintille */
+        .cosmetic-donnealpotere {
+            border: 3px solid #ec4899 !important;
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.8), inset 0 0 15px rgba(244, 114, 182, 0.4) !important;
+        }
+        .cosmetic-donnealpotere::before {
+            content: '💅';
+            position: absolute;
+            top: -18px;
+            left: -15px;
+            font-size: 34px;
+            z-index: 20;
+            animation: floatCrown 2.5s ease-in-out infinite alternate;
+        }
+        .cosmetic-donnealpotere::after {
+            content: '✨';
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            font-size: 26px;
+            z-index: 20;
+            animation: twinkleStar 2s infinite alternate;
+        }
+
+        /* --- ANIMAZIONI PER TUTTI I COSMETICI --- */
+        @keyframes crownFloat {
+            0%, 100% { transform: translate(-50%, 0) scale(1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7)); }
+            50% { transform: translate(-50%, -8px) scale(1.15); filter: drop-shadow(0 10px 15px rgba(251,191,36,1)); }
+        }
+        @keyframes pulseMedal {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(10deg); filter: drop-shadow(0 0 10px #10b981); }
+        }
+        @keyframes stab {
             0%, 100% { transform: translateX(-5px) rotate(-45deg); }
-            50% { transform: translateX(8px) rotate(-20deg); }
+            50% { transform: translateX(10px) rotate(-20deg); filter: drop-shadow(2px 2px 5px #991b1b); }
         }
         @keyframes dripBlood {
             0% { transform: translateY(0) scale(1); opacity: 1; }
             80% { transform: translateY(20px) scale(0.8); opacity: 0; }
             100% { opacity: 0; }
         }
-
-        /* Sopravvissuto: Cerotto e un bagliore a "battito cardiaco" da sopravvivenza estrema */
-        .cosmetic-sopravvissuto {
-            position: relative !important;
-            border: 2px solid #ea580c !important; /* Arancio intenso */
-            animation: heartbeatSurv 1.2s infinite !important;
+        @keyframes burn {
+            0%, 100% { transform: translateX(-50%) scale(1) rotate(-5deg); filter: drop-shadow(0 0 10px #ea580c); }
+            50% { transform: translateX(-50%) scale(1.2) rotate(5deg); filter: drop-shadow(0 0 20px #f97316); }
         }
-        .cosmetic-sopravvissuto::after {
-            content: '🩹';
-            position: absolute;
-            top: -8px; right: -8px;
-            font-size: 16px;
-            z-index: 10;
-            transform: rotate(25deg);
-            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+        @keyframes bowBounce {
+            0%, 100% { transform: rotate(15deg) scale(1); filter: drop-shadow(0 0 5px #f472b6); }
+            50% { transform: rotate(5deg) scale(1.1); filter: drop-shadow(0 0 15px #f472b6); }
         }
-        @keyframes heartbeatSurv {
-            0%, 100% { box-shadow: 0 0 10px #ea580c, inset 0 0 10px rgba(234, 88, 12, 0.5); transform: scale(1); }
-            50% { box-shadow: 0 0 25px #f97316, inset 0 0 20px rgba(249, 115, 22, 0.8); transform: scale(1.05); border-color: #f97316; }
-        }
-
-        /* MVP: Stile High-Tech, neon ciano con riflesso a specchio dinamico */
-        .cosmetic-mvp {
-            position: relative !important;
-            border: 2px solid #06b6d4 !important; /* Ciano */
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.6) !important;
-            isolation: isolate;
-        }
-        .cosmetic-mvp::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            /* Crea un riflesso di luce che passa sopra l'immagine */
-            background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.6) 50%, transparent 80%);
-            background-size: 200% 100%;
-            animation: shineTech 2.5s infinite linear;
-            z-index: 5;
-            pointer-events: none;
-            mix-blend-mode: overlay;
-        }
-        .cosmetic-mvp::after {
-            content: '⚡';
-            position: absolute;
-            bottom: -8px; right: -8px;
-            font-size: 16px;
-            z-index: 10;
-            filter: drop-shadow(0 0 5px #06b6d4);
-            animation: shockMVP 0.5s infinite alternate;
-        }
-        @keyframes shineTech {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+        @keyframes floatHeart {
+            0% { transform: translateY(0px) scale(0); opacity: 0; }
+            20% { transform: translateY(-10px) scale(1); opacity: 1; }
+            80% { transform: translateY(-30px) scale(1); opacity: 0.8; filter: drop-shadow(0 0 5px #f472b6); }
+            100% { transform: translateY(-40px) scale(0.5); opacity: 0; }
         }
         @keyframes shockMVP {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.3) rotate(10deg); opacity: 1; filter: brightness(1.5) drop-shadow(0 0 10px #22d3ee); }
-        }
-
-        /* Idolo: Aura Mistica magenta e Tiki/Moai fluttuante */
-        .cosmetic-idolo {
-            position: relative !important;
-            border: 2px solid #d946ef !important; /* Magenta magico */
-            box-shadow: 0 0 20px rgba(217, 70, 239, 0.6), inset 0 0 15px rgba(192, 38, 211, 0.5) !important;
-        }
-        .cosmetic-idolo::after {
-            content: '🗿';
-            position: absolute;
-            top: -14px; left: 50%;
-            transform: translateX(-50%);
-            font-size: 18px;
-            z-index: 10;
-            filter: drop-shadow(0 0 8px #d946ef);
-            animation: floatTiki 3s ease-in-out infinite;
+            0% { transform: scale(1); filter: drop-shadow(0 0 5px #06b6d4); }
+            100% { transform: scale(1.3) rotate(15deg); filter: drop-shadow(0 0 20px #22d3ee); }
         }
         @keyframes floatTiki {
-            0%, 100% { transform: translate(-50%, 0) scale(1); filter: brightness(1); }
-            50% { transform: translate(-50%, -5px) scale(1.1); filter: brightness(1.3) drop-shadow(0 0 12px #e879f9); }
-        }
-
-        /* Agente 007: Stile Hacker/Radar verde a scansione */
-        .cosmetic-agente007 {
-            position: relative !important;
-            border: 2px solid #22c55e !important; /* Verde hacker */
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5) !important;
-            isolation: isolate;
-        }
-        .cosmetic-agente007::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            /* Linea laser verde che scansiona dall'alto verso il basso */
-            background: linear-gradient(to bottom, transparent, rgba(74, 222, 128, 0.2) 50%, #22c55e 55%, transparent 56%);
-            background-size: 100% 300%;
-            animation: radarScan 2.5s infinite linear;
-            z-index: 5;
-            pointer-events: none;
-        }
-        .cosmetic-agente007::after {
-            content: '👁️';
-            position: absolute;
-            bottom: -8px; left: -8px;
-            font-size: 14px;
-            z-index: 10;
-            filter: drop-shadow(0 0 5px #22c55e);
-            animation: blinkSpy 4s infinite;
-        }
-        @keyframes radarScan {
-            0% { background-position: 0 -100%; }
-            100% { background-position: 0 200%; }
+            0%, 100% { transform: translate(-50%, 0) scale(1); filter: drop-shadow(0 0 10px #d946ef); }
+            50% { transform: translate(-50%, -10px) scale(1.1); filter: drop-shadow(0 0 25px #e879f9); }
         }
         @keyframes blinkSpy {
-            0%, 96%, 100% { transform: scaleY(1); }
-            98% { transform: scaleY(0.1); }
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); filter: drop-shadow(0 0 15px #22c55e); }
         }
-
-        /* Effetto per Donne al Potere */
-        .cosmetic-donnealpotere {
-            position: relative !important;
-            border: 2px solid #ec4899 !important; /* Pink 500 */
-            box-shadow: 0 0 20px rgba(236, 72, 153, 0.6), inset 0 0 10px rgba(250, 204, 21, 0.5) !important;
-            overflow: visible !important;
+        @keyframes firePulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 10px #ef4444); }
+            100% { transform: scale(1.2); filter: drop-shadow(0 0 25px #ef4444); }
         }
-        .cosmetic-donnealpotere::after {
-            content: '👑';
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 18px;
-            animation: floatCrown 3s ease-in-out infinite alternate;
-            z-index: 20;
-            filter: drop-shadow(0 0 5px #facc15);
-            pointer-events: none;
+        @keyframes superFirePulse {
+            0% { transform: scale(1); filter: brightness(1.2) drop-shadow(0 0 15px #fef08a); }
+            100% { transform: scale(1.3); filter: brightness(1.6) drop-shadow(0 0 35px #fef08a); }
         }
-        @keyframes floatCrown {
-            0% { transform: translate(-50%, 0px); }
-            100% { transform: translate(-50%, -5px); }
+        @keyframes floatGhost {
+            0%, 100% { transform: translateY(0px) rotate(0deg); filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
+            50% { transform: translateY(-8px) rotate(10deg); filter: drop-shadow(0 0 20px rgba(255,255,255,0.7)); }
+        }
+        @keyframes twinkleStar {
+            0%, 100% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 0 10px #22d3ee); }
+            50% { transform: translateX(-50%) scale(1.3); filter: drop-shadow(0 0 25px #67e8f9) brightness(1.5); }
+        }
+        @keyframes flutter {
+            0% { transform: translate(0, 0) rotate(-15deg) scale(0.9); }
+            50% { transform: translate(8px, -12px) rotate(15deg) scale(1.2); filter: drop-shadow(0 0 15px #f472b6); }
+            100% { transform: translate(-8px, -5px) rotate(-5deg) scale(1); }
+        }
+        @keyframes floatBubbles {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 0.8; filter: drop-shadow(0 0 10px #84cc16); }
+            100% { transform: translateY(-40px) scale(1.3); opacity: 0; }
+        }
+        @keyframes spinIce {
+            0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 10px #38bdf8); }
+            50% { transform: rotate(180deg) scale(1.3); filter: drop-shadow(0 0 25px #bae6fd); }
+            100% { transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 10px #38bdf8); }
+        }
+        @keyframes clash {
+            0%, 100% { transform: translateX(-50%) scale(1) rotate(0deg); }
+            50% { transform: translateX(-50%) scale(1.3) rotate(20deg); filter: drop-shadow(0 0 15px #3b82f6); }
+        }
+        @keyframes rotateInfinity {
+            0% { transform: rotate(0deg); filter: hue-rotate(0deg) drop-shadow(0 0 15px #a855f7); }
+            100% { transform: rotate(360deg); filter: hue-rotate(360deg) drop-shadow(0 0 15px #a855f7); }
         }
     </style>
 </head>
@@ -688,8 +629,8 @@
         
         const SEASON_CONFIG = [
           { name: "L'Isola", bg: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop", theme: "Spiaggia" },
-          { name: "Azione", bg: "https://images.unsplash.com/photo-1478720568477-152d9b164e63?q=80&w=2000&auto=format&fit=crop", theme: "Cinema" },
-          { name: "World Tour", bg: "https://images.unsplash.com/photo-1559586616-361e18714958?q=80&w=2070&auto=format&fit=crop", theme: "Aereo" }
+          { name: "Azione", bg: "https://i.pinimg.com/1200x/71/63/9f/71639f5b61891844fd00c3581f83a21d.jpg", theme: "Cinema" },
+          { name: "World Tour", bg: "https://i.pinimg.com/736x/63/c2/11/63c2118545514e7194efc88ae9cf7393.jpg", theme: "Aereo" }
         ];
 
         // --- SISTEMA COSMETICI ---
@@ -728,9 +669,9 @@
           { name: "Argos", img: "https://i.pinimg.com/736x/61/a0/d7/61a0d70a9cba0c930bb2ed13e95f6e87.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/61/a0/d7/61a0d70a9cba0c930bb2ed13e95f6e87.jpg" }, { name: "Felix", img: "https://i.pinimg.com/736x/48/ac/11/48ac1194c4797527ba21db8a3135642e.jpg" }, { name: "Flairmidable", img: "https://i.pinimg.com/736x/b5/f9/59/b5f959382a40c29d13a338d05504b6c7.jpg" }], speeches: ["Non ho bisogno dei vostri finti sorrisi. Voglio solo il premio per i miei veri obiettivi.", "Ho manipolato le ombre e i cuori per arrivare in vetta. Questa vittoria è il mio riscatto."], alignment: 'villain', isNew: true },
           { name: "Heartfixer", img: "https://i.pinimg.com/736x/fe/82/7c/fe827caedc137c8832fd7b313209cc55.jpg", speeches: ["Ho riparato ogni cuore spezzato su quest'isola, ma il premio spetta solo a me! Votatemi!", "Non c'è bisogno di essere akumatizzati per capire che sono io la vera vincitrice. Datemi i vostri voti!"], alignment: 'villain' },
           { name: "Chrysalis", img: "https://i.pinimg.com/736x/c1/8e/6a/c18e6a45d98eee60c330d37bb2f4e562.jpg", speeches: ["Vi ho manipolati tutti dall'inizio alla fine con le mie bugie perfette. Sono io la regina dell'inganno e merito la corona.", "Un bravo prestigiatore non rivela mai i suoi trucchi... ma vi assicuro che la mia vittoria era scritta fin dal primo giorno."], alignment: 'villain' },
-          { name: "Nathalie", img: "https://i.pinimg.com/736x/ad/8e/68/ad8e68f410c0379c3b5412b8afeef3dc.jpg", speeches: ["Ho sempre agito con fredda efficienza e logica impeccabile. I risultati parlano da soli, il vostro voto dovrebbe essere per me.", "Ho sacrificato molto per arrivare fin qui. Non siate irrazionali, sono l'unica che merita questo premio."] },
-		  { name: "Luka", img: "https://i.pinimg.com/736x/16/40/f3/1640f3c6c2b14e00c110316e02e86c7f.jpg", speeches: ["Ho giocato in modo pulito, chiaro e cristallino come il suono della mia musica. Votate per me :)", "*suona la chitarra* Spero che questa melodia possa convincervi."] },
-		  { name: "Kagami", img: "https://i.pinimg.com/736x/56/e2/ad/56e2adc6421c613a6d00b393abd1a6c1.jpg", speeches: ["Ho vinto molte sfide e non ho mai dato potere alle mie emozioni. Mi merito questo voto.", "Votatemi, grazie."] },
+          { name: "Nathalie", img: "https://i.pinimg.com/736x/ad/8e/68/ad8e68f410c0379c3b5412b8afeef3dc.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/ad/8e/68/ad8e68f410c0379c3b5412b8afeef3dc.jpg" }, { name: "Mayura", img: "https://i.pinimg.com/1200x/30/75/d0/3075d0bd5b41bd8be9a7c5c6bfee9a25.jpg" }], speeches: ["Ho sempre agito con fredda efficienza e logica impeccabile. I risultati parlano da soli, il vostro voto dovrebbe essere per me.", "Ho sacrificato molto per arrivare fin qui. Non siate irrazionali, sono l'unica che merita questo premio."] },
+          { name: "Luka", img: "https://i.pinimg.com/736x/16/40/f3/1640f3c6c2b14e00c110316e02e86c7f.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/16/40/f3/1640f3c6c2b14e00c110316e02e86c7f.jpg" }, { name: "Viperion", img: "https://i.pinimg.com/736x/2c/ee/63/2cee6368e413f58540e762802cf01791.jpg" }], speeches: ["Ho giocato in modo pulito, chiaro e cristallino come il suono della mia musica. Votate per me :)", "*suona la chitarra* Spero che questa melodia possa convincervi."] },
+          { name: "Kagami", img: "https://i.pinimg.com/736x/56/e2/ad/56e2adc6421c613a6d00b393abd1a6c1.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/56/e2/ad/56e2adc6421c613a6d00b393abd1a6c1.jpg" }, { name: "Ryuko", img: "https://i.pinimg.com/1200x/e2/95/a3/e295a335ae87848200859130529cbdec.jpg" }], speeches: ["Ho vinto molte sfide e non ho mai dato potere alle mie emozioni. Mi merito questo voto.", "Votatemi, grazie."] },
           { name: "Re Julien", img: "https://i.pinimg.com/736x/1e/17/19/1e17194ef5b383e4202fbb4875cfbd81.jpg", speeches: ["Votate per il vostro Re! Se vinco, faremo una festa indimenticabile!", "I piedi di Mortino non sono nulla in confronto a questi milioni di dollari!"] },
           { name: "Mortino", img: " https://i.pinimg.com/736x/b9/56/ec/b956ec4741a1ba90c7176478e203f78b.jpg" },
 		  { name: "Skipper", img: "https://i.pinimg.com/736x/e6/f0/5b/e6f05b20dda962344721db983c882679.jpg", speeches: ["Carini e coccolosi ragazzi, carini e coccolosi. Ora datemi quei soldi per finanziare le operazioni.", "Ho gestito questa isola come un'operazione militare tattica. Vittoria meritata."] },
@@ -745,16 +686,16 @@
           { name: "Owen", img: "https://i.pinimg.com/1200x/d8/67/6b/d8676b6ca40fa5a14aabace2a6542a39.jpg", speeches: ["Amici! Se vinco questi soldi prometto una festa gigante con pizza e formaggio per tutti!", "Ahahahah! Non ci credo di essere in finale! Siete i migliori, votate per me!"] },
           { name: "Lightning", img: "https://i.pinimg.com/736x/44/af/e7/44afe7a858a67cbd1458cebee28693aa.jpg", speeches: ["Sha-bam! Lightning colpisce ancora! Merito di vincere perché sono il più forte!", "Nessuno può fermare Lightning! Votate per il campione assoluto! Sha-vittoria!"], alignment: 'villain' },
 		  { name: "Courtney", img: "https://i.pinimg.com/736x/ad/94/34/ad9434468d4a502c89ea01c0249e8899.jpg", speeches: ["Sono l'unica qui con un vero piano d'investimento per questi soldi. Votatemi, è la scelta logica.", "Se non vinco io, chiamerò i miei avvocati e vi farò causa tutti quanti!"], alignment: 'villain' },
-		  { name: "Lindsay", img: "https://i.pinimg.com/1200x/ed/96/df/ed96df179eaa7030663473c575067cb4.jpg", speeches: ["Dovete votare per me perché i miei capelli sono stati perfetti per tutto il tempo! Grazie!", "Aspetta, ma se vinco io... divento la regina dell'isola? Siii, votatemi! Ciao Tyson!"] },
+		  { name: "Lindsay", img: "https://i.pinimg.com/736x/d7/bf/82/d7bf8237867c96050d1244518ce1ffef.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/d7/bf/82/d7bf8237867c96050d1244518ce1ffef.jpg" }, { name: "Lindsay Wonder Woman", img: "https://i.pinimg.com/1200x/ed/96/df/ed96df179eaa7030663473c575067cb4.jpg" }], speeches: ["Dovete votare per me perché i miei capelli sono stati perfetti per tutto il tempo! Grazie!", "Aspetta, ma se vinco io... divento la regina dell'isola? Siii, votatemi! Ciao Tyson!"] },
 		  { name: "Bowie", img: "https://i.pinimg.com/1200x/03/6c/0f/036c0ffe4fcd39d5840ed60a2fb104c3.jpg", speeches: ["Ammettetelo, senza di me questa stagione sarebbe stata noiosissima. Merito la corona.", "Ho manipolato le votazioni dal giorno uno. Sono il re strategico di questa edizione."], alignment: 'villain' },
 		  { name: "Raj", img: "https://i.pinimg.com/736x/05/b2/97/05b297c32cd4507adbd7b0c7ce84fb3a.jpg" },
           { name: "Conan", img: "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg" }, { name: "Shinichi", img: "https://i.pinimg.com/736x/7f/b5/48/7fb54863b62a2b153990cb87901be037.jpg" }] },
           { name: "Ran", img: "https://i.pinimg.com/1200x/46/ee/c7/46eec75f3a3eeb4846216dfdd7083ff4.jpg" },
           { name: "Rias", img: "https://i.pinimg.com/736x/d1/a7/df/d1a7df7bfe5769c39e9b66041144e4eb.jpg" },
-          { name: "Bayonetta", img: "https://i.pinimg.com/1200x/60/fc/c0/60fcc064dc97d24b96a9517f726c1970.jpg" },
+          { name: "Bayonetta", img: "https://i.pinimg.com/1200x/60/fc/c0/60fcc064dc97d24b96a9517f726c1970.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/60/fc/c0/60fcc064dc97d24b96a9517f726c1970.jpg" }, { name: "Bayonetta 1", img: "https://i.pinimg.com/736x/fb/3e/82/fb3e829ce315d7f75b5cda5e13d7661e.jpg" }, { name: "Bayonetta 2", img: "https://i.pinimg.com/736x/c0/8d/38/c08d38e8e76763eb42428bfc13da8848.jpg" }] },
           { name: "Yoshi", img: "https://i.pinimg.com/736x/f3/05/7f/f3057f14de68b0afe682ffe93dcc479b.jpg", speeches: ["Yoshi! Yoshi yoshi! (Traduzione: Se mi votate, vi farò fare un giro sulla mia schiena!)", "Yoooshiii! (Traduzione: Ho superato ogni ostacolo per arrivare fin qui, merito il premio!)"] },
           { name: "Rosalinda", img: "https://i.pinimg.com/736x/09/14/f0/0914f029e712e92de9d4f0081a5da032.jpg", speeches: ["Le stelle mi hanno guidato fino a questa finale. Spero che la vostra luce mi faccia vincere.", "Ho protetto il cosmo, posso sicuramente gestire questo show. Votatemi, mie piccole stelle."] },
-		  { name: "Peach", img: "https://i.pinimg.com/736x/c0/53/fb/c053fb4dd4f8c0dd9c277212490b1962.jpg", speeches: ["Grazie a tutti per avermi salvata... oh aspetta, stavolta ho fatto tutto da sola! Votate per me!", "Prometto di invitare tutti i miei elettori a mangiare una deliziosa torta al castello! Scegliete me!"] },
+		  { name: "Peach", img: "https://i.pinimg.com/736x/c0/53/fb/c053fb4dd4f8c0dd9c277212490b1962.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/c0/53/fb/c053fb4dd4f8c0dd9c277212490b1962.jpg" }, { name: "in-game", img: "https://i.pinimg.com/736x/9a/cf/82/9acf82face7c9f68c9461e0038c9bbe0.jpg" }, { name: "Peach in Blu", img: "https://i.pinimg.com/736x/39/5c/ba/395cba2853de29ace3bbfc2ad8568889.jpg" }], speeches: ["Grazie a tutti per avermi salvata... oh aspetta, stavolta ho fatto tutto da sola! Votate per me!", "Prometto di invitare tutti i miei elettori a mangiare una deliziosa torta al castello! Scegliete me!"] },
           { name: "Luigi", img: "https://i.pinimg.com/1200x/21/30/94/213094c8273db9b3d9dcb4cb407d6d63.jpg", speeches: ["M-mamma mia! Sono in finale! Speriamo che Mario sia fiero di me, votatemi per favore!", "Okey dokey! Sono riuscito ad arrivare fin qui senza fantasmi, merito un premio!"] },
 		  { name: "Daisy", img: "https://i.pinimg.com/736x/e2/47/61/e2476198364b030d3a8f9a1f93becfb9.jpg", speeches: ["Hi I'm Daisy! Sono la più forte, la più determinata e vi ho stracciato tutti! Merito di vincere!", "Non ho bisogno di farmi rapire per avere attenzioni, ho dominato le sfide! Votatemi!"] },
 		  { name: "Pauline", img: "https://i.pinimg.com/736x/86/83/ee/8683ee7c89735311e61addebf517a3de.jpg", speeches: ["Ho cantato per voi, gestisco una città e ora ho dominato quest'isola. Sono la vostra superstar!", "Nessuno brilla più di me sotto i riflettori di questa finale. Votate per Pauline!"] },
@@ -767,17 +708,17 @@
 		  { name: "Zatch Bell", img: "https://i.pinimg.com/736x/9c/64/41/9c6441a65ad0c75dbf8eaee194659acf.jpg", speeches: ["La lealtà prima di tutto: votatemi, cosi potremmo avere un campione gentile.", "Wow sono in finale che bello!!!! Chissà quanti pinne gialle riuscirò a comprarmi con i soldi!"] },
 		  { name: "Tio", img: "https://i.pinimg.com/736x/ea/f3/30/eaf3305c1cb5b8d7475da20687b0ec40.jpg", speeches: ["Amici datemi il vostro voto perfavore ♥", "Un discorso? Beh... okay! Votatemi pe... Zatch, la smetti con quelle smorfie? È un momento serio!"] },
 		  { name: "Penny", img: "https://i.pinimg.com/736x/f5/c2/17/f5c21738d5b922e6108b7b72bc33a25b.jpg", speeches: ["Sono bellissima carinissima e fortissima! Votatemi oraoraora!", "Hihihihi ovvio che uno splendore come me ha raggiunto una posizione cosi alta, sono io la regina votatemi"] },
-          { name: "Steven", img: "https://i.pinimg.com/736x/2b/fd/20/2bfd202ab782611ea6a0fb0cdcdc37ab.jpg", speeches: ["Ho sempre cercato di vedere il lato buono di tutti voi! Anche se abbiamo lottato, possiamo essere amici... e potete votarmi!", "Abbiamo imparato tanto in questa stagione. Per favore, credete in me, così come io ho sempre creduto in voi!"] },
-          { name: "Perla", img: "https://i.pinimg.com/1200x/bf/d3/78/bfd378c4c8921a30ee00cf48bdb7fa11.jpg", speeches: ["Ho dimostrato eleganza, tattica e una precisione assoluta in ogni singola sfida. La mia vittoria è la conclusione più logica.", "Tutto quello che faccio, lo faccio con dedizione. Votatemi e vi dimostrerò che il duro lavoro ripaga sempre!"] },
+          { name: "Steven", img: "https://i.pinimg.com/736x/2b/fd/20/2bfd202ab782611ea6a0fb0cdcdc37ab.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/2b/fd/20/2bfd202ab782611ea6a0fb0cdcdc37ab.jpg" }, { name: "Pink Steven", img: "https://i.pinimg.com/1200x/68/75/33/687533a8484d2d771dda9a04fe86ba35.jpg" }, { name: "Kid Steven", img: "https://i.pinimg.com/736x/85/be/8f/85be8fc24e6fb68cac79e0ba317c2808.jpg" }], speeches: ["Ho sempre cercato di vedere il lato buono di tutti voi! Anche se abbiamo lottato, possiamo essere amici... e potete votarmi!", "Abbiamo imparato tanto in questa stagione. Per favore, credete in me, così come io ho sempre creduto in voi!"] },
+          { name: "Perla", img: "https://i.pinimg.com/736x/59/e8/b6/59e8b66977255dc52fd925228a5cf86e.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/59/e8/b6/59e8b66977255dc52fd925228a5cf86e.jpg" }, { name: "OG Perla", img: "https://i.pinimg.com/1200x/bf/d3/78/bfd378c4c8921a30ee00cf48bdb7fa11.jpg" }, { name: "Icon Perla", img: "https://i.pinimg.com/1200x/58/68/e4/5868e49b9763a89303aae13fa6ba5776.jpg" }], speeches: ["Ho dimostrato eleganza, tattica e una precisione assoluta in ogni singola sfida. La mia vittoria è la conclusione più logica.", "Tutto quello che faccio, lo faccio con dedizione. Votatemi e vi dimostrerò che il duro lavoro ripaga sempre!"] },
 		  { name: "Garnet", img: "https://i.pinimg.com/736x/3f/8a/05/3f8a05bdbc4a7622f521eb294f51d4c8.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/3f/8a/05/3f8a05bdbc4a7622f521eb294f51d4c8.jpg" }, { name: "Rubino", img: "https://i.pinimg.com/1200x/5a/0c/55/5a0c55765a113325ccc60642f0b766d2.jpg" }, { name: "Zaffiro", img: "https://i.pinimg.com/1200x/f7/b6/14/f7b614d8de72f8ddcb6b5dfe7ba627f5.jpg" }], speeches: ["Sono fatta di amore, e so già come andrà a finire. Ho visto la mia vittoria con la visione futura.", "Non mi serve dire molto. Voi conoscete la mia forza e sapete che merito questa vittoria. La scelta è vostra."] },
 		  { name: "Peridot", img: "https://i.pinimg.com/736x/d5/3e/f6/d53ef6f0ec684f7f0f888971dded59fb.jpg", speeches: ["Ovviamente dovreste votare per me, tonti! Sono chiaramente il concorrente intellettualmente superiore su quest'isola!", "Ho analizzato tutte le probabilità e i dati confermano che io, Peridot, sono la legittima vincitrice. Non discutete la scienza!"] },
 		  { name: "Lapis", img: "https://i.pinimg.com/736x/88/0f/a5/880fa555f1f954dbca08aded1be846d2.jpg", speeches: ["Ho sopportato abbastanza drammi in passato, non mi interessa molto, ma... visto che sono qui, tanto vale vincere.", "L'acqua ricorda tutto, e io ricordo chi mi ha tradito e chi no. Ma se mi votate... potrei essere indulgente."] },
-          { name: "Ametista", img: "https://i.pinimg.com/736x/b4/e4/45/b4e445061d31ec75fa4ee63e20ebf87e.jpg", speeches: ["Ehi belli! Mi sono divertita un mondo a distruggere roba nelle sfide! Datemi i soldi così ci mangiamo una pizza gigante!", "Non ho seguito le regole, ma ehi, sono arrivata in finale lo stesso! Votatemi, sarà uno spasso!"] },
+          { name: "Ametista", img: "https://i.pinimg.com/736x/b4/e4/45/b4e445061d31ec75fa4ee63e20ebf87e.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/b4/e4/45/b4e445061d31ec75fa4ee63e20ebf87e.jpg" }, { name: "Og Ametista", img: "https://i.pinimg.com/736x/df/e8/c4/dfe8c4007fd488741070100364a45278.jpg" }, { name: "Ponytail Ametista", img: "https://i.pinimg.com/736x/73/ad/f6/73adf60da16e715913742998440b3a4e.jpg" }], speeches: ["Ehi belli! Mi sono divertita un mondo a distruggere roba nelle sfide! Datemi i soldi così ci mangiamo una pizza gigante!", "Non ho seguito le regole, ma ehi, sono arrivata in finale lo stesso! Votatemi, sarà uno spasso!"] },
           { name: "Nicole", img: "https://i.pinimg.com/736x/4e/ac/70/4eac705ff7feba9202c200de511c8583.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/4e/ac/70/4eac705ff7feba9202c200de511c8583.jpg" }, { name: "Nicole Anime", img: "https://i.pinimg.com/736x/3c/26/25/3c2625a4ad2bb8a6329804ddbc20aa82.jpg" }, { name: "Nicole 25s/30s", img: "https://i.pinimg.com/736x/d8/fa/f8/d8faf8b165f067efbb32c0cee54356fd.jpg" }] },
           { name: "Gumball", img: "https://i.pinimg.com/736x/ae/88/e3/ae88e329120b3edc196af1ebbfd8fe07.jpg" },
           { name: "Anais", img: "https://i.pinimg.com/736x/0a/8b/ab/0a8bab3e6151e894a2d9b96749d63e61.jpg" },
-          { name: "Lisa", img: "https://i.pinimg.com/736x/e5/2d/fe/e52dfee5a58f5dad19f9e0592c63a7cd.jpg", speeches: ["Ho analizzato statisticamente le probabilità e votare per me è l'unica scelta razionale e moralmente corretta.", "Se vinco io, donerò una parte del premio in beneficenza... e il resto per andare al college. Siate ragionevoli, votatemi!"] },
-          { name: "Bart", img: "https://i.pinimg.com/1200x/cf/dc/86/cfdc8641fb98a49c0e731a8e6c002b02.jpg", speeches: ["Ciucciati il calzino! Sapevo dall'inizio che vi avrei stracciato tutti.", "Ho causato più caos di chiunque altro qui dentro. Voglio la mia ricompensa!"] },
+          { name: "Lisa", img: "https://i.pinimg.com/736x/e5/2d/fe/e52dfee5a58f5dad19f9e0592c63a7cd.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/e5/2d/fe/e52dfee5a58f5dad19f9e0592c63a7cd.jpg" }, { name: "Teenager Lisa", img: "https://i.pinimg.com/736x/48/20/52/482052e2fa62928ed3174f78219d2867.jpg" }], speeches: ["Ho analizzato statisticamente le probabilità e votare per me è l'unica scelta razionale e moralmente corretta.", "Se vinco io, donerò una parte del premio in beneficenza... e il resto per andare al college. Siate ragionevoli, votatemi!"] },
+          { name: "Bart", img: "https://i.pinimg.com/1200x/cf/dc/86/cfdc8641fb98a49c0e731a8e6c002b02.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/cf/dc/86/cfdc8641fb98a49c0e731a8e6c002b02.jpg" }, { name: "Teenager Bart", img: "https://i.pinimg.com/1200x/f0/cb/f0/f0cbf0a2fa4fafa4f20e331f6465af09.jpg" }], speeches: ["Ciucciati il calzino! Sapevo dall'inizio che vi avrei stracciato tutti.", "Ho causato più caos di chiunque altro qui dentro. Voglio la mia ricompensa!"] },
           { name: "Marge", img: "https://i.pinimg.com/736x/77/6d/41/776d41748c4c9ae5940d8a9b10db881a.jpg", speeches: ["Mmmh... spero davvero che nessuno si sia fatto male in questa stagione. Se mi votate, preparerò i biscotti per tutti!", "Ho dovuto sopportare Homer per anni, sopravvivere a quest'isola è stata una passeggiata. Spero mi diate il vostro voto, cari."] },
           { name: "Ned", img: "https://i.pinimg.com/1200x/4e/12/0e/4e120eb01e572b2ad08af6552214ce82.jpg", speeches: ["Salve salvino vicini di reality! Sarebbe un vero miracolo ricevere il vostro voto, che il Signore vi benedica!", "Ho porto l'altra guancia per tutta la stagione! Spero che la mia onestà venga ripagata con una bella votatina-ina-ina!"] },
           { name: "Neera", img: "https://i.pinimg.com/736x/49/15/3c/49153c31d0b41814b3c862a98d848b40.jpg" },
@@ -798,14 +739,14 @@
           { name: "Robin TT", img: "https://i.pinimg.com/736x/cd/57/18/cd57186e05d47ef5f75bef6f0a33f59c.jpg", speeches: ["Un leader fa le scelte difficili. Io le ho fatte, per questo sono in finale. I Titans sarebbero fieri.", "La giustizia trionfa sempre, e io ho giocato con la massima strategia tattica!"] },
           { name: "Nightwing", img: "https://i.pinimg.com/736x/47/bc/ce/47bcceac6b573a1b8277b6a75f0a4b55.jpg", speeches: ["Ho lavorato da solo e nell'ombra. Questa vittoria dimostra che l'addestramento non mente mai.", "Non ho bisogno di superpoteri per battervi. Votate per me, la scelta è ovvia."] },
           { name: "Robin GO", img: "https://i.pinimg.com/736x/92/b6/50/92b650adbe57c5cec55a3ef46b65e933.jpg", speeches: ["SONO IO IL LEADER! I LEADER DEVONO VINCERE! VOTATEMI O VI METTO TUTTI IN PUNIZIONE!", "Guardate le mie baby-hands... e guardate il mio bastone! Sono il migliore, ammettetelo e datemi i soldi!"] },
-          { name: "Johnny Bravo", img: "https://i.pinimg.com/736x/4a/62/70/4a6270678f7adcf130672bcd0af41fdf.jpg" },
+          { name: "Johnny Bravo", img: "https://i.pinimg.com/736x/4a/62/70/4a6270678f7adcf130672bcd0af41fdf.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/4a/62/70/4a6270678f7adcf130672bcd0af41fdf.jpg" }, { name: "Johnny 1", img: "https://i.pinimg.com/736x/3d/5c/33/3d5c33a6cb34d1a80d9d4a5200e350fd.jpg" }] },
           { name: "Daphne", img: "https://i.pinimg.com/736x/aa/91/39/aa9139e32492a07712926dbd0db0b521.jpg" },
           { name: "Shaggy", img: "https://i.pinimg.com/1200x/0e/46/70/0e46703bcf03ff84420b0b71474c9ed7.jpg", speeches: ["Ehi amico, votami e comprerò un'infinita fornitura di Scooby Snacks per tutti noi!", "Sono scappato da un sacco di mostri in questa stagione, merito di vincere, giuro!"] },
           { name: "Fred", img: "https://i.pinimg.com/736x/d2/8c/36/d28c36ac805792e5624f41c3c19dcebb.jpg", speeches: ["Bene gang, dividiamoci e... ah no, ho già vinto io! Votatemi e risolveremo questo mistero con stile!", "Le trappole che ho preparato in questa stagione sono state perfette. Ammettetelo, merito di vincere!"] },
-          { name: "Velma", img: "https://i.pinimg.com/736x/2d/58/ff/2d58fffc72c416245a2768b455c177af.jpg", speeches: ["Jinkies! Ho dedotto la strategia di ogni singolo concorrente. Sono chiaramente la mente superiore di questa finale.", "I miei calcoli indicano che ho il 99.9% di probabilità di vincere. Non siate l'anomalia statistica, votate per me!"] },
-          { name: "Francine", img: "https://i.pinimg.com/736x/b3/b5/f6/b3b5f6849a52b4daed92424650a98f7f.jpg" },
+          { name: "Velma", img: "https://i.pinimg.com/736x/2d/58/ff/2d58fffc72c416245a2768b455c177af.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/2d/58/ff/2d58fffc72c416245a2768b455c177af.jpg" }, { name: "OG Velma", img: "https://i.pinimg.com/736x/75/1e/64/751e64d1715b79f34366f9222e42cd80.jpg" }], speeches: ["Jinkies! Ho dedotto la strategia di ogni singolo concorrente. Sono chiaramente la mente superiore di questa finale.", "I miei calcoli indicano che ho il 99.9% di probabilità di vincere. Non siate l'anomalia statistica, votate per me!"] },
+          { name: "Francine", img: "https://i.pinimg.com/736x/b3/b5/f6/b3b5f6849a52b4daed92424650a98f7f.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/b3/b5/f6/b3b5f6849a52b4daed92424650a98f7f.jpg" }, { name: "Hot Francine", img: "https://i.pinimg.com/736x/62/81/87/6281879259b7161bce9a30665c14cbdf.jpg" }, { name: "Francine in black", img: "https://i.pinimg.com/736x/2b/9c/c8/2b9cc8451d125ae8dbe83d5f18b75a32.jpg" }] },
           { name: "Hayley", img: "https://i.pinimg.com/originals/9d/58/70/9d58707a635942c60ee7fd1afc8403bd.gif" },
-          { name: "Stan", img: "https://i.pinimg.com/736x/cc/48/c0/cc48c09c661d4f9af432a37c6b908e41.jpg" },
+          { name: "Stan", img: "https://i.pinimg.com/736x/cc/48/c0/cc48c09c661d4f9af432a37c6b908e41.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/cc/48/c0/cc48c09c661d4f9af432a37c6b908e41.jpg" }, { name: "HS Stan", img: "https://i.pinimg.com/736x/5f/e2/f0/5fe2f0a436744a9f2a2de9de5c0be63e.jpg" }, { name: "Female Stan", img: "https://i.pinimg.com/1200x/f6/22/45/f622453263e192fafb680881badf4d8e.jpg" }] },
           { name: "Stewie", img: "https://i.pinimg.com/1200x/1e/a2/cc/1ea2cc7a197e3841086f4a1ce18b089c.jpg", speeches: ["Inchiniamoci tutti al mio genio superiore. Ho calcolato ogni vostra mossa.", "Votatemi, stolti! O la mia prossima invenzione vi disintegrerà uno per uno."], alignment: 'villain' },
           { name: "Lois", img: "https://i.pinimg.com/736x/6e/f7/42/6ef74238d3938c8e02f62c54fa7fb4c5.jpg", speeches: ["Ho dovuto crescere tre figli, un cane parlante e Peter. Gestire voi sull'isola è stata una vacanza. Votatemi, me lo merito!", "Se non mi votate, scordatevi che vi inviti al prossimo barbecue in famiglia. Sono una madre disperata, datemi quei soldi!"] },
           { name: "Peter", img: "https://i.pinimg.com/736x/9e/40/74/9e4074bbe7890cd245b51b9ff5c0e33c.jpg", speeches: ["Eheheh, se mi votate vi prometto una birra alla Pawtucket Patriot per tutti! Ah, e non fate vincere il pollo gigante.", "Questo è ancora più assurdo di quella volta in cui sono arrivato in finale in un reality show... oh, aspetta."] },
@@ -814,14 +755,14 @@
           { name: "Kim", img: "https://i.pinimg.com/736x/5d/7d/55/5d7d55fec8f9d8fb81e9db4438235f71.jpg" },
           { name: "Tess", img: "https://i.pinimg.com/736x/3f/bc/a9/3fbca9cb61b70f4d58c83598f0236764.jpg", speeches: ["Se volete votarmi, ne sarò orgogliosa. Grazie a chi lo farà.", "Ringrazio tutti coloro che decideranno di votarmi, siete stati tutti una parte importante di questa stagione."] },
 		  { name: "Hunter", img: "https://i.pinimg.com/736x/0d/f2/73/0df2731820fb9f74774f5e8607556625.jpg", speeches: ["Sono stato uno dei migliori durante le sfide fisiche, dovete riconoscerlo, solo per questo mi merito un voto.", "Hey ho sempre giocato in modo pulito al contrario di altri, penso di meritarmi questa vittoria, no?"] },
-		  { name: "Jake DC", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg" }, { name: "Vampiro", img: "https://i.pinimg.com/736x/16/4d/56/164d56da68e35ea1ede705ad0d3967b4.jpg" }, { name: "Cowboy", img: "https://i.pinimg.com/736x/4b/ea/11/4bea11e33391d0c89671491baebec99a.jpg" }, { name: "Sciolto", img: "https://i.pinimg.com/736x/28/3b/2d/283b2d85ccb4762668e7d6138c6684f9.jpg" }], speeches: ["Wow.. non mi sarei mai aspettato di arrivare in finale. Se volete votarmi siate liberissimi di farlo hahaha", "Marika so che credi in me cercherò di vincere per te e per Tom."] },
-		  { name: "Tom", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg" }, { name: "Tom mascherato", img: "https://i.pinimg.com/1200x/51/0f/2f/510f2f0a851676123017e67e2a6a25aa.jpg" }, { name: "Tom nuovo", img: "https://i.pinimg.com/736x/d9/90/fb/d990fb60a0cce807a8277c840afcee32.jpg" }], speeches: ["Jake, dedicherò questa vittoria per te", "Una spia come me sa di meritarsi questa vittoria, se mi votate farete la scelta giusta"] },
+		  { name: "Jake DC", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg" }, { name: "Vampiro", img: "https://i.pinimg.com/736x/16/4d/56/164d56da68e35ea1ede705ad0d3967b4.jpg" }, { name: "Cowboy", img: "https://i.pinimg.com/736x/4b/ea/11/4bea11e33391d0c89671491baebec99a.jpg" }, { name: "Sciolto", img: "https://i.pinimg.com/736x/28/3b/2d/283b2d85ccb4762668e7d6138c6684f9.jpg" }, { name: "Jake in white", img: "https://i.pinimg.com/736x/1e/16/36/1e1636d0aa70d64ebb6bd431e547c33f.jpg" }], speeches: ["Wow.. non mi sarei mai aspettato di arrivare in finale. Se volete votarmi siate liberissimi di farlo hahaha", "Marika so che credi in me cercherò di vincere per te e per Tom."] },
+		  { name: "Tom", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg" }, { name: "Tom mascherato", img: "https://i.pinimg.com/1200x/51/0f/2f/510f2f0a851676123017e67e2a6a25aa.jpg" }, { name: "Tom nuovo", img: "https://i.pinimg.com/736x/d9/90/fb/d990fb60a0cce807a8277c840afcee32.jpg" }, { name: "Tom sportivo", img: "https://i.pinimg.com/736x/4e/4d/74/4e4d74918a43da3de0444d3c52c347a8.jpg" }], speeches: ["Jake, dedicherò questa vittoria per te", "Una spia come me sa di meritarsi questa vittoria, se mi votate farete la scelta giusta"] },
 		  { name: "Ashley", img: "https://i.pinimg.com/736x/d1/c5/5f/d1c55f57218baecf0c2e160155e80c61.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/d1/c5/5f/d1c55f57218baecf0c2e160155e80c61.jpg" }, { name: "Ashley 1", img: "https://i.pinimg.com/736x/9c/a9/a0/9ca9a02a39ea02cb260c1fd21a0d4cc9.jpg" }, { name: "Ashley 2", img: "https://i.pinimg.com/736x/d5/ee/74/d5ee741ccb171d3c4e871db3b6259910.jpg" }], speeches: ["Eccomi qui in finale! Sono molto emozionata e spero davvero di aggiudicarmi i vostri voti ♥", "Buona fortuna per la finale mio caro avversario ma non pensare che sia finita"] },
 		  { name: "Grett", img: "https://i.pinimg.com/736x/fa/fb/5d/fafb5de75578a12b0eb2eb5efb035d23.jpg", speeches: ["Non dirò molto, solo che ovviamente mi merito questa vittoria.", "Beh siate obiettivi, non sarò la piu simpatica, ma questa vittoria me la merito."], alignment: 'villain' },
-		  { name: "Fiore", img: "https://i.pinimg.com/736x/78/79/43/787943ad5e0e1991f0a8f30189d0969f.jpg", speeches: ["Hey.. grazie a tutti per.. nah al diavolo. Votatemi bastardi.", "O mi votate o vi conviene dormire con un occhio aperto questa notte."], alignment: 'villain' },
+		  { name: "Fiore", img: "https://i.pinimg.com/736x/78/79/43/787943ad5e0e1991f0a8f30189d0969f.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/78/79/43/787943ad5e0e1991f0a8f30189d0969f.jpg" }, { name: "Fiore 1", img: "https://i.pinimg.com/736x/0a/1c/86/0a1c863f3fd688c8cade6b87d2d9907b.jpg" }, { name: "Fiore 2", img: "https://i.pinimg.com/736x/69/2a/0f/692a0f19d1f7a08ba4f5c97d7804497d.jpg" }], speeches: ["Hey.. grazie a tutti per.. nah al diavolo. Votatemi bastardi.", "O mi votate o vi conviene dormire con un occhio aperto questa notte."], alignment: 'villain' },
 		  { name: "Ally", img: "https://i.pinimg.com/736x/58/a8/e6/58a8e6232e4e38ca2a867f208c1b83fa.jpg", speeches: ["Ragazzi, questa stagione per me è stata come un roguelike: ogni giorno morivo dentro, ma respawnavo più forte, votate per la mia win!", "Ho affrontato più bug e glitch qui che in qualsiasi gioco indie, me lo merito questo voto dai haha!"] },
 		  { name: "Isabelle", img: "https://i.pinimg.com/736x/5e/1a/f6/5e1af69ac6196b02e015133b3de84fd3.jpg", speeches: ["Non sarò stata la piu onorevole, ma il signore sapra come perdonarmi, quindi votatemi. Ora.", "Dedicherò questa vittoria al nostro signore, votatemi."], alignment: 'villain' },
-		  { name: "Anastasia", img: "https://i.pinimg.com/736x/56/e5/52/56e552315c56b809d3978914d294ad34.jpg", speeches: ["Beh, questo outcome di me in finale era scontato, ho giocato con eleganza, strategia e bravura. Sapete chi si merita la vittoria no?", "Che vinca il migliore, ma sappiamo che sono io"], alignment: 'villain' },
+		  { name: "Anastasia", img: "https://i.pinimg.com/736x/56/e5/52/56e552315c56b809d3978914d294ad34.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/56/e5/52/56e552315c56b809d3978914d294ad34.jpg" }, { name: "Yuri Anastasia", img: "https://i.pinimg.com/736x/e9/d1/0c/e9d10c6ee6731e0eaa8323c26a3c96f5.jpg" }, { name: "Singer Anastasia", img: "https://i.pinimg.com/736x/8b/fe/61/8bfe6137dd0d010d7c8d9b81834d5afc.jpg" }, { name: "Winter Anastasia", img: "https://i.pinimg.com/736x/6f/2c/78/6f2c7807cc2e179d0d496b9cacd8c391.jpg" }], speeches: ["Beh, questo outcome di me in finale era scontato, ho giocato con eleganza, strategia e bravura. Sapete chi si merita la vittoria no?", "Che vinca il migliore, ma sappiamo che sono io"], alignment: 'villain' },
 		  { name: "Robot Boy", img: "https://i.pinimg.com/736x/91/d3/42/91d342072cae0214447bf8c362d9e02e.jpg" },
 		  { name: "Timmy", img: "https://i.pinimg.com/736x/91/de/1b/91de1b5b1897a71a36957191623af776.jpg", speeches: ["I miei fantagenitori non possono aiutarmi a vincere il milione, ma ci sono arrivato lo stesso! Votatemi!", "Desidero... no aspetta, non posso. Votate per me ragazzi!"] },
           { name: "Cosmo", img: "https://i.pinimg.com/1200x/3e/66/72/3e667202130fb974cfecb27b3f46c64a.jpg", speeches: ["Ehi, se vinco io compriamo un milione di monetine luccicanti!", "Wanda dice che non posso trasformare i soldi in budino, ma io ci proverò lo stesso!"] },
@@ -835,11 +776,11 @@
 		  { name: "Jake", img: "https://i.pinimg.com/1200x/cd/77/22/cd7722b2f98ffc75d1128913df6861d7.jpg" },
 		  { name: "Cake", img: "https://i.pinimg.com/736x/70/6c/08/706c08681ae007b24d103c44910431c1.jpg" },
           { name: "Re Ghiaccio", img: "https://i.pinimg.com/736x/63/11/d2/6311d2bddf8b2672df70a957bea7a93d.jpg", speeches: ["Se mi votate, prometto di non rapire nessuna principessa per un'intera settimana! Forse...", "Oh Gunther, guarda! Il tuo padrone è in finale! Sono un vero re!"], alignment: 'villain' },
-          { name: "Gommarosa", img: "https://i.pinimg.com/736x/6e/d9/f3/6ed9f3e6206e8ea0f26bf6da6529b22b.jpg", speeches: ["La scienza dimostra che sono la candidata ottimale per questa vittoria.", "Ho governato Dolcelandia con logica e precisione, questa sfida era solo un esperimento riuscito."], isNew: true },
-		  { name: "Marceline", img: "https://i.pinimg.com/736x/3a/58/7d/3a587db4bdc947c7d3458dc9582af9cd.jpg" },
+          { name: "Gommarosa", img: "https://i.pinimg.com/736x/6e/d9/f3/6ed9f3e6206e8ea0f26bf6da6529b22b.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/6e/d9/f3/6ed9f3e6206e8ea0f26bf6da6529b22b.jpg" }, { name: "Gommarosa 1", img: "https://i.pinimg.com/736x/50/b5/33/50b533d6bd63cee56e48c15e47339fe3.jpg" }, { name: "Gommarosa 2", img: "https://i.pinimg.com/736x/35/42/02/3542021aa285736a534c6330d0bcf55c.jpg" }], speeches: ["La scienza dimostra che sono la candidata ottimale per questa vittoria.", "Ho governato Dolcelandia con logica e precisione, questa sfida era solo un esperimento riuscito."], isNew: true },
+		  { name: "Marceline", img: "https://i.pinimg.com/736x/3a/58/7d/3a587db4bdc947c7d3458dc9582af9cd.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/3a/58/7d/3a587db4bdc947c7d3458dc9582af9cd.jpg" }, { name: "Stylish Marceline", img: "https://i.pinimg.com/736x/9e/ca/36/9eca368bfdd4568fb788eb452c5b017a.jpg" }, { name: "Marceline 1", img: "https://i.pinimg.com/736x/55/85/82/558582405e0df783d1518da245ee73c5.jpg" }] },
 		  { name: "Zoey", img: "https://i.pinimg.com/736x/48/53/3e/48533edc4b5054ec0a7bca17130f22af.jpg" },
 		  { name: "Rochelle", img: "https://i.pinimg.com/736x/bb/56/ed/bb56ed9fa63be897ba67032706d75cc7.jpg" },
-		  { name: "Ellis", img: "https://i.pinimg.com/736x/be/58/d5/be58d584da6dfa953ec9be2bd0ac94ac.jpg" },
+		  { name: "Ellis", img: "https://i.pinimg.com/736x/be/58/d5/be58d584da6dfa953ec9be2bd0ac94ac.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/be/58/d5/be58d584da6dfa953ec9be2bd0ac94ac.jpg" }, { name: "Shirtless Ellis", img: "https://i.pinimg.com/1200x/d1/14/f5/d114f52e271fa02f5e1c40739a146a47.jpg" }] },
 		  { name: "Tanjiro", img: "https://i.pinimg.com/736x/e9/6d/20/e96d20e7c159897a05c6baa57fac7f35.jpg" },
 		  { name: "Hinosuke", img: "https://i.pinimg.com/1200x/cf/d8/27/cfd82718c3f40c906665a0d680196439.jpg" },
 		  { name: "Zenitsu", img: "https://i.pinimg.com/1200x/91/12/9d/91129dee62e996da6313160605cb514d.jpg" },
@@ -855,18 +796,18 @@
 		  { name: "Sokka", img: "https://i.pinimg.com/736x/61/a7/91/61a7919a2c2df87b0106a425c031b9ca.jpg" },
 		  { name: "Mordecai", img: "https://i.pinimg.com/736x/4f/2e/04/4f2e04cace599c4433a84b490d12c2a4.jpg" },
 		  { name: "Rigby", img: "https://i.pinimg.com/736x/dd/7d/18/dd7d18fad1de3125ac14554e42f4d55f.jpg" },
-		  { name: "Superboy", img: "https://i.pinimg.com/1200x/70/d3/45/70d345e2d54b002fbc96b4ae8aa255e5.jpg" },
+		  { name: "Superboy", img: "https://i.pinimg.com/1200x/70/d3/45/70d345e2d54b002fbc96b4ae8aa255e5.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/70/d3/45/70d345e2d54b002fbc96b4ae8aa255e5.jpg" }, { name: "Superboy 1", img: "https://i.pinimg.com/1200x/44/42/a4/4442a49e57e9644b7fd8f62326289165.jpg" }, { name: "Superboy 2", img: "https://i.pinimg.com/1200x/34/20/a3/3420a34c3f0a287a8c06d435fcb577b7.jpg" }, { name: "Superboy 3", img: "https://i.pinimg.com/736x/36/78/d8/3678d8f26addd7908017de8d9e6b514d.jpg" }] },
 		  { name: "Miss Martian", img: "https://i.pinimg.com/1200x/f9/8c/75/f98c75467a5002ad20a36272cfe9faa1.jpg" },
 		  { name: "Zatanna", img: "https://i.pinimg.com/1200x/c9/9f/59/c99f5937cc6afce81e3298a007468992.jpg" },
-		  { name: "Draculaura", img: "https://i.pinimg.com/236x/49/d8/23/49d823b49c0621162712fb43dd5bf002.jpg" },
+		  { name: "Draculaura", img: "https://i.pinimg.com/236x/49/d8/23/49d823b49c0621162712fb43dd5bf002.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/236x/49/d8/23/49d823b49c0621162712fb43dd5bf002.jpg" }, { name: "Ponytail Draculaura", img: "https://i.pinimg.com/736x/8f/d4/52/8fd452564124174bedd94549df915c60.jpg" }] },
 		  { name: "Clawdeen", img: "https://i.pinimg.com/736x/fe/cb/1c/fecb1c67924cd56bb01e19deb12294f1.jpg" },
 		  { name: "Frankie", img: "https://i.pinimg.com/736x/c0/ae/bb/c0aebba7d0b329e4a8e26f92d36a857a.jpg" },
 		  { name: "Shego", img: "https://i.pinimg.com/736x/54/70/77/5470771ee32d3350ffa08f921bb3d1ad.jpg", alignment: 'villain' },
-		  { name: "Ariana Grande", img: "https://media.tenor.com/1u94p6qR01gAAAAM/ariana-grande-eternal-sunshine.gif", speeches: ["Grazie a tutti i miei fan per avermi supportata fino a qui! Yuh! 🤍 Votatemi e il mio prossimo singolo sarà dedicato a voi!", "Sono passata dal pop al fango di quest'isola, e sono ancora flawless. Datemi la corona, thank you, next!"] },
+		  { name: "Ariana Grande", img: "https://media.tenor.com/1u94p6qR01gAAAAM/ariana-grande-eternal-sunshine.gif", skins: [{ name: "Default", img: "https://media.tenor.com/1u94p6qR01gAAAAM/ariana-grande-eternal-sunshine.gif" }, { name: "Ariana 1", img: "https://i.pinimg.com/1200x/2d/85/23/2d8523c2f95a47cdc2f68f428da59e44.jpg" }, { name: "Ariana 2", img: "https://i.pinimg.com/736x/92/45/a3/9245a3787d5a46529f4188d88386cb4d.jpg" }, { name: "Ariana 3", img: "https://i.pinimg.com/originals/b7/de/f4/b7def4c28e8839bfe5d0c29e2450c82f.gif" }], speeches: ["Grazie a tutti i miei fan per avermi supportata fino a qui! Yuh! 🤍 Votatemi e il mio prossimo singolo sarà dedicato a voi!", "Sono passata dal pop al fango di quest'isola, e sono ancora flawless. Datemi la corona, thank you, next!"] },
 		  { name: "Will", img: "https://i.pinimg.com/originals/88/80/73/8880736b5695844044e0e38c8063a1ff.gif", speeches: ["Ho sempre guidato il mio gruppo con il Cuore. Se mi darete il vostro voto, dimostrerete che l'unione fa la forza!", "Abbiamo superato sfide magiche e ostacoli impossibili. Prometto di usare questa vittoria per fare del bene!"] },
-		  { name: "Carlos Oliveira", img: "https://i.pinimg.com/originals/32/0d/d1/320dd13031f1aba8a2d3d9b9837174f4.gif", speeches: ["In un mondo pieno di mostri, voi siete stati la mia squadra. Votate per me, vi ho guardato le spalle fin dall'inizio.", "Non lascio mai un civile indietro, figuriamoci una finale. Sono un sopravvissuto nato, merito il vostro voto."] },
-		  { name: "Leon", img: "https://i.pinimg.com/736x/db/ef/fc/dbeffc6e915a929f7dbe908390f5af42.jpg", speeches: ["Ho affrontato di peggio a Raccoon City. Ho mantenuto il sangue freddo e ho giocato pulito. Votatemi, missione compiuta.", "Scusate il ritardo, ma eccomi in finale. Se cercate un vero sopravvissuto, sapete a chi dare il vostro voto."] },
-		  { name: "Spongebob", img: "https://i.pinimg.com/originals/4c/74/21/4c742132b3f7018e49ae1901a2ab3e68.gif", speeches: ["Sono pronto! Sono pronto per vincere! Hahahaha!", "Ho sempre creduto nel potere dell'amicizia e del Krabby Patty. Votatemi!"] },
+		  { name: "Carlos Oliveira", img: "https://i.pinimg.com/originals/32/0d/d1/320dd13031f1aba8a2d3d9b9837174f4.gif", skins: [{ name: "Default", img: "https://i.pinimg.com/originals/32/0d/d1/320dd13031f1aba8a2d3d9b9837174f4.gif" }, { name: "Carlos 1", img: "https://i.pinimg.com/736x/3b/32/29/3b3229d97074aac59eceb564b01601e8.jpg" }, { name: "Carlos 2", img: "https://i.pinimg.com/736x/c3/3e/60/c33e605cb3df44bdb47d56ee48423f18.jpg" }], speeches: ["In un mondo pieno di mostri, voi siete stati la mia squadra. Votate per me, vi ho guardato le spalle fin dall'inizio.", "Non lascio mai un civile indietro, figuriamoci una finale. Sono un sopravvissuto nato, merito il vostro voto."] },
+		  { name: "Leon", img: "https://i.pinimg.com/736x/db/ef/fc/dbeffc6e915a929f7dbe908390f5af42.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/db/ef/fc/dbeffc6e915a929f7dbe908390f5af42.jpg" }, { name: "Leon 1", img: "https://i.pinimg.com/736x/38/a7/51/38a7517e952f29656cc0f6ec62c9723e.jpg" }, { name: "Leon 2", img: "https://i.pinimg.com/736x/cf/c3/eb/cfc3eb57eaabeda3e3636ebaf6d91cc8.jpg" }], speeches: ["Ho affrontato di peggio a Raccoon City. Ho mantenuto il sangue freddo e ho giocato pulito. Votatemi, missione compiuta.", "Scusate il ritardo, ma eccomi in finale. Se cercate un vero sopravvissuto, sapete a chi dare il vostro voto."] },
+		  { name: "Spongebob", img: "https://i.pinimg.com/originals/4c/74/21/4c742132b3f7018e49ae1901a2ab3e68.gif", skins: [{ name: "Default", img: "https://i.pinimg.com/originals/4c/74/21/4c742132b3f7018e49ae1901a2ab3e68.gif" }, { name: "Girly", img: "https://i.pinimg.com/1200x/6c/62/c7/6c62c7b364228712eb9dc440a486db82.jpg" }], speeches: ["Sono pronto! Sono pronto per vincere! Hahahaha!", "Ho sempre creduto nel potere dell'amicizia e del Krabby Patty. Votatemi!"] },
 		  { name: "Patrick", img: "https://i.pinimg.com/736x/cc/45/b5/cc45b504e5bba418a3621d894a7693d6.jpg", speeches: ["La maionese è uno strumento musicale? Votatemi, vi prego.", "Se vinco prometto di comprare... uhm... cosa stavo dicendo? Ah, i soldi!"] },
 		  { name: "Squiddi", img: "https://i.pinimg.com/originals/bb/9a/08/bb9a082dd1a1a8f49200b8f5e5392d23.gif", alignment: 'villain' },
 		  { name: "Mr Krab", img: "https://i.pinimg.com/1200x/74/9c/f5/749cf53dd48dbb440fcde8d958c7dbb1.jpg" },
@@ -898,7 +839,7 @@
 		  { name: "Sam", img: "https://i.pinimg.com/736x/e4/2c/11/e42c119ef2567059407c05275aba27ca.jpg" },
 		  { name: "Alex TS", img: "https://i.pinimg.com/1200x/31/0a/1e/310a1ecf6798fecaec781fe314ace8c0.jpg" },
 		  { name: "Ben 10", img: "https://i.pinimg.com/736x/b3/c8/eb/b3c8ebedc4123fa33f6e72ff2deff109.jpg" },
-          { name: "Gwen Tennyson", img: "https://i.pinimg.com/736x/f7/59/57/f75957bd5bad8195e2322e58de3f8119.jpg" },
+          { name: "Gwen Tennyson", img: "https://i.pinimg.com/736x/f7/59/57/f75957bd5bad8195e2322e58de3f8119.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/f7/59/57/f75957bd5bad8195e2322e58de3f8119.jpg" }, { name: "Giovane", img: "https://i.pinimg.com/736x/a1/df/13/a1df13d2b14865c925fe9b239431631f.jpg" }] },
           { name: "Baki", img: "https://i.pinimg.com/736x/86/f4/7f/86f47f0f1ad80d4e64a8079d1a3676bb.jpg", speeches: ["Voglio solo essere il più forte! I soldi sono un extra, votate per il campione!", "Ho affrontato avversari ben più temibili di voi. La vittoria mi spetta di diritto."], isNew: true },
           { name: "Doraemon", img: "https://i.pinimg.com/1200x/b0/4f/ea/b04fea416bc7d7add2665c37174cb7d1.jpg", speeches: ["Se mi votate, tirerò fuori un Chiusky speciale dal mio gattopone per festeggiare!", "Nobita sarebbe orgoglioso di me! Dai, datemi i vostri voti!"], isNew: true },
           { name: "Shizuka", img: "https://i.pinimg.com/736x/90/cb/40/90cb40d43c386ae195edc851152cd1d2.jpg", speeches: ["Ho cercato di essere gentile con tutti e spero lo abbiate apprezzato. Per favore, votate per Shizuka :D!", "Se vinco prometto di invitarvi a mangiare le patate dolci arrosto! Votatemi!"], isNew: true },
@@ -1549,6 +1490,10 @@
             "Spongebob": {
                 name: "Spugna",
                 style: "bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(253,224,71,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Girly": {
+                name: "Teen Girl",
+                style: "bg-gradient-to-r from-pink-300 via-rose-300 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(252,165,165,0.4)] tracking-widest font-black text-[11px]"
             },
             "Patrick": {
                 name: "Idiota",
@@ -3052,7 +2997,7 @@
             if (selectedSkin) {
                 finalChar.img = selectedSkin.img;
                 finalChar.skinName = selectedSkin.name;
-                if (["Rubino", "Zaffiro", "Shinichi"].includes(selectedSkin.name)) {
+                if (["Rubino", "Zaffiro", "Shinichi", "Girly"].includes(selectedSkin.name)) {
                     finalChar.name = selectedSkin.name;
                 }
             }
@@ -3093,18 +3038,18 @@
                 
                 usedNames.add(random.name);
                 
-                let finalCharObj = { ...random };
+                let finalBotChar = { ...randomChar };
                 // Assegna una skin casuale anche ai bot se disponibili!
-                if (finalCharObj.skins && finalCharObj.skins.length > 0) {
-                    const randomSkin = finalCharObj.skins[Math.floor(Math.random() * finalCharObj.skins.length)];
-                    finalCharObj.img = randomSkin.img;
-                    finalCharObj.skinName = randomSkin.name;
-                    if (["Rubino", "Zaffiro", "Shinichi"].includes(randomSkin.name)) {
-                        finalCharObj.name = randomSkin.name;
+                if (finalBotChar.skins && finalBotChar.skins.length > 0) {
+                    const randomSkin = finalBotChar.skins[Math.floor(Math.random() * finalBotChar.skins.length)];
+                    finalBotChar.img = randomSkin.img;
+                    finalBotChar.skinName = randomSkin.name;
+                    if (["Rubino", "Zaffiro", "Shinichi", "Girly"].includes(randomSkin.name)) {
+                        finalBotChar.name = randomSkin.name;
                     }
                 }
                 
-                return { ...p, character: finalCharObj };
+                return { ...p, character: finalBotChar };
               }
               return p;
             });
@@ -3185,7 +3130,7 @@
                   const randomSkin = finalBotChar.skins[Math.floor(Math.random() * finalBotChar.skins.length)];
                   finalBotChar.img = randomSkin.img;
                   finalBotChar.skinName = randomSkin.name;
-                  if (["Rubino", "Zaffiro", "Shinichi"].includes(randomSkin.name)) {
+                  if (["Rubino", "Zaffiro", "Shinichi", "Girly"].includes(randomSkin.name)) {
                       finalBotChar.name = randomSkin.name;
                       if (botName === randomChar.name) {
                           botName = randomSkin.name;
@@ -3208,7 +3153,9 @@
                 diceRoll: null,
                 immunityWins: 0,
                 totalVotesReceived: 0,
-                nextRollNerf: false 
+                nextRollNerf: false,
+                equippedCosmetic: null,
+                equippedTitle: null
               });
             }
 
@@ -3352,7 +3299,7 @@
                       const randomSkin = finalCharObj.skins[Math.floor(Math.random() * finalCharObj.skins.length)];
                       finalCharObj.img = randomSkin.img;
                       finalCharObj.skinName = randomSkin.name;
-                      if (["Rubino", "Zaffiro", "Shinichi"].includes(randomSkin.name)) {
+                      if (["Rubino", "Zaffiro", "Shinichi", "Girly"].includes(randomSkin.name)) {
                           finalCharObj.name = randomSkin.name;
                       }
                   }
@@ -3377,7 +3324,7 @@
                           const randomSkin = finalBotChar.skins[Math.floor(Math.random() * finalBotChar.skins.length)];
                           finalBotChar.img = randomSkin.img;
                           finalBotChar.skinName = randomSkin.name;
-                          if (["Rubino", "Zaffiro", "Shinichi"].includes(randomSkin.name)) {
+                          if (["Rubino", "Zaffiro", "Shinichi", "Girly"].includes(randomSkin.name)) {
                               finalBotChar.name = randomSkin.name;
                               botName = randomSkin.name;
                           }
@@ -3396,7 +3343,9 @@
                           diceRoll: null,
                           immunityWins: 0,
                           totalVotesReceived: 0,
-                          nextRollNerf: false 
+                          nextRollNerf: false,
+                          equippedCosmetic: null,
+                          equippedTitle: null
                       });
                   }
               });
@@ -3769,6 +3718,19 @@
 
           const [isProcessing, setIsProcessing] = useState(false);
           const processedAchievements = useRef(new Set()); // Riferimento per evitare conteggi doppi
+
+          // --- PREVIENE BLOCCO HOST DURANTE SETUP STAGIONE IN CASO DI REFRESH ---
+          useEffect(() => {
+              if (isHost && lobby.phase === 'season_setup' && !nextSeasonConfig) {
+                  const maxReturning = lobby.players.length;
+                  const humanCount = lobby.players.filter(p => !p.isBot).length;
+                  setNextSeasonConfig({
+                      returningCount: Math.min(maxReturning, Math.max(2, humanCount)), 
+                      numTeams: lobby.config.numTeams,
+                      mergeSize: lobby.config.mergeSize || Math.floor(lobby.config.maxPlayers / 2)
+                  });
+              }
+          }, [lobby.phase, isHost, nextSeasonConfig, lobby.players.length, lobby.config]);
 
           // --- FUNZIONE PER AGGIORNARE LE STATISTICHE GLOBALI ---
           const incrementActivePlayersStats = async (playersToCount) => {
@@ -4445,8 +4407,10 @@
             const playerObj = lobby.players.find(p => p.uid === currentPlayerId);
 
             if (playerObj?.isBot) {
-                // ANTI-LAG: Se ci sono più di 20 giocatori, i lanci dei dadi diventano super veloci (50ms invece di 1500ms)
-                const rollDelay = lobby.players.length > 20 ? 50 : 1500;
+                // ANTI-LAG MIGLIORATO: Calcola il ritardo sui giocatori ancora in gara (rollPlayers), non sul totale della lobby!
+                let rollDelay = 800; // 0.8 secondi: tempo perfetto per leggere chi tira durante il merge
+                if (rollPlayers.length > 30) rollDelay = 100; // Molto veloce per l'inizio di partite gigantesche
+                else if (rollPlayers.length > 15) rollDelay = 300; // Medio-veloce per la fase pre-merge
                 
                 const timer = setTimeout(async () => {
                     playSound('roll');
@@ -4998,24 +4962,59 @@
                 nextPlayersList = nextPlayersList.concat(bots.slice(0, slotsForBots));
             }
             
-            let nextPlayers = nextPlayersList.map(p => ({
-                uid: p.uid,
-                name: p.name,
-                character: p.character, 
-                isBot: p.isBot,
-                status: 'active', 
-                team: null, 
-                relationships: {}, 
-                alliances: [], 
-                diceRoll: null,
-                immunityWins: 0,
-                totalVotesReceived: p.totalVotesReceived || 0,
-                nextRollNerf: false,
-                legacyImmunityActive: false,
-                legacyDoubleVoteActive: false,
-                equippedCosmetic: p.equippedCosmetic,
-                equippedTitle: p.equippedTitle
-            }));
+            const returningUids = new Set(nextPlayersList.map(p => p.uid));
+            
+            let nextPlayers = nextPlayersList.map(p => {
+                let keptRelationships = {};
+                let keptAlliances = [];
+                
+                // Mantiene ~30% delle relazioni e alleanze della stagione passata
+                if (p.relationships) {
+                    Object.entries(p.relationships).forEach(([targetUid, val]) => {
+                        if (returningUids.has(targetUid)) {
+                            // MODIFICA: Se è un flirt/fidanzamento (val >= 11), mantienilo al 100% per sempre!
+                            if (val >= 11) {
+                                keptRelationships[targetUid] = val;
+                                // Mantiene anche l'alleanza forzatamente per i fidanzati
+                                if (p.alliances && p.alliances.includes(targetUid)) {
+                                    keptAlliances.push(targetUid);
+                                }
+                            } 
+                            // Altrimenti, normale decadimento (solo il 30% sopravvive)
+                            else if (Math.random() <= 0.30) {
+                                keptRelationships[targetUid] = val;
+                            }
+                        }
+                    });
+                }
+                
+                if (p.alliances) {
+                    p.alliances.forEach(targetUid => {
+                        if (returningUids.has(targetUid) && keptRelationships[targetUid] > 0 && Math.random() <= 0.30 && !keptAlliances.includes(targetUid)) {
+                            keptAlliances.push(targetUid);
+                        }
+                    });
+                }
+
+                return {
+                    uid: p.uid,
+                    name: p.name,
+                    character: p.character, 
+                    isBot: p.isBot,
+                    status: 'active', 
+                    team: null, 
+                    relationships: keptRelationships, 
+                    alliances: keptAlliances, 
+                    diceRoll: null,
+                    immunityWins: 0,
+                    totalVotesReceived: p.totalVotesReceived || 0,
+                    nextRollNerf: false,
+                    legacyImmunityActive: false,
+                    legacyDoubleVoteActive: false,
+                    equippedCosmetic: p.equippedCosmetic || null,
+                    equippedTitle: p.equippedTitle || null
+                };
+            });
 
             const numTeams = newConfig.numTeams;
             let currentTeamNames = DEFAULT_TEAM_NAMES;
@@ -5065,18 +5064,51 @@
                 );
             }
 
+            // Inizializza le casse per la nuova stagione
+            const advantageConfig = lobby.config.advantages || { idol: 1, extraVote: 1, advantage: 1, voteSteal: 1, spyDrone: 1, mutiny: 1, safety: 1, immunitySteal: 1, legacy: 1 };
+            let itemPool = [];
+            Object.entries(advantageConfig).forEach(([key, count]) => {
+                for(let i=0; i<count; i++) itemPool.push(key);
+            });
+            itemPool.sort(() => Math.random() - 0.5);
+            const totalCrates = nextPlayers.length;
+            let availableIndices = Array.from({length: totalCrates}, (_, i) => i).sort(() => Math.random() - 0.5);
+            let itemDistribution = {};
+            for (let i=0; i<itemPool.length && availableIndices.length > 0; i++) {
+                itemDistribution[availableIndices.pop()] = itemPool[i];
+            }
+            const initialCrates = Array.from({length: totalCrates}, (_, i) => ({ id: i, owner: null }));
+
             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                currentSeasonIndex: nextIndex,
                players: nextPlayers,
-               phase: 'episode_start',
-               round: 1,
+               phase: 'idol_hunt',
+               round: 0,
                config: {
                    ...lobby.config,
                    maxPlayers: newConfig.returningCount, 
                    numTeams: newConfig.numTeams,
                    mergeSize: newConfig.mergeSize
                },
-               logs: arrayUnion(`--- INIZIO STAGIONE ${nextIndex + 1}: ${SEASON_CONFIG[nextIndex].name} ---`)
+               idolData: {
+                  active: true,
+                  itemDistribution,
+                  inventory: { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} },
+                  activeEffects: { legacyDesignations: {} },
+                  crates: initialCrates,
+                  stage: 'selection'
+               },
+               votes: {},
+               ceremonyData: null,
+               challengeData: null,
+               juryData: null,
+               finalData: null,
+               redemptionData: null,
+               ghostIslandData: null,
+               twistData: null,
+               immunity: [],
+               losingTeam: null,
+               logs: arrayUnion(`--- INIZIO STAGIONE ${nextIndex + 1}: ${SEASON_CONFIG[nextIndex]?.name || 'Nuova Stagione'} ---`, `--- CACCIA AI VANTAGGI (Inizia la ricerca delle casse!) ---`)
             });
 
             // Aggiunge le presenze per la nuova stagione
@@ -5428,7 +5460,9 @@
                        round: lobby.round, 
                        season: currentSeason.name,
                        immunities: victim.immunityWins || 0,
-                       votes: victim.totalVotesReceived || 0
+                       votes: victim.totalVotesReceived || 0,
+                       friendships: Object.values(victim.relationships || {}).filter(v => v > 0).length,
+                       episodesSurvived: lobby.round
                   };
 
                   const nextRound = lobby.round + 1;
@@ -5795,7 +5829,9 @@
                           round: lobby.round, 
                           season: currentSeason.name,
                           immunities: victim.immunityWins || 0,
-                          votes: victim.totalVotesReceived || 0
+                          votes: victim.totalVotesReceived || 0,
+                          friendships: Object.values(victim.relationships || {}).filter(v => v > 0).length,
+                          episodesSurvived: lobby.round
                       });
                       newLogs.push(`${victim.name} è stato eliminato!`);
                   });
@@ -5974,7 +6010,9 @@
                       round: "FINALE", 
                       season: currentSeason.name,
                       immunities: loser.immunityWins || 0,
-                      votes: loser.totalVotesReceived || 0
+                      votes: loser.totalVotesReceived || 0,
+                      friendships: Object.values(loser.relationships || {}).filter(v => v > 0).length,
+                      episodesSurvived: lobby.round
                     };
 
                     const winnerEntry = { 
@@ -5983,7 +6021,9 @@
                          round: "WINNER", 
                          season: currentSeason.name,
                          immunities: winner.immunityWins || 0,
-                         votes: winner.totalVotesReceived || 0 
+                         votes: winner.totalVotesReceived || 0,
+                         friendships: Object.values(winner.relationships || {}).filter(v => v > 0).length,
+                         episodesSurvived: lobby.round
                     };
 
                     if (lobby.currentSeasonIndex < lobby.config.numSeasons - 1) {
@@ -6001,11 +6041,38 @@
                             mergeSize: lobby.config.mergeSize || Math.floor(lobby.config.maxPlayers / 2)
                          });
                     } else {
-                         updates.phase = 'game_over';
-                         updates.seasonWinners = arrayUnion(winner.name);
-                         updates.rankings = arrayUnion(loserEntry, winnerEntry); 
-                         updates.logs = arrayUnion(`GIOCO FINITO! ${winner.name} è il campione!`);
-                         playSound('victory');
+                         if (lobby.config.numSeasons > 1) {
+                             // MODIFICA: SE CI SONO PIU STAGIONI, CREA LA TOP 6
+                             const allRankings = [...(lobby.rankings || []), loserEntry, winnerEntry];
+                             const aggregated = {};
+                             allRankings.forEach(r => {
+                                 if (!aggregated[r.name]) {
+                                     const charData = ROSTER.find(c => c.name === r.name);
+                                     aggregated[r.name] = { name: r.name, totalEpisodes: 0, img: charData?.img || "" };
+                                 }
+                                 let ep = r.episodesSurvived !== undefined ? r.episodesSurvived : lobby.round;
+                                 aggregated[r.name].totalEpisodes += ep;
+                             });
+                             
+                             const top6 = Object.values(aggregated)
+                                 .sort((a, b) => b.totalEpisodes - a.totalEpisodes)
+                                 .slice(0, 6)
+                                 .reverse(); // Reverse per svelarli dal 6° al 1°
+                                 
+                             updates.phase = 'grand_finale_top6';
+                             updates.seasonWinners = arrayUnion(winner.name);
+                             updates.rankings = arrayUnion(loserEntry, winnerEntry);
+                             updates.top6Data = { players: top6, revealIndex: -1 };
+                             updates.logs = arrayUnion(`GIOCO FINITO! ${winner.name} vince l'ultima stagione! Preparatevi per scoprire i 6 TITANI SUPREMI...`);
+                             playSound('victory');
+                         } else {
+                             // MODIFICA: GIOCO FINITO NORMALE PER 1 STAGIONE
+                             updates.phase = 'game_over';
+                             updates.seasonWinners = arrayUnion(winner.name);
+                             updates.rankings = arrayUnion(loserEntry, winnerEntry); 
+                             updates.logs = arrayUnion(`GIOCO FINITO! ${winner.name} è il campione!`);
+                             playSound('victory');
+                         }
                     }
                 }
             }
@@ -6065,6 +6132,18 @@
                 }
             }
 
+            // MODIFICA: AGGIUNTO HANDLER PER LA TRANSIZIONE DELLA TOP 6
+            else if (lobby.phase === 'grand_finale_top6') {
+                if (lobby.top6Data.revealIndex < lobby.top6Data.players.length - 1) {
+                    updates = { [`top6Data.revealIndex`]: increment(1) };
+                    // Suono vittoria quando svela il numero 1
+                    if (lobby.top6Data.revealIndex === lobby.top6Data.players.length - 2) playSound('victory'); 
+                    else playSound('roll');
+                } else {
+                    updates = { phase: 'game_over' };
+                }
+            }
+
             try {
                 if (Object.keys(updates).length > 0) {
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
@@ -6121,7 +6200,9 @@
                       round: "FINALE", 
                       season: currentSeason.name,
                       immunities: loser.immunityWins || 0,
-                      votes: loser.totalVotesReceived || 0
+                      votes: loser.totalVotesReceived || 0,
+                      friendships: Object.values(loser.relationships || {}).filter(v => v > 0).length,
+                      episodesSurvived: lobby.round
                   };
                   
                   if (lobby.currentSeasonIndex < lobby.config.numSeasons - 1) {
@@ -6139,18 +6220,47 @@
                      });
 
                   } else {
-                     updates.phase = 'game_over';
-                     updates.seasonWinners = arrayUnion(winner.name);
                      const winnerEntry = { 
                          name: winner.name, 
                          team: "WINNER", 
                          round: "WINNER", 
                          season: currentSeason.name,
                          immunities: winner.immunityWins || 0,
-                         votes: winner.totalVotesReceived || 0 
+                         votes: winner.totalVotesReceived || 0,
+                         friendships: Object.values(winner.relationships || {}).filter(v => v > 0).length,
+                         episodesSurvived: lobby.round
                      };
-                     updates.rankings = arrayUnion(loserEntry, winnerEntry); 
-                     updates.logs = arrayUnion(`GIOCO FINITO!`);
+                     
+                     if (lobby.config.numSeasons > 1) {
+                         // MODIFICA: SE CI SONO PIU STAGIONI, CREA LA TOP 6 ANCHE QUI
+                         const allRankings = [...(lobby.rankings || []), loserEntry, winnerEntry];
+                         const aggregated = {};
+                         allRankings.forEach(r => {
+                             if (!aggregated[r.name]) {
+                                 const charData = ROSTER.find(c => c.name === r.name);
+                                 aggregated[r.name] = { name: r.name, totalEpisodes: 0, img: charData?.img || "" };
+                             }
+                             let ep = r.episodesSurvived !== undefined ? r.episodesSurvived : lobby.round;
+                             aggregated[r.name].totalEpisodes += ep;
+                         });
+                         
+                         const top6 = Object.values(aggregated)
+                             .sort((a, b) => b.totalEpisodes - a.totalEpisodes)
+                             .slice(0, 6)
+                             .reverse();
+                             
+                         updates.phase = 'grand_finale_top6';
+                         updates.seasonWinners = arrayUnion(winner.name);
+                         updates.rankings = arrayUnion(loserEntry, winnerEntry);
+                         updates.top6Data = { players: top6, revealIndex: -1 };
+                         updates.logs = arrayUnion(`GIOCO FINITO! ${winner.name} vince l'ultima stagione! Preparatevi per la TOP 6 SUPREMA...`);
+                     } else {
+                         // MODIFICA: GIOCO FINITO NORMALE PER 1 STAGIONE
+                         updates.phase = 'game_over';
+                         updates.seasonWinners = arrayUnion(winner.name);
+                         updates.rankings = arrayUnion(loserEntry, winnerEntry); 
+                         updates.logs = arrayUnion(`GIOCO FINITO!`);
+                     }
                   }
               }
 
@@ -7342,6 +7452,7 @@
                         {lobby.phase === 'season_setup' && "SETUP STAGIONE"}
                         {lobby.phase === 'redemption' && "REDEMPTION TIME"}
                         {lobby.phase === 'ghost_island' && "GHOST ISLAND"}
+                        {lobby.phase === 'grand_finale_top6' && "TOP 6 ASSOLUTA"}
                      </div>
                      
                      <div className="flex items-center gap-4">
@@ -7382,6 +7493,8 @@
                                                             : lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'revealing'
                                                                 ? (lobby.challengeData.revealIndex < lobby.challengeData.popularityResults.length - 1 ? 'SVELA POSIZIONE' : 'PROCLAMA VINCITORI')
                                                                 : lobby.phase === 'ghost_island' ? 'RISOLVI GHOST ISLAND' 
+                                                                : lobby.phase === 'grand_finale_top6' 
+                                                                    ? (lobby.top6Data.revealIndex < lobby.top6Data.players.length - 1 ? 'SVELA POSIZIONE' : 'VAI ALLA CLASSIFICA')
                                                                 : lobby.phase === 'game_over' ? 'CHIUDI LOBBY' : 'AVANTI'} 
                             {!(isProcessing || (lobby.phase === 'ghost_island' && Object.keys(lobby.ghostIslandData?.rolls || {}).length < lobby.ghostIslandData?.candidates.length) || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0)) && <ArrowRight size={16} />}
                             </button>
@@ -8856,101 +8969,258 @@
                          </div>
                      )}
 
-                     {lobby.phase === 'game_over' && (
-                         <div className="flex flex-col items-center h-full justify-center">
-                             <h1 className="text-5xl font-black text-yellow-400 mb-8">CLASSIFICA FINALE</h1>
-                             
-                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-7xl h-[70vh]">
-                                 <div className="flex-1 bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
-                                     <div className="bg-slate-700/50 p-4 border-b border-slate-600 text-center font-bold text-yellow-400 uppercase tracking-widest sticky top-0">
-                                         Piazzamenti
-                                     </div>
-                                     <div className="flex-1 overflow-y-auto no-scrollbar">
-                                         {lobby.rankings.slice().reverse().map((r, i) => {
-                                             const charImg = ROSTER.find(c => c.name === r.name)?.img || "";
-                                             return (
-                                                 <div key={i} className={`flex items-center justify-between p-4 border-b border-slate-700 ${i === 0 ? 'bg-gradient-to-r from-yellow-500/20 to-transparent' : 'hover:bg-slate-700/50'}`}>
-                                                     <div className="flex items-center gap-4">
-                                                         <div className={`font-black text-xl w-8 text-center flex-shrink-0 ${i === 0 ? 'text-yellow-400 scale-125' : 'text-slate-500'}`}>
-                                                            {i === 0 ? <Crown size={24} className="mx-auto"/> : i+1}
-                                                         </div>
-                                                         
-                                                         <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-slate-600 flex-shrink-0">
-                                                            {charImg && <img src={charImg} className="w-full h-full object-cover"/>}
-                                                         </div>
+                     {/* SCHERMATA SVELAMENTO TOP 6 ASSOLUTA (SOLO MULTI-STAGIONE) */}
+                     {lobby.phase === 'grand_finale_top6' && lobby.top6Data && (
+                         <div className="flex flex-col items-center justify-center min-h-[80vh] animate-in zoom-in duration-700">
+                             <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-500 to-orange-500 mb-4 drop-shadow-[0_0_20px_rgba(234,179,8,0.5)] tracking-widest uppercase text-center">
+                                 I 6 TITANI
+                             </h1>
+                             <p className="text-xl text-slate-300 mb-12 bg-black/50 px-6 py-2 rounded-full border border-yellow-500/30 font-bold">
+                                 I concorrenti che hanno dominato le {lobby.config.numSeasons} stagioni sopravvivendo a più episodi in assoluto!
+                             </p>
 
-                                                         <div>
-                                                             <div className={`font-bold text-lg ${i === 0 ? 'text-yellow-100' : 'text-white'}`}>{r.name}</div>
-                                                             <div className="text-xs text-slate-400 uppercase flex items-center gap-2">
-                                                                <span>{r.season} • {r.team}</span>
-                                                             </div>
-                                                         </div>
+                             <div className="flex flex-wrap justify-center items-end gap-6 max-w-6xl">
+                                 {lobby.top6Data.players.map((player, idx) => {
+                                     const isRevealed = lobby.top6Data.revealIndex >= idx;
+                                     const isNumberOne = idx === lobby.top6Data.players.length - 1; 
+                                     const rank = lobby.top6Data.players.length - idx; 
+
+                                     return (
+                                         <div key={idx} className={`relative flex flex-col items-center p-4 rounded-2xl border-4 transition-all duration-1000 ${isRevealed ? (isNumberOne ? 'border-yellow-400 bg-yellow-900/60 scale-[1.35] shadow-[0_0_40px_rgba(250,204,21,0.8)] z-20 mx-8 mb-4' : 'border-slate-400 bg-slate-800 scale-110 shadow-xl') : 'border-slate-700 bg-slate-900 opacity-60 scale-95'}`}>
+                                             
+                                             <div className={`absolute -top-5 bg-black text-white font-black px-4 py-1 rounded-full border-2 z-10 text-lg ${isRevealed && isNumberOne ? 'border-yellow-400 text-yellow-300' : 'border-slate-500'}`}>
+                                                 #{rank}
+                                             </div>
+
+                                             {isRevealed ? (
+                                                 <img src={player.img} className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-white/20 mb-3 shadow-lg"/>
+                                             ) : (
+                                                 <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-slate-800 border-4 border-slate-700 flex items-center justify-center mb-3">
+                                                     <span className="text-5xl font-black text-slate-600">?</span>
+                                                 </div>
+                                             )}
+
+                                             <div className="text-center w-32 md:w-40">
+                                                 <div className={`font-black text-lg truncate ${isRevealed && isNumberOne ? 'text-yellow-300 drop-shadow-md' : isRevealed ? 'text-white' : 'text-slate-500'}`}>
+                                                     {isRevealed ? player.name : "Sconosciuto"}
+                                                 </div>
+                                                 <div className={`text-sm font-bold mt-1 ${isRevealed && isNumberOne ? 'text-yellow-400' : isRevealed ? 'text-green-400' : 'text-slate-600'}`}>
+                                                     {isRevealed ? `${player.totalEpisodes} Episodi` : "??? Episodi"}
+                                                 </div>
+                                             </div>
+
+                                             {isRevealed && isNumberOne && (
+                                                 <Crown size={48} className="text-yellow-400 absolute -top-16 animate-[bounce_2s_infinite] drop-shadow-[0_0_15px_rgba(250,204,21,1)]"/>
+                                             )}
+                                         </div>
+                                     )
+                                 })}
+                             </div>
+                             
+                             {isHost && lobby.top6Data.revealIndex < lobby.top6Data.players.length - 1 && (
+                                 <div className="mt-16 text-yellow-400 font-bold animate-pulse text-xl bg-black/60 px-6 py-2 rounded-full border border-yellow-500/50">
+                                     Clicca su SVELA POSIZIONE in alto a destra!
+                                 </div>
+                             )}
+                         </div>
+                     )}
+
+                     {lobby.phase === 'game_over' && (
+                         <div className="flex flex-col items-center h-full justify-start pt-8 overflow-y-auto no-scrollbar pb-12 px-4">
+                             <h1 className="text-5xl md:text-6xl font-black text-yellow-400 mb-8 drop-shadow-lg text-center tracking-widest">CLASSIFICA GENERALE</h1>
+                             
+                             {/* SEZIONE VINCITORI DELLE STAGIONI */}
+                             {lobby.seasonWinners && lobby.seasonWinners.length > 0 && (
+                                 <div className="w-full max-w-5xl mb-12 animate-in slide-in-from-top duration-700">
+                                     <h2 className="text-2xl md:text-3xl font-black text-center text-white mb-6 tracking-widest bg-yellow-600/30 py-3 rounded-xl border border-yellow-500/50 shadow-[0_0_30px_rgba(234,179,8,0.3)]">
+                                         🏆 ALBO D'ORO VINCITORI 🏆
+                                     </h2>
+                                     <div className="flex flex-wrap justify-center gap-6">
+                                         {lobby.seasonWinners.map((winnerName, idx) => {
+                                             const charData = ROSTER.find(c => c.name === winnerName);
+                                             const seasonName = SEASON_CONFIG[idx]?.name || `Stagione ${idx + 1}`;
+                                             return (
+                                                 <div key={idx} className="bg-gradient-to-b from-yellow-500/30 to-slate-900 border-2 border-yellow-500 p-5 rounded-2xl flex flex-col items-center w-52 shadow-[0_0_25px_rgba(234,179,8,0.4)] relative transform hover:scale-110 transition-transform duration-300">
+                                                     <div className="absolute -top-4 bg-yellow-500 text-black font-black text-xs px-4 py-1 rounded-full shadow-lg uppercase border-2 border-white">
+                                                         {seasonName}
                                                      </div>
+                                                     <img src={charData?.img} className="w-28 h-28 rounded-full object-cover border-4 border-yellow-400 mb-3 shadow-[0_0_15px_rgba(250,204,21,0.6)]" />
+                                                     <div className="text-xl font-black text-white text-center leading-tight">{winnerName}</div>
+                                                     <Crown size={24} className="text-yellow-400 mt-2 animate-pulse"/>
                                                  </div>
                                              )
                                          })}
                                      </div>
                                  </div>
+                             )}
 
-                                 <div className="flex-1 bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
-                                     <div className="bg-slate-700/50 p-4 border-b border-slate-600 text-center font-bold text-red-400 uppercase tracking-widest sticky top-0 flex items-center justify-center gap-2">
-                                         <Target size={20}/> Classifica Bersagli (Voti)
-                                     </div>
-                                     <div className="flex-1 overflow-y-auto no-scrollbar">
-                                         {(() => {
-                                            const sortedByVotes = [...lobby.rankings].sort((a, b) => (b.votes || 0) - (a.votes || 0));
-                                            
-                                            return sortedByVotes.map((r, i) => {
-                                                const charImg = ROSTER.find(c => c.name === r.name)?.img || "";
-                                                return (
-                                                 <div key={i} className="flex items-center justify-between p-4 border-b border-slate-700 hover:bg-slate-700/50">
-                                                     <div className="flex items-center gap-4">
-                                                         <div className="font-bold text-slate-500 w-6 text-center">{i+1}</div>
-                                                         <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-600 flex-shrink-0 grayscale opacity-80">
-                                                            {charImg && <img src={charImg} className="w-full h-full object-cover"/>}
-                                                         </div>
-                                                         <div className="font-bold text-white">{r.name}</div>
-                                                     </div>
-                                                     <div className="font-black text-xl text-red-400 flex items-center gap-1">
-                                                         {r.votes} <Vote size={16}/>
-                                                     </div>
+                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-[90rem] flex-1 animate-in zoom-in duration-500">
+                                 
+                                 {(() => {
+                                     // ALGORITMO DI AGGREGAZIONE STATISTICHE TOTALI
+                                     const aggregatedStats = Object.values((lobby.rankings || []).reduce((acc, r) => {
+                                         if (!acc[r.name]) {
+                                             acc[r.name] = {
+                                                 name: r.name,
+                                                 totalVotes: 0,
+                                                 totalImmunities: 0,
+                                                 totalEpisodes: 0,
+                                                 totalFriendships: 0,
+                                                 seasonsWon: 0,
+                                                 seasonsPlayed: 0
+                                             };
+                                         }
+                                         acc[r.name].totalVotes += (r.votes || 0);
+                                         acc[r.name].totalImmunities += (r.immunities || 0);
+                                         acc[r.name].totalFriendships += (r.friendships || 0);
+                                         
+                                         // Calcola gli episodi totali in modo fedele
+                                         let ep = r.episodesSurvived;
+                                         if (ep === undefined) {
+                                             ep = typeof r.round === 'number' ? r.round : lobby.round;
+                                         }
+                                         acc[r.name].totalEpisodes += ep;
+                                         acc[r.name].seasonsPlayed += 1;
+                                         if (r.team === 'WINNER') acc[r.name].seasonsWon += 1;
+                                         
+                                         return acc;
+                                     }, {}));
+
+                                     // Ordinamento fedele per Sopravvivenza (prima chi ha più round in totale, poi eventuali vittorie come spareggio)
+                                     const sortedByEpisodes = [...aggregatedStats].sort((a, b) => {
+                                         if (b.totalEpisodes !== a.totalEpisodes) return b.totalEpisodes - a.totalEpisodes;
+                                         return b.seasonsWon - a.seasonsWon;
+                                     });
+                                     
+                                     const sortedByVotes = [...aggregatedStats].sort((a, b) => b.totalVotes - a.totalVotes);
+                                     
+                                     const sortedByImmunities = [...aggregatedStats]
+                                         .filter(a => a.totalImmunities > 0)
+                                         .sort((a, b) => b.totalImmunities - a.totalImmunities);
+
+                                     const sortedByFriendships = [...aggregatedStats]
+                                         .filter(a => a.totalFriendships > 0)
+                                         .sort((a, b) => b.totalFriendships - a.totalFriendships);
+
+                                     return (
+                                         <>
+                                             <div className="flex-1 bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col h-[50vh] md:h-[60vh]">
+                                                 <div className="bg-slate-700/80 p-4 border-b border-slate-600 text-center font-bold text-yellow-400 uppercase tracking-widest sticky top-0 z-10 backdrop-blur-md">
+                                                     Sopravvivenza Totale
                                                  </div>
-                                                )
-                                            })
-                                         })()}
-                                     </div>
-                                 </div>
+                                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                                     {sortedByEpisodes.map((r, i) => {
+                                                         const charImg = ROSTER.find(c => c.name === r.name)?.img || "";
+                                                         const isAbsoluteWinner = r.seasonsWon > 0;
+                                                         return (
+                                                             <div key={i} className={`flex items-center justify-between p-4 border-b border-slate-700 ${i === 0 ? 'bg-gradient-to-r from-yellow-500/20 to-transparent' : 'hover:bg-slate-700/50'}`}>
+                                                                 <div className="flex items-center gap-4 w-full">
+                                                                     <div className={`font-black text-xl w-8 text-center flex-shrink-0 ${i === 0 ? 'text-yellow-400 scale-125' : 'text-slate-500'}`}>
+                                                                        {i === 0 ? <Crown size={24} className="mx-auto"/> : i+1}
+                                                                     </div>
+                                                                     
+                                                                     <div className={`w-12 h-12 rounded-full overflow-hidden border-2 flex-shrink-0 ${isAbsoluteWinner ? 'border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.8)]' : 'border-slate-600'}`}>
+                                                                        {charImg && <img src={charImg} className="w-full h-full object-cover"/>}
+                                                                     </div>
 
-                                 <div className="flex-1 bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col">
-                                     <div className="bg-slate-700/50 p-4 border-b border-slate-600 text-center font-bold text-green-400 uppercase tracking-widest sticky top-0 flex items-center justify-center gap-2">
-                                         <Shield size={20}/> Classifica Bestie (Immunità)
-                                     </div>
-                                     <div className="flex-1 overflow-y-auto no-scrollbar">
-                                         {(() => {
-                                            const sortedByWins = [...lobby.rankings].sort((a, b) => (b.immunities || 0) - (a.immunities || 0));
-                                            
-                                            return sortedByWins.map((r, i) => {
-                                                if ((r.immunities || 0) === 0) return null; 
-                                                const charImg = ROSTER.find(c => c.name === r.name)?.img || "";
-                                                return (
-                                                 <div key={i} className="flex items-center justify-between p-4 border-b border-slate-700 hover:bg-slate-700/50">
-                                                     <div className="flex items-center gap-4">
-                                                         <div className="font-bold text-slate-500 w-6 text-center">{i+1}</div>
-                                                         <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-600 flex-shrink-0">
-                                                            {charImg && <img src={charImg} className="w-full h-full object-cover"/>}
-                                                         </div>
-                                                         <div className="font-bold text-white">{r.name}</div>
-                                                     </div>
-                                                     <div className="font-black text-xl text-green-400 flex items-center gap-1">
-                                                         {r.immunities} <Trophy size={16}/>
-                                                     </div>
+                                                                     <div className="flex-1 min-w-0">
+                                                                         <div className={`font-bold text-lg flex items-center gap-2 truncate ${isAbsoluteWinner ? 'text-yellow-100' : 'text-white'}`}>
+                                                                             {r.name} {isAbsoluteWinner && <Crown size={14} className="text-yellow-400 flex-shrink-0"/>}
+                                                                         </div>
+                                                                         <div className="text-[10px] sm:text-xs text-slate-400 uppercase flex items-center gap-2">
+                                                                            <span>{r.totalEpisodes} EPISODI IN {r.seasonsPlayed} STAGION{r.seasonsPlayed > 1 ? 'I' : 'E'}</span>
+                                                                         </div>
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                         )
+                                                     })}
                                                  </div>
-                                                )
-                                            })
-                                         })()}
-                                     </div>
-                                 </div>
+                                             </div>
 
+                                             <div className="flex-1 bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col h-[50vh] md:h-[60vh]">
+                                                 <div className="bg-slate-700/80 p-4 border-b border-slate-600 text-center font-bold text-red-400 uppercase tracking-widest sticky top-0 z-10 backdrop-blur-md flex items-center justify-center gap-2">
+                                                     <Target size={20}/> Bersagli (Voti)
+                                                 </div>
+                                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                                     {sortedByVotes.map((r, i) => {
+                                                         const charImg = ROSTER.find(c => c.name === r.name)?.img || "";
+                                                         return (
+                                                          <div key={i} className="flex items-center justify-between p-4 border-b border-slate-700 hover:bg-slate-700/50">
+                                                              <div className="flex items-center gap-4 w-full">
+                                                                  <div className="font-bold text-slate-500 w-6 text-center flex-shrink-0">{i+1}</div>
+                                                                  <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-600 flex-shrink-0 grayscale opacity-80">
+                                                                     {charImg && <img src={charImg} className="w-full h-full object-cover"/>}
+                                                                  </div>
+                                                                  <div className="font-bold text-white truncate flex-1">{r.name}</div>
+                                                                  <div className="font-black text-xl text-red-400 flex items-center gap-1 flex-shrink-0">
+                                                                      {r.totalVotes} <Vote size={16}/>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                         )
+                                                     })}
+                                                 </div>
+                                             </div>
+
+                                             <div className="flex-1 bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col h-[50vh] md:h-[60vh]">
+                                                 <div className="bg-slate-700/80 p-4 border-b border-slate-600 text-center font-bold text-green-400 uppercase tracking-widest sticky top-0 z-10 backdrop-blur-md flex items-center justify-center gap-2">
+                                                     <Shield size={20}/> Bestie (Immunità)
+                                                 </div>
+                                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                                     {sortedByImmunities.map((r, i) => {
+                                                         const charImg = ROSTER.find(c => c.name === r.name)?.img || "";
+                                                         return (
+                                                          <div key={i} className="flex items-center justify-between p-4 border-b border-slate-700 hover:bg-slate-700/50">
+                                                              <div className="flex items-center gap-4 w-full">
+                                                                  <div className="font-bold text-slate-500 w-6 text-center flex-shrink-0">{i+1}</div>
+                                                                  <div className="w-10 h-10 rounded-full overflow-hidden border border-green-600/50 flex-shrink-0">
+                                                                     {charImg && <img src={charImg} className="w-full h-full object-cover"/>}
+                                                                  </div>
+                                                                  <div className="font-bold text-white truncate flex-1">{r.name}</div>
+                                                                  <div className="font-black text-xl text-green-400 flex items-center gap-1 flex-shrink-0">
+                                                                      {r.totalImmunities} <Trophy size={16}/>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                         )
+                                                     })}
+                                                     {sortedByImmunities.length === 0 && (
+                                                         <div className="text-center text-slate-500 italic py-8">Nessuno ha vinto immunità.</div>
+                                                     )}
+                                                 </div>
+                                             </div>
+
+                                             <div className="flex-1 bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-700 flex flex-col h-[50vh] md:h-[60vh]">
+                                                 <div className="bg-slate-700/80 p-4 border-b border-slate-600 text-center font-bold text-pink-400 uppercase tracking-widest sticky top-0 z-10 backdrop-blur-md flex items-center justify-center gap-2">
+                                                     <Heart size={20}/> Social (Amicizie)
+                                                 </div>
+                                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                                     {sortedByFriendships.map((r, i) => {
+                                                         const charImg = ROSTER.find(c => c.name === r.name)?.img || "";
+                                                         return (
+                                                          <div key={i} className="flex items-center justify-between p-4 border-b border-slate-700 hover:bg-slate-700/50">
+                                                              <div className="flex items-center gap-4 w-full">
+                                                                  <div className="font-bold text-slate-500 w-6 text-center flex-shrink-0">{i+1}</div>
+                                                                  <div className="w-10 h-10 rounded-full overflow-hidden border border-pink-600/50 flex-shrink-0">
+                                                                     {charImg && <img src={charImg} className="w-full h-full object-cover"/>}
+                                                                  </div>
+                                                                  <div className="font-bold text-white truncate flex-1">{r.name}</div>
+                                                                  <div className="font-black text-xl text-pink-400 flex items-center gap-1 flex-shrink-0">
+                                                                      {r.totalFriendships} <Heart size={16} fill="currentColor"/>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                         )
+                                                     })}
+                                                     {sortedByFriendships.length === 0 && (
+                                                         <div className="text-center text-slate-500 italic py-8">Nessuno ha fatto amicizia.</div>
+                                                     )}
+                                                 </div>
+                                             </div>
+                                         </>
+                                     );
+                                 })()}
                              </div>
                          </div>
                      )}
