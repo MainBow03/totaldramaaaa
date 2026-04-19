@@ -358,100 +358,239 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- NUOVI STILI COSMETICI PREMIUM (Senza Lampeggio) --- */
+        /* --- NUOVI STILI COSMETICI PREMIUM (SUPER FIGHI E ANIMATI) --- */
+        
+        /* Campione: Corona d'alloro/Trofeo, riflesso oro e particelle rotanti */
         .cosmetic-campione {
             position: relative !important;
-            box-shadow: 0 0 20px rgba(250, 204, 21, 0.5) !important;
+            border: 2px solid #eab308 !important; /* Giallo Oro */
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.6) !important;
+            isolation: isolate;
+        }
+        .cosmetic-campione::before {
+            content: '🏆';
+            position: absolute;
+            top: -12px; left: -8px;
+            font-size: 18px;
+            z-index: 10;
+            animation: bounceTrophy 2s ease-in-out infinite;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
         .cosmetic-campione::after {
             content: '';
             position: absolute;
-            inset: 0;
-            z-index: 10; /* Lo mantiene sopra l'immagine */
+            inset: -4px;
             border-radius: inherit;
-            padding: 3px; /* Spessore bordo */
-            background: linear-gradient(45deg, #fef08a, #ca8a04, #fef08a, #a16207);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
+            background: conic-gradient(from 0deg, transparent, rgba(250, 204, 21, 0.8), transparent);
+            z-index: -1;
+            animation: rotateShadow 3s linear infinite;
+        }
+        @keyframes bounceTrophy {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px) scale(1.1); }
         }
 
+        /* Veterano: Bordo smeraldo pulsante con stelline militari */
         .cosmetic-veterano {
             position: relative !important;
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5) !important;
+            border: 2px solid #10b981 !important; /* Smeraldo */
+            box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.5), 0 0 15px rgba(16, 185, 129, 0.6) !important;
         }
         .cosmetic-veterano::after {
-            content: '';
+            content: '⭐';
             position: absolute;
-            inset: 0;
+            bottom: -8px; right: -8px;
+            font-size: 16px;
             z-index: 10;
-            border-radius: inherit;
-            border: 2px solid rgba(52, 211, 153, 0.8);
-            box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.4);
-            pointer-events: none;
+            animation: pulseStar 1.5s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 5px #10b981);
+        }
+        .cosmetic-veterano::before {
+            content: '⭐';
+            position: absolute;
+            top: -8px; left: -8px;
+            font-size: 12px;
+            z-index: 10;
+            animation: pulseStar 2s ease-in-out infinite alternate-reverse;
+            filter: drop-shadow(0 0 5px #10b981);
+        }
+        @keyframes pulseStar {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            100% { transform: scale(1.2) rotate(15deg); opacity: 1; }
         }
 
+        /* Pugnalatore: Lame che tagliano e gocce di sangue */
         .cosmetic-pugnalatore {
             position: relative !important;
-            box-shadow: -5px 0 15px rgba(220, 38, 38, 0.5), 5px 0 15px rgba(220, 38, 38, 0.5) !important;
+            border: 2px solid #991b1b !important; /* Rosso Sangue */
+            box-shadow: inset 0 0 15px rgba(220, 38, 38, 0.6), 0 0 20px rgba(220, 38, 38, 0.8) !important;
+        }
+        .cosmetic-pugnalatore::before {
+            content: '🔪';
+            position: absolute;
+            top: 10%; left: -15px;
+            font-size: 18px;
+            z-index: 10;
+            transform: rotate(-45deg);
+            animation: stabLeft 2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.8));
         }
         .cosmetic-pugnalatore::after {
-            content: '';
+            content: '🩸';
             position: absolute;
-            inset: 0;
+            bottom: -10px; right: -5px;
+            font-size: 14px;
             z-index: 10;
-            border-radius: inherit;
-            border-left: 3px solid #dc2626;
-            border-right: 3px solid #dc2626;
-            pointer-events: none;
+            animation: dripBlood 2.5s infinite;
+        }
+        @keyframes stabLeft {
+            0%, 100% { transform: translateX(-5px) rotate(-45deg); }
+            50% { transform: translateX(8px) rotate(-20deg); }
+        }
+        @keyframes dripBlood {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            80% { transform: translateY(20px) scale(0.8); opacity: 0; }
+            100% { opacity: 0; }
         }
 
+        /* Sopravvissuto: Cerotto e un bagliore a "battito cardiaco" da sopravvivenza estrema */
         .cosmetic-sopravvissuto {
             position: relative !important;
-            box-shadow: 0 0 20px rgba(249, 115, 22, 0.7), 0 0 40px rgba(234, 88, 12, 0.3) !important;
+            border: 2px solid #ea580c !important; /* Arancio intenso */
+            animation: heartbeatSurv 1.2s infinite !important;
         }
         .cosmetic-sopravvissuto::after {
-            content: '';
+            content: '🩹';
             position: absolute;
-            inset: 0;
+            top: -8px; right: -8px;
+            font-size: 16px;
             z-index: 10;
-            border-radius: inherit;
-            border: 2px solid #f97316;
-            pointer-events: none;
+            transform: rotate(25deg);
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+        }
+        @keyframes heartbeatSurv {
+            0%, 100% { box-shadow: 0 0 10px #ea580c, inset 0 0 10px rgba(234, 88, 12, 0.5); transform: scale(1); }
+            50% { box-shadow: 0 0 25px #f97316, inset 0 0 20px rgba(249, 115, 22, 0.8); transform: scale(1.05); border-color: #f97316; }
         }
 
+        /* MVP: Stile High-Tech, neon ciano con riflesso a specchio dinamico */
         .cosmetic-mvp {
             position: relative !important;
-            box-shadow: 0 0 15px rgba(34, 211, 238, 0.6) !important;
+            border: 2px solid #06b6d4 !important; /* Ciano */
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.6) !important;
+            isolation: isolate;
+        }
+        .cosmetic-mvp::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            /* Crea un riflesso di luce che passa sopra l'immagine */
+            background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.6) 50%, transparent 80%);
+            background-size: 200% 100%;
+            animation: shineTech 2.5s infinite linear;
+            z-index: 5;
+            pointer-events: none;
+            mix-blend-mode: overlay;
         }
         .cosmetic-mvp::after {
-            content: '';
+            content: '⚡';
             position: absolute;
-            inset: 0;
+            bottom: -8px; right: -8px;
+            font-size: 16px;
             z-index: 10;
-            border-radius: inherit;
-            border: 2px solid #22d3ee;
-            box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.3); /* Simula il doppio bordo hi-tech */
-            pointer-events: none;
+            filter: drop-shadow(0 0 5px #06b6d4);
+            animation: shockMVP 0.5s infinite alternate;
+        }
+        @keyframes shineTech {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        @keyframes shockMVP {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.3) rotate(10deg); opacity: 1; filter: brightness(1.5) drop-shadow(0 0 10px #22d3ee); }
         }
 
+        /* Idolo: Aura Mistica magenta e Tiki/Moai fluttuante */
         .cosmetic-idolo {
             position: relative !important;
-            box-shadow: 0 0 25px rgba(217, 70, 239, 0.5) !important;
+            border: 2px solid #d946ef !important; /* Magenta magico */
+            box-shadow: 0 0 20px rgba(217, 70, 239, 0.6), inset 0 0 15px rgba(192, 38, 211, 0.5) !important;
         }
         .cosmetic-idolo::after {
+            content: '🗿';
+            position: absolute;
+            top: -14px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            z-index: 10;
+            filter: drop-shadow(0 0 8px #d946ef);
+            animation: floatTiki 3s ease-in-out infinite;
+        }
+        @keyframes floatTiki {
+            0%, 100% { transform: translate(-50%, 0) scale(1); filter: brightness(1); }
+            50% { transform: translate(-50%, -5px) scale(1.1); filter: brightness(1.3) drop-shadow(0 0 12px #e879f9); }
+        }
+
+        /* Agente 007: Stile Hacker/Radar verde a scansione */
+        .cosmetic-agente007 {
+            position: relative !important;
+            border: 2px solid #22c55e !important; /* Verde hacker */
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5) !important;
+            isolation: isolate;
+        }
+        .cosmetic-agente007::before {
             content: '';
             position: absolute;
             inset: 0;
-            z-index: 10;
             border-radius: inherit;
-            padding: 3px;
-            background: linear-gradient(135deg, #e879f9, #c026d3, #86198f);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
+            /* Linea laser verde che scansiona dall'alto verso il basso */
+            background: linear-gradient(to bottom, transparent, rgba(74, 222, 128, 0.2) 50%, #22c55e 55%, transparent 56%);
+            background-size: 100% 300%;
+            animation: radarScan 2.5s infinite linear;
+            z-index: 5;
             pointer-events: none;
+        }
+        .cosmetic-agente007::after {
+            content: '👁️';
+            position: absolute;
+            bottom: -8px; left: -8px;
+            font-size: 14px;
+            z-index: 10;
+            filter: drop-shadow(0 0 5px #22c55e);
+            animation: blinkSpy 4s infinite;
+        }
+        @keyframes radarScan {
+            0% { background-position: 0 -100%; }
+            100% { background-position: 0 200%; }
+        }
+        @keyframes blinkSpy {
+            0%, 96%, 100% { transform: scaleY(1); }
+            98% { transform: scaleY(0.1); }
+        }
+
+        /* Effetto per Donne al Potere */
+        .cosmetic-donnealpotere {
+            position: relative !important;
+            border: 2px solid #ec4899 !important; /* Pink 500 */
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.6), inset 0 0 10px rgba(250, 204, 21, 0.5) !important;
+            overflow: visible !important;
+        }
+        .cosmetic-donnealpotere::after {
+            content: '👑';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            animation: floatCrown 3s ease-in-out infinite alternate;
+            z-index: 20;
+            filter: drop-shadow(0 0 5px #facc15);
+            pointer-events: none;
+        }
+        @keyframes floatCrown {
+            0% { transform: translate(-50%, 0px); }
+            100% { transform: translate(-50%, -5px); }
         }
     </style>
 </head>
@@ -564,7 +703,7 @@
                 'dolcezza': 'cosmetic-bow', // Fiocco e cuoricino fluttuante
                 'mvp': 'cosmetic-mvp', // Doppio bordo neon tech
                 'idolo': 'cosmetic-idolo', // Gradiente magenta magico
-                'agente007': 'ring-2 ring-offset-2 ring-offset-slate-900 ring-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.9)] border-dashed animate-[pulse_3s_cubic-bezier(0.4,0,0.6,1)_infinite]', // L'UNICO LAMPEGGIANTE: Aura Radar Spia lenta
+                'agente007': 'cosmetic-agente007', // Radar Spia a scansione verde hacker
                 'mibrucialamano': 'cosmetic-fire', // Fiamma custom alla base
                 'manoincandescente': 'cosmetic-incandescente', // Fiamma bianca/gialla suprema
                 'ladrodipalcoscenico': 'cosmetic-shadow', // Aura oscura rotante posteriore
@@ -574,7 +713,8 @@
                 'dramaqueen': 'cosmetic-toxic', // Bolle e veleno verde
                 'tiseioffeso': 'cosmetic-ice', // Fiocco di neve rotante
                 'itremoschettieri': 'cosmetic-moschettieri', // Effetto spade incrociate
-                'ineluttabile': 'cosmetic-ineluttabile' // Aura stile Gemme dell'Infinito
+                'ineluttabile': 'cosmetic-ineluttabile', // Aura stile Gemme dell'Infinito
+                'donnealpotere': 'cosmetic-donnealpotere' // Coroncina dorata e aura rosa
             };
             return cosmetics[cosmeticId] || '';
         };
@@ -582,11 +722,10 @@
         // AGGIUNTE LE FRASI (SPEECHES) AI PERSONAGGI PRINCIPALI
         const ROSTER = [
           { name: "Lord Farquaad", img: "https://i.pinimg.com/736x/35/93/ac/3593acb0b8f9d75704f5a0778c693e73.jpg", speeches: ["La vittoria è mia per diritto divino. Gli orchi non meritano questi soldi!", "Alcuni di voi sono stati eliminati, ma è un sacrificio che sono stato disposto a fare per vincere."], alignment: 'villain' },
-          { name: "Marinette", img: "https://i.pinimg.com/736x/b8/74/55/b87455575cd069609007a639c9490293.jpg", speeches: ["Ho cercato di giocare in modo onesto e leale con tutti. Spero possiate riconoscerlo!", "Essere leader non è facile, ma ho sempre protetto il mio team. Votatemi!"] },
-          { name: "Adrien", img: "https://i.pinimg.com/1200x/5c/2d/c7/5c2dc740ed2fe906b6afaf1320bf4273.jpg", speeches: ["Sono sempre stato prigioniero di mio padre, votatemi cosi posso dimostrargli di brillare anche da solo!", "Ho giocato in modo pulito e ottimale, spero lo possiate riconoscere, votate per me!"] },
-		  { name: "Alya", img: "https://i.pinimg.com/736x/3e/3b/99/3e3b99fc26e6b2cb8bf7359c53acca24.jpg", speeches: ["Grazie alle mie doti giornalistiche sono riuscita ad arrivare fin qui, votatemi e non ve ne pentirete!", "Miraggio! Guardate cosa so fare? Direi che mi merito il voto."] },
-          { name: "Rena Rouge", img: "https://i.pinimg.com/736x/3b/52/7e/3b527e80e1a63f7dd83e80f4d67d65d6.jpg", speeches: ["Con un po' di illusione e molta astuzia, la vittoria è mia!", "Ho sempre saputo di poter arrivare fin qui. Ora votatemi e rendiamo questa vittoria realtà, Miraggio!"], isNew: true },
-          { name: "Argos", img: "https://i.pinimg.com/736x/61/a0/d7/61a0d70a9cba0c930bb2ed13e95f6e87.jpg", speeches: ["Non ho bisogno dei vostri finti sorrisi. Voglio solo il premio per i miei veri obiettivi.", "Ho manipolato le ombre e i cuori per arrivare in vetta. Questa vittoria è il mio riscatto."], alignment: 'villain', isNew: true },
+          { name: "Marinette", img: "https://i.pinimg.com/736x/b8/74/55/b87455575cd069609007a639c9490293.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/b8/74/55/b87455575cd069609007a639c9490293.jpg" }, { name: "Ladybug", img: "https://i.pinimg.com/736x/a4/03/62/a40362d9f13a56551c5e02676e936bfa.jpg" }, { name: "Viperbug", img: "https://i.pinimg.com/736x/e5/f9/24/e5f9249cc4e9fc1ce56f969e8892bf3a.jpg" }, { name: "Aqua Bug", img: "https://i.pinimg.com/736x/04/54/35/045435b811c8a29e316f350c5e18381e.jpg" }], speeches: ["Ho cercato di giocare in modo onesto e leale con tutti. Spero possiate riconoscerlo!", "Essere leader non è facile, ma ho sempre protetto il mio team. Votatemi!"] },
+          { name: "Adrien", img: "https://i.pinimg.com/1200x/5c/2d/c7/5c2dc740ed2fe906b6afaf1320bf4273.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/5c/2d/c7/5c2dc740ed2fe906b6afaf1320bf4273.jpg" }, { name: "Chat Noir", img: "https://i.pinimg.com/736x/b8/27/6a/b8276a7767c008ced6c9ef7b9f569250.jpg" }], speeches: ["Sono sempre stato prigioniero di mio padre, votatemi cosi posso dimostrargli di brillare anche da solo!", "Ho giocato in modo pulito e ottimale, spero lo possiate riconoscere, votate per me!"] },
+		  { name: "Alya", img: "https://i.pinimg.com/736x/3e/3b/99/3e3b99fc26e6b2cb8bf7359c53acca24.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/3e/3b/99/3e3b99fc26e6b2cb8bf7359c53acca24.jpg" }, { name: "Rena Rouge", img: "https://i.pinimg.com/736x/3b/52/7e/3b527e80e1a63f7dd83e80f4d67d65d6.jpg" }], speeches: ["Grazie alle mie doti giornalistiche sono riuscita ad arrivare fin qui, votatemi e non ve ne pentirete!", "Miraggio! Guardate cosa so fare? Direi che mi merito il voto."] },
+          { name: "Argos", img: "https://i.pinimg.com/736x/61/a0/d7/61a0d70a9cba0c930bb2ed13e95f6e87.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/61/a0/d7/61a0d70a9cba0c930bb2ed13e95f6e87.jpg" }, { name: "Felix", img: "https://i.pinimg.com/736x/48/ac/11/48ac1194c4797527ba21db8a3135642e.jpg" }, { name: "Flairmidable", img: "https://i.pinimg.com/736x/b5/f9/59/b5f959382a40c29d13a338d05504b6c7.jpg" }], speeches: ["Non ho bisogno dei vostri finti sorrisi. Voglio solo il premio per i miei veri obiettivi.", "Ho manipolato le ombre e i cuori per arrivare in vetta. Questa vittoria è il mio riscatto."], alignment: 'villain', isNew: true },
           { name: "Heartfixer", img: "https://i.pinimg.com/736x/fe/82/7c/fe827caedc137c8832fd7b313209cc55.jpg", speeches: ["Ho riparato ogni cuore spezzato su quest'isola, ma il premio spetta solo a me! Votatemi!", "Non c'è bisogno di essere akumatizzati per capire che sono io la vera vincitrice. Datemi i vostri voti!"], alignment: 'villain' },
           { name: "Chrysalis", img: "https://i.pinimg.com/736x/c1/8e/6a/c18e6a45d98eee60c330d37bb2f4e562.jpg", speeches: ["Vi ho manipolati tutti dall'inizio alla fine con le mie bugie perfette. Sono io la regina dell'inganno e merito la corona.", "Un bravo prestigiatore non rivela mai i suoi trucchi... ma vi assicuro che la mia vittoria era scritta fin dal primo giorno."], alignment: 'villain' },
           { name: "Nathalie", img: "https://i.pinimg.com/736x/ad/8e/68/ad8e68f410c0379c3b5412b8afeef3dc.jpg", speeches: ["Ho sempre agito con fredda efficienza e logica impeccabile. I risultati parlano da soli, il vostro voto dovrebbe essere per me.", "Ho sacrificato molto per arrivare fin qui. Non siate irrazionali, sono l'unica che merita questo premio."] },
@@ -597,12 +736,11 @@
 		  { name: "Skipper", img: "https://i.pinimg.com/736x/e6/f0/5b/e6f05b20dda962344721db983c882679.jpg", speeches: ["Carini e coccolosi ragazzi, carini e coccolosi. Ora datemi quei soldi per finanziare le operazioni.", "Ho gestito questa isola come un'operazione militare tattica. Vittoria meritata."] },
           { name: "Rico", img: "https://i.pinimg.com/736x/a8/fe/a5/a8fea5d9ce18a230a1ea6b996cef8bb8.jpg", speeches: ["Kaboom?! Kaboom!", "*Vomita un candelotto di dinamite* Ecco il mio discorso!"], alignment: 'villain' },
 		  { name: "Kowalski", img: "https://i.pinimg.com/736x/e7/bc/38/e7bc382c57bfb2f3de7f44a0cce39fcd.jpg" },
-		  { name: "Soldato", img: "https://i.pinimg.com/1200x/5e/3f/0d/5e3f0d06b262dc18869f550806d1bdb4.jpg" },
-		  { name: "Baby Soldato", img: "https://i.pinimg.com/736x/81/3c/57/813c57fcb969d58fac1672594da05532.jpg" },
+		  { name: "Soldato", img: "https://i.pinimg.com/1200x/5e/3f/0d/5e3f0d06b262dc18869f550806d1bdb4.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/5e/3f/0d/5e3f0d06b262dc18869f550806d1bdb4.jpg" }, { name: "Baby Soldato", img: "https://i.pinimg.com/736x/81/3c/57/813c57fcb969d58fac1672594da05532.jpg" }] },
           { name: "Gwen", img: "https://i.pinimg.com/1200x/59/d7/15/59d71578cd5f889ae898bbc83dda29dc.jpg", speeches: ["Non mi importa molto dei soldi, ma ho giocato pulito. A differenza di certa gente.", "Ho sopportato tutti voi per settimane, questo è il minimo premio che mi spetta."] },
           { name: "Julia", img: "https://i.pinimg.com/736x/80/c2/83/80c283f82be806cdd40e71d303d09474.jpg", speeches: ["Guardatemi. Sono stupenda, intelligente e vi ho distrutti tutti. Votate per la regina.", "Non fatemi perdere tempo, sapete tutti che i soldi spettano a me. Ciao follower!"], alignment: 'villain' },
           { name: "Duncan", img: "https://i.pinimg.com/736x/3f/2d/e1/3f2de1cd71448e1413ab3ccafbed5b4d.jpg", speeches: ["Votate per me o vi farò pentire di essere nati, chiaro?", "Ho giocato duro e ho fregato chi dovevo fregare. Date a me i soldi o vi picchio."], alignment: 'villain' },
-		  { name: "Heather", img: "https://i.pinimg.com/736x/81/5b/b6/815bb632721e7d38f26d35801466dd30.jpg", speeches: ["Io mi merito la vittoria poichè sono la villain migliore della stagione, ammettetelo.", "Se non votate per me non avete buon gusto, sappiatelo. Siete solo comparse nel mio show!"], alignment: 'villain' },
+		  { name: "Heather", img: "https://i.pinimg.com/736x/81/5b/b6/815bb632721e7d38f26d35801466dd30.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/81/5b/b6/815bb632721e7d38f26d35801466dd30.jpg" }, { name: "Heather 1", img: "https://i.pinimg.com/736x/d1/64/4a/d1644a80241078f0461f048fecae65b1.jpg" }, { name: "Heather 2", img: "https://i.pinimg.com/736x/68/0b/fb/680bfb4da66a5d468309ddf6205fdf55.jpg" }], speeches: ["Io mi merito la vittoria poichè sono la villain migliore della stagione, ammettetelo.", "Se non votate per me non avete buon gusto, sappiatelo. Siete solo comparse nel mio show!"], alignment: 'villain' },
           { name: "Alejandro", img: "https://i.pinimg.com/736x/42/68/90/42689043c52c2a7402ab46de85988ff1.jpg", speeches: ["Le mie abilità e il mio fascino mi hanno portato in cima. Votate per me, por favor.", "Ho giocato con tutti voi, e ora chiedo umilmente il vostro voto."], alignment: 'villain' },
           { name: "Owen", img: "https://i.pinimg.com/1200x/d8/67/6b/d8676b6ca40fa5a14aabace2a6542a39.jpg", speeches: ["Amici! Se vinco questi soldi prometto una festa gigante con pizza e formaggio per tutti!", "Ahahahah! Non ci credo di essere in finale! Siete i migliori, votate per me!"] },
           { name: "Lightning", img: "https://i.pinimg.com/736x/44/af/e7/44afe7a858a67cbd1458cebee28693aa.jpg", speeches: ["Sha-bam! Lightning colpisce ancora! Merito di vincere perché sono il più forte!", "Nessuno può fermare Lightning! Votate per il campione assoluto! Sha-vittoria!"], alignment: 'villain' },
@@ -610,7 +748,7 @@
 		  { name: "Lindsay", img: "https://i.pinimg.com/1200x/ed/96/df/ed96df179eaa7030663473c575067cb4.jpg", speeches: ["Dovete votare per me perché i miei capelli sono stati perfetti per tutto il tempo! Grazie!", "Aspetta, ma se vinco io... divento la regina dell'isola? Siii, votatemi! Ciao Tyson!"] },
 		  { name: "Bowie", img: "https://i.pinimg.com/1200x/03/6c/0f/036c0ffe4fcd39d5840ed60a2fb104c3.jpg", speeches: ["Ammettetelo, senza di me questa stagione sarebbe stata noiosissima. Merito la corona.", "Ho manipolato le votazioni dal giorno uno. Sono il re strategico di questa edizione."], alignment: 'villain' },
 		  { name: "Raj", img: "https://i.pinimg.com/736x/05/b2/97/05b297c32cd4507adbd7b0c7ce84fb3a.jpg" },
-          { name: "Conan", img: "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg" },
+          { name: "Conan", img: "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg" }, { name: "Shinichi", img: "https://i.pinimg.com/736x/7f/b5/48/7fb54863b62a2b153990cb87901be037.jpg" }] },
           { name: "Ran", img: "https://i.pinimg.com/1200x/46/ee/c7/46eec75f3a3eeb4846216dfdd7083ff4.jpg" },
           { name: "Rias", img: "https://i.pinimg.com/736x/d1/a7/df/d1a7df7bfe5769c39e9b66041144e4eb.jpg" },
           { name: "Bayonetta", img: "https://i.pinimg.com/1200x/60/fc/c0/60fcc064dc97d24b96a9517f726c1970.jpg" },
@@ -631,11 +769,11 @@
 		  { name: "Penny", img: "https://i.pinimg.com/736x/f5/c2/17/f5c21738d5b922e6108b7b72bc33a25b.jpg", speeches: ["Sono bellissima carinissima e fortissima! Votatemi oraoraora!", "Hihihihi ovvio che uno splendore come me ha raggiunto una posizione cosi alta, sono io la regina votatemi"] },
           { name: "Steven", img: "https://i.pinimg.com/736x/2b/fd/20/2bfd202ab782611ea6a0fb0cdcdc37ab.jpg", speeches: ["Ho sempre cercato di vedere il lato buono di tutti voi! Anche se abbiamo lottato, possiamo essere amici... e potete votarmi!", "Abbiamo imparato tanto in questa stagione. Per favore, credete in me, così come io ho sempre creduto in voi!"] },
           { name: "Perla", img: "https://i.pinimg.com/1200x/bf/d3/78/bfd378c4c8921a30ee00cf48bdb7fa11.jpg", speeches: ["Ho dimostrato eleganza, tattica e una precisione assoluta in ogni singola sfida. La mia vittoria è la conclusione più logica.", "Tutto quello che faccio, lo faccio con dedizione. Votatemi e vi dimostrerò che il duro lavoro ripaga sempre!"] },
-		  { name: "Garnet", img: "https://i.pinimg.com/736x/3f/8a/05/3f8a05bdbc4a7622f521eb294f51d4c8.jpg", speeches: ["Sono fatta di amore, e so già come andrà a finire. Ho visto la mia vittoria con la visione futura.", "Non mi serve dire molto. Voi conoscete la mia forza e sapete che merito questa vittoria. La scelta è vostra."] },
+		  { name: "Garnet", img: "https://i.pinimg.com/736x/3f/8a/05/3f8a05bdbc4a7622f521eb294f51d4c8.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/3f/8a/05/3f8a05bdbc4a7622f521eb294f51d4c8.jpg" }, { name: "Rubino", img: "https://i.pinimg.com/1200x/5a/0c/55/5a0c55765a113325ccc60642f0b766d2.jpg" }, { name: "Zaffiro", img: "https://i.pinimg.com/1200x/f7/b6/14/f7b614d8de72f8ddcb6b5dfe7ba627f5.jpg" }], speeches: ["Sono fatta di amore, e so già come andrà a finire. Ho visto la mia vittoria con la visione futura.", "Non mi serve dire molto. Voi conoscete la mia forza e sapete che merito questa vittoria. La scelta è vostra."] },
 		  { name: "Peridot", img: "https://i.pinimg.com/736x/d5/3e/f6/d53ef6f0ec684f7f0f888971dded59fb.jpg", speeches: ["Ovviamente dovreste votare per me, tonti! Sono chiaramente il concorrente intellettualmente superiore su quest'isola!", "Ho analizzato tutte le probabilità e i dati confermano che io, Peridot, sono la legittima vincitrice. Non discutete la scienza!"] },
 		  { name: "Lapis", img: "https://i.pinimg.com/736x/88/0f/a5/880fa555f1f954dbca08aded1be846d2.jpg", speeches: ["Ho sopportato abbastanza drammi in passato, non mi interessa molto, ma... visto che sono qui, tanto vale vincere.", "L'acqua ricorda tutto, e io ricordo chi mi ha tradito e chi no. Ma se mi votate... potrei essere indulgente."] },
           { name: "Ametista", img: "https://i.pinimg.com/736x/b4/e4/45/b4e445061d31ec75fa4ee63e20ebf87e.jpg", speeches: ["Ehi belli! Mi sono divertita un mondo a distruggere roba nelle sfide! Datemi i soldi così ci mangiamo una pizza gigante!", "Non ho seguito le regole, ma ehi, sono arrivata in finale lo stesso! Votatemi, sarà uno spasso!"] },
-          { name: "Nicole", img: "https://i.pinimg.com/736x/4e/ac/70/4eac705ff7feba9202c200de511c8583.jpg" },
+          { name: "Nicole", img: "https://i.pinimg.com/736x/4e/ac/70/4eac705ff7feba9202c200de511c8583.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/4e/ac/70/4eac705ff7feba9202c200de511c8583.jpg" }, { name: "Nicole Anime", img: "https://i.pinimg.com/736x/3c/26/25/3c2625a4ad2bb8a6329804ddbc20aa82.jpg" }, { name: "Nicole 25s/30s", img: "https://i.pinimg.com/736x/d8/fa/f8/d8faf8b165f067efbb32c0cee54356fd.jpg" }] },
           { name: "Gumball", img: "https://i.pinimg.com/736x/ae/88/e3/ae88e329120b3edc196af1ebbfd8fe07.jpg" },
           { name: "Anais", img: "https://i.pinimg.com/736x/0a/8b/ab/0a8bab3e6151e894a2d9b96749d63e61.jpg" },
           { name: "Lisa", img: "https://i.pinimg.com/736x/e5/2d/fe/e52dfee5a58f5dad19f9e0592c63a7cd.jpg", speeches: ["Ho analizzato statisticamente le probabilità e votare per me è l'unica scelta razionale e moralmente corretta.", "Se vinco io, donerò una parte del premio in beneficenza... e il resto per andare al college. Siate ragionevoli, votatemi!"] },
@@ -676,9 +814,9 @@
           { name: "Kim", img: "https://i.pinimg.com/736x/5d/7d/55/5d7d55fec8f9d8fb81e9db4438235f71.jpg" },
           { name: "Tess", img: "https://i.pinimg.com/736x/3f/bc/a9/3fbca9cb61b70f4d58c83598f0236764.jpg", speeches: ["Se volete votarmi, ne sarò orgogliosa. Grazie a chi lo farà.", "Ringrazio tutti coloro che decideranno di votarmi, siete stati tutti una parte importante di questa stagione."] },
 		  { name: "Hunter", img: "https://i.pinimg.com/736x/0d/f2/73/0df2731820fb9f74774f5e8607556625.jpg", speeches: ["Sono stato uno dei migliori durante le sfide fisiche, dovete riconoscerlo, solo per questo mi merito un voto.", "Hey ho sempre giocato in modo pulito al contrario di altri, penso di meritarmi questa vittoria, no?"] },
-		  { name: "Jake DC", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg", speeches: ["Wow.. non mi sarei mai aspettato di arrivare in finale. Se volete votarmi siate liberissimi di farlo hahaha", "Marika so che credi in me cercherò di vincere per te e per Tom."] },
-		  { name: "Tom", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg", speeches: ["Jake, dedicherò questa vittoria per te", "Una spia come me sa di meritarsi questa vittoria, se mi votate farete la scelta giusta"] },
-		  { name: "Ashley", img: "https://i.pinimg.com/736x/d1/c5/5f/d1c55f57218baecf0c2e160155e80c61.jpg", speeches: ["Eccomi qui in finale! Sono molto emozionata e spero davvero di aggiudicarmi i vostri voti ♥", "Buona fortuna per la finale mio caro avversario ma non pensare che sia finita"] },
+		  { name: "Jake DC", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg" }, { name: "Vampiro", img: "https://i.pinimg.com/736x/16/4d/56/164d56da68e35ea1ede705ad0d3967b4.jpg" }, { name: "Cowboy", img: "https://i.pinimg.com/736x/4b/ea/11/4bea11e33391d0c89671491baebec99a.jpg" }, { name: "Sciolto", img: "https://i.pinimg.com/736x/28/3b/2d/283b2d85ccb4762668e7d6138c6684f9.jpg" }], speeches: ["Wow.. non mi sarei mai aspettato di arrivare in finale. Se volete votarmi siate liberissimi di farlo hahaha", "Marika so che credi in me cercherò di vincere per te e per Tom."] },
+		  { name: "Tom", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg" }, { name: "Tom mascherato", img: "https://i.pinimg.com/1200x/51/0f/2f/510f2f0a851676123017e67e2a6a25aa.jpg" }, { name: "Tom nuovo", img: "https://i.pinimg.com/736x/d9/90/fb/d990fb60a0cce807a8277c840afcee32.jpg" }], speeches: ["Jake, dedicherò questa vittoria per te", "Una spia come me sa di meritarsi questa vittoria, se mi votate farete la scelta giusta"] },
+		  { name: "Ashley", img: "https://i.pinimg.com/736x/d1/c5/5f/d1c55f57218baecf0c2e160155e80c61.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/d1/c5/5f/d1c55f57218baecf0c2e160155e80c61.jpg" }, { name: "Ashley 1", img: "https://i.pinimg.com/736x/9c/a9/a0/9ca9a02a39ea02cb260c1fd21a0d4cc9.jpg" }, { name: "Ashley 2", img: "https://i.pinimg.com/736x/d5/ee/74/d5ee741ccb171d3c4e871db3b6259910.jpg" }], speeches: ["Eccomi qui in finale! Sono molto emozionata e spero davvero di aggiudicarmi i vostri voti ♥", "Buona fortuna per la finale mio caro avversario ma non pensare che sia finita"] },
 		  { name: "Grett", img: "https://i.pinimg.com/736x/fa/fb/5d/fafb5de75578a12b0eb2eb5efb035d23.jpg", speeches: ["Non dirò molto, solo che ovviamente mi merito questa vittoria.", "Beh siate obiettivi, non sarò la piu simpatica, ma questa vittoria me la merito."], alignment: 'villain' },
 		  { name: "Fiore", img: "https://i.pinimg.com/736x/78/79/43/787943ad5e0e1991f0a8f30189d0969f.jpg", speeches: ["Hey.. grazie a tutti per.. nah al diavolo. Votatemi bastardi.", "O mi votate o vi conviene dormire con un occhio aperto questa notte."], alignment: 'villain' },
 		  { name: "Ally", img: "https://i.pinimg.com/736x/58/a8/e6/58a8e6232e4e38ca2a867f208c1b83fa.jpg", speeches: ["Ragazzi, questa stagione per me è stata come un roguelike: ogni giorno morivo dentro, ma respawnavo più forte, votate per la mia win!", "Ho affrontato più bug e glitch qui che in qualsiasi gioco indie, me lo merito questo voto dai haha!"] },
@@ -750,9 +888,9 @@
 		  { name: "Kai", img: "https://i.pinimg.com/1200x/ea/9d/97/ea9d97dd2a54c3d0aa13ca67e0b4864d.jpg" },
 		  { name: "Sensei WU", img: " https://i.pinimg.com/1200x/65/7e/86/657e8647544d634ac721a0ee06a55e6c.jpg" },
 		  { name: "Po", img: "https://i.pinimg.com/736x/fb/99/a5/fb99a5c7ce5b313ed1c4e71ee0260a9b.jpg" },
-		  { name: "Shifu", img: "https://i.pinimg.com/736x/c8/90/f3/c890f3dcf69372cd5ef3c68aad711bb9.jpg" },
-		  { name: "Mimikyu", img: "https://i.pinimg.com/1200x/7f/c3/98/7fc3984347358acee07cf91f2ed1d0ff.jpg", speeches: ["Kyu... mi votate? Voglio solo essere amato...", "Se vinco, forse qualcuno mi vorrà bene quanto a Pikachu..."] },
-          { name: "Pikachu", img: "https://i.pinimg.com/736x/1f/4a/ef/1f4aef84e0e90b8dd059b9c17ab403cb.jpg", speeches: ["Pika pika! Pikachu!", "Pikaaa... CHU! (Traduzione: Scegliete me per una vittoria elettrizzante!)"] },
+          { name: "Mimikyu", img: "https://i.pinimg.com/1200x/7f/c3/98/7fc3984347358acee07cf91f2ed1d0ff.jpg", speeches: ["Kyu... mi votate? Voglio solo essere amato...", "Se vinco, forse qualcuno mi vorrà bene quanto a Pikachu..."] },
+          /* Pikachu qara yapasqa */
+          { name: "Pikachu", img: "https://i.pinimg.com/736x/1f/4a/ef/1f4aef84e0e90b8dd059b9c17ab403cb.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/1f/4a/ef/1f4aef84e0e90b8dd059b9c17ab403cb.jpg" }, { name: "Popstar Pikachu", img: "https://i.pinimg.com/736x/47/cd/ac/47cdac7bde4d41aa890b4efa0be314c5.jpg" }], speeches: ["Pika pika! Pikachu!", "Pikaaa... CHU! (Traduzione: Scegliete me per una vittoria elettrizzante!)"] },
           { name: "Gallade", img: "https://i.pinimg.com/736x/4e/17/22/4e17227014018602a4c61c3405ef2662.jpg", speeches: ["Ho combattuto con onore e lealtà fino alla fine. Il mio spirito guerriero merita questa vittoria.", "Come un vero cavaliere, ho protetto i miei alleati. Confido nel vostro supporto."] },
           { name: "Gardevoir", img: "https://i.pinimg.com/736x/f9/36/ae/f936ae4bb983bc889f13d4d44344d2d4.jpg", speeches: ["Ho percepito i vostri sentimenti per tutta la stagione. Spero che i vostri cuori vi guidino a votarmi.", "La mia eleganza e il mio potere psichico mi hanno portata qui. Vi proteggerò sempre se mi sceglierete."] },
           { name: "Roserade", img: "https://i.pinimg.com/736x/4a/89/38/4a893836de815c65b9c9926effed33a9.jpg", speeches: ["Ogni rosa ha le sue spine, e io ho dimostrato di saper pungere al momento giusto.", "Una performance elegante richiede un finale perfetto. Accordatemi questa vittoria."] },
@@ -804,15 +942,15 @@
           "Brains", "Beauties", "Brawns", "Eroi", "Villains", "Neutrali"
         ];
 
-        const BRAINS = ["Marinette", "Kowalski", "Conan", "Anais", "Peridot", "Dr Doofenshmirtz", "Corvina GO", "Corvina TT", "Velma", "Stewie", "Perla", "Wanda", "Shinobu", "Tails", "Gwen Tennyson", "Gommarosa", "Doraemon", "Azula", "Hiro", "Hiccup", "Sypha"];
-        const BEAUTIES = ["Heartfixer", "Gwen", "Heather", "Rias", "Penny", "Stellarubia GO", "Fred", "Anastasia", "Ellis", "Tengen", "Zuko", "Ariana Grande", "Poison Ivy", "Simba", "Leon", "Rena Rouge", "Shizuka", "Sdentato", "Helga", "Megara"];
-        const BRAWNS = ["Kagami", "Alejandro", "Lightning", "Bowser", "Brago", "Garnet", "Nicole", "Johnny Bravo", "Robin TT", "Hunter", "Tom", "Tanjiro", "Superboy", "Kratos", "Po", "Argos", "Baki", "Sephiroth", "Clark", "Legoshi", "Morte", "Gatto con gli stivali"];
+        const BRAINS = ["Marinette", "Kowalski", "Conan", "Shinichi", "Anais", "Peridot", "Dr Doofenshmirtz", "Corvina GO", "Corvina TT", "Velma", "Stewie", "Perla", "Wanda", "Shinobu", "Tails", "Gwen Tennyson", "Gommarosa", "Doraemon", "Azula", "Hiro", "Hiccup", "Sypha"];
+        const BEAUTIES = ["Heartfixer", "Gwen", "Heather", "Rias", "Penny", "Stellarubia GO", "Fred", "Anastasia", "Ellis", "Tengen", "Zuko", "Ariana Grande", "Poison Ivy", "Simba", "Leon", "Alya", "Shizuka", "Sdentato", "Helga", "Megara"];
+        const BRAWNS = ["Kagami", "Alejandro", "Lightning", "Bowser", "Brago", "Garnet", "Rubino", "Zaffiro", "Nicole", "Johnny Bravo", "Robin TT", "Hunter", "Tom", "Tanjiro", "Superboy", "Kratos", "Po", "Argos", "Baki", "Sephiroth", "Clark", "Legoshi", "Morte", "Gatto con gli stivali"];
 
-        const HEROES = ["Marinette", "Adrien", "Owen", "Lindsay", "Yoshi", "Luigi", "Zatch Bell", "Steven", "Ponygon", "Jake DC", "Finn", "Mortino", "Spongebob", "Sonic", "Robin TT", "Aang", "Rena Rouge", "Gommarosa", "Doraemon", "Shizuka", "Clark", "Hiro", "Hiccup", "Sdentato", "Gatto con gli stivali", "Megara", "Sypha"];
+        const HEROES = ["Marinette", "Adrien", "Owen", "Lindsay", "Yoshi", "Luigi", "Zatch Bell", "Steven", "Ponygon", "Jake DC", "Finn", "Mortino", "Spongebob", "Sonic", "Robin TT", "Aang", "Alya", "Gommarosa", "Doraemon", "Shizuka", "Clark", "Hiro", "Hiccup", "Sdentato", "Gatto con gli stivali", "Megara", "Sypha"];
         const VILLAINS_LIST = ["Dr Eggman", "Chrysalis", "Heather", "Alejandro", "Bowser", "Vicky", "Stewie", "Fiore", "Shego", "Scar", "Yzma", "Malefica", "Ghostface", "Plankton", "Poison Ivy", "Argos", "Azula", "Sephiroth", "Helga", "Morte"];
         const NEUTRALS = ["Kratos", "Squiddi", "Mr Krab", "Zuko", "Bowser Jr", "Trixie", "Anastasia", "Re Ghiaccio", "Francine", "Dr Doofenshmirtz", "Vanessa", "Bart", "Brago", "Wario", "Waluigi", "Duncan", "Baki", "Legoshi"];
 
-        const FEMALES = ["Marinette", "Alya", "Rena Rouge", "Heartfixer", "Chrysalis", "Nathalie", "Kagami", "Gwen", "Julia", "Heather", "Courtney", "Lindsay", "Ran", "Rias", "Bayonetta", "Rosalinda", "Peach", "Daisy", "Pauline", "Tio", "Penny", "Perla", "Garnet", "Peridot", "Lapis", "Ametista", "Nicole", "Anais", "Lisa", "Marge", "Neera", "Candace", "Vanessa", "Isabella", "Nonnina", "Corvina GO", "Corvina TT", "Stellarubia GO", "Daphne", "Velma", "Francine", "Hayley", "Lois", "Leela", "Kim", "Tess", "Ashley", "Grett", "Fiore", "Ally", "Isabelle", "Anastasia", "Trixie", "Vicky", "Fiona", "Cake", "Gommarosa", "Marceline", "Zoey", "Rochelle", "Nezuko", "Shinobu", "Katara", "Toph", "Miss Martian", "Zatanna", "Draculaura", "Clawdeen", "Frankie", "Shego", "Ariana Grande", "Will", "Poison Ivy", "Malefica", "Yzma", "Aurora", "Gardevoir", "Roserade", "Clover", "Sam", "Gwen Tennyson", "Shizuka", "Helga", "Megara", "Sypha"];
+        const FEMALES = ["Marinette", "Alya", "Heartfixer", "Chrysalis", "Nathalie", "Kagami", "Gwen", "Julia", "Heather", "Courtney", "Lindsay", "Ran", "Rias", "Bayonetta", "Rosalinda", "Peach", "Daisy", "Pauline", "Tio", "Penny", "Perla", "Garnet", "Rubino", "Zaffiro", "Peridot", "Lapis", "Ametista", "Nicole", "Anais", "Lisa", "Marge", "Neera", "Candace", "Vanessa", "Isabella", "Nonnina", "Corvina GO", "Corvina TT", "Stellarubia GO", "Daphne", "Velma", "Francine", "Hayley", "Lois", "Leela", "Kim", "Tess", "Ashley", "Grett", "Fiore", "Ally", "Isabelle", "Anastasia", "Trixie", "Vicky", "Fiona", "Cake", "Gommarosa", "Marceline", "Zoey", "Rochelle", "Nezuko", "Shinobu", "Katara", "Toph", "Miss Martian", "Zatanna", "Draculaura", "Clawdeen", "Frankie", "Shego", "Ariana Grande", "Will", "Poison Ivy", "Malefica", "Yzma", "Aurora", "Gardevoir", "Roserade", "Clover", "Sam", "Gwen Tennyson", "Shizuka", "Helga", "Megara", "Sypha"];
 
         // --- TITOLI PERSONAGGI ---
         const CHARACTER_TITLES = {
@@ -831,10 +969,6 @@
             "Alya": {
                 name: "Vlogger",
                 style: "bg-gradient-to-r from-orange-500 via-amber-500 to-rose-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(249,115,22,0.4)] tracking-widest font-black text-[11px]"
-            },
-            "Rena Rouge": {
-                name: "Miraggio",
-                style: "bg-gradient-to-r from-orange-600 via-orange-400 to-yellow-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(234,88,12,0.4)] tracking-widest font-black text-[11px]"
             },
             "Argos": {
                 name: "Sentimentale",
@@ -884,10 +1018,6 @@
                 name: "Recluta",
                 style: "bg-gradient-to-r from-green-500 via-emerald-400 to-teal-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(16,185,129,0.4)] tracking-widest font-black text-[11px]"
             },
-            "Baby Soldato": {
-                name: "Puro di cuore",
-                style: "bg-gradient-to-r from-sky-200 via-blue-200 to-indigo-300 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(147,197,253,0.4)] tracking-widest font-black text-[11px]"
-            },
             "Gwen": {
                 name: "Gotica",
                 style: "bg-gradient-to-r from-slate-400 via-purple-500 to-slate-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(168,85,247,0.4)] tracking-widest font-black text-[11px]"
@@ -933,6 +1063,10 @@
                 style: "bg-gradient-to-r from-blue-200 via-sky-300 to-blue-400 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(125,211,252,0.4)] tracking-widest font-black text-[11px]"
             },
             "Conan": {
+                name: "Detective",
+                style: "bg-gradient-to-r from-blue-600 via-red-500 to-blue-700 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(37,99,235,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Shinichi": {
                 name: "Detective",
                 style: "bg-gradient-to-r from-blue-600 via-red-500 to-blue-700 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(37,99,235,0.4)] tracking-widest font-black text-[11px]"
             },
@@ -1019,6 +1153,14 @@
             "Garnet": {
                 name: "Equilibrio Perfetto",
                 style: "bg-gradient-to-r from-red-600 via-rose-800 to-purple-800 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(225,29,72,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Rubino": {
+                name: "Fiamma",
+                style: "bg-gradient-to-r from-red-500 via-red-600 to-red-700 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(220,38,38,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Zaffiro": {
+                name: "Visione",
+                style: "bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(59,130,246,0.4)] tracking-widest font-black text-[11px]"
             },
             "Peridot": {
                 name: "Ingegno",
@@ -1627,6 +1769,7 @@
                   tiseioffeso: { progress: 0, unlocked: false },
                   itremoschettieri: { progress: 0, unlocked: false },
                   ineluttabile: { progress: 0, unlocked: false },
+                  donnealpotere: { progress: 0, unlocked: false },
                   title_Marinette: { progress: 0, unlocked: false }
               };
               
@@ -2801,6 +2944,32 @@
                                  </div>
                               </div>
 
+                              {/* ACHIEVEMENT: DONNE AL POTERE */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.donnealpotere?.unlocked ? 'border-pink-500 bg-pink-900/20 shadow-[0_0_15px_rgba(236,72,153,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.donnealpotere?.unlocked ? 'text-pink-400' : 'text-slate-300'}`}>
+                                         <Crown size={20} className={achievements.donnealpotere?.unlocked ? 'text-yellow-400' : 'text-slate-500'}/> Donne al Potere
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-pink-400 font-bold">
+                                         {achievements.donnealpotere?.progress || 0} / 25
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Completa 25 stagioni utilizzando un personaggio femminile.</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.donnealpotere?.unlocked ? 'bg-pink-500' : 'bg-slate-500'}`} style={{ width: `${((achievements.donnealpotere?.progress || 0) / 25) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.donnealpotere?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('donnealpotere')}
+                                             className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'donnealpotere' ? 'bg-pink-500 text-white border-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.8)]' : 'bg-slate-800 text-pink-400 border-pink-500 hover:bg-slate-700'}`}
+                                         >
+                                             {equippedCosmetic === 'donnealpotere' ? 'EQUIPAGGIATO' : 'AURA MATRIARCA'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+
                               <div className="p-4 border-2 border-dashed border-slate-700 bg-slate-800/50 rounded-xl text-center">
                                   <Lock size={24} className="mx-auto text-slate-500 mb-2"/>
                                   <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Altri trofei in arrivo...</p>
@@ -2869,16 +3038,36 @@
         const LobbyRoom = ({ lobby, user, lobbyId, onLeave }) => {
           const isHost = lobby.hostId === user.uid;
 
-          // STATI PER LA MODALITÀ CUSTOM
+          // STATI PER LA MODALITÀ CUSTOM E SKIN
+          const [skinModalChar, setSkinModalChar] = useState(null);
           const [showCustomModal, setShowCustomModal] = useState(false);
           const [customTeams, setCustomTeams] = useState([]);
           const [selectedCustomTeam, setSelectedCustomTeam] = useState("");
           const [customAssignments, setCustomAssignments] = useState({});
 
-          const selectCharacter = async (char) => {
+          const selectCharacter = async (char, selectedSkin = null) => {
             if (lobby.players.some(p => p.character?.name === char.name)) return;
-            const updatedPlayers = lobby.players.map(p => p.uid === user.uid ? { ...p, character: char } : p);
+            
+            let finalChar = { ...char };
+            if (selectedSkin) {
+                finalChar.img = selectedSkin.img;
+                finalChar.skinName = selectedSkin.name;
+                if (["Rubino", "Zaffiro", "Shinichi"].includes(selectedSkin.name)) {
+                    finalChar.name = selectedSkin.name;
+                }
+            }
+
+            const updatedPlayers = lobby.players.map(p => p.uid === user.uid ? { ...p, character: finalChar } : p);
             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), { players: updatedPlayers });
+            setSkinModalChar(null);
+          };
+
+          const handleCharacterClick = (char) => {
+              if (char.skins && char.skins.length > 0) {
+                  setSkinModalChar(char);
+              } else {
+                  selectCharacter(char);
+              }
           };
 
           const startSeason = async () => {
@@ -2898,12 +3087,24 @@
               if (!p.character) {
                 const available = ROSTER.filter(r => !usedNames.has(r.name) && themeFilter(r));
                 // FALLBACK DI SICUREZZA: se la lista filtrata è vuota, pesca da tutti
-                const random = available.length > 0 
+                let random = available.length > 0 
                     ? available[Math.floor(Math.random() * available.length)]
                     : ROSTER[Math.floor(Math.random() * ROSTER.length)];
                 
                 usedNames.add(random.name);
-                return { ...p, character: random };
+                
+                let finalCharObj = { ...random };
+                // Assegna una skin casuale anche ai bot se disponibili!
+                if (finalCharObj.skins && finalCharObj.skins.length > 0) {
+                    const randomSkin = finalCharObj.skins[Math.floor(Math.random() * finalCharObj.skins.length)];
+                    finalCharObj.img = randomSkin.img;
+                    finalCharObj.skinName = randomSkin.name;
+                    if (["Rubino", "Zaffiro", "Shinichi"].includes(randomSkin.name)) {
+                        finalCharObj.name = randomSkin.name;
+                    }
+                }
+                
+                return { ...p, character: finalCharObj };
               }
               return p;
             });
@@ -2979,11 +3180,26 @@
                   }
               }
               
+              let finalBotChar = { ...randomChar };
+              if (finalBotChar.skins && finalBotChar.skins.length > 0) {
+                  const randomSkin = finalBotChar.skins[Math.floor(Math.random() * finalBotChar.skins.length)];
+                  finalBotChar.img = randomSkin.img;
+                  finalBotChar.skinName = randomSkin.name;
+                  if (["Rubino", "Zaffiro", "Shinichi"].includes(randomSkin.name)) {
+                      finalBotChar.name = randomSkin.name;
+                      if (botName === randomChar.name) {
+                          botName = randomSkin.name;
+                      } else {
+                          botName = botName.replace(randomChar.name, randomSkin.name);
+                      }
+                  }
+              }
+
               const botId = `bot_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
               currentPlayers.push({
                 uid: botId,
                 name: botName,
-                character: randomChar,
+                character: finalBotChar,
                 isBot: true,
                 status: 'active',
                 team: null,
@@ -3127,11 +3343,22 @@
               lobby.players.forEach(p => {
                   let charObj = p.character;
                   // Assegna un personaggio casuale se l'umano non l'ha scelto
-                  if (!charObj) {
-                      const available = ROSTER.filter(r => !usedNames.has(r.name) && !Object.keys(customAssignments).includes(r.name));
-                      charObj = available[Math.floor(Math.random() * available.length)];
+              if (!charObj) {
+                  const available = ROSTER.filter(r => !usedNames.has(r.name) && !Object.keys(customAssignments).includes(r.name));
+                  charObj = available[Math.floor(Math.random() * available.length)];
+                  
+                  let finalCharObj = { ...charObj };
+                  if (finalCharObj.skins && finalCharObj.skins.length > 0) {
+                      const randomSkin = finalCharObj.skins[Math.floor(Math.random() * finalCharObj.skins.length)];
+                      finalCharObj.img = randomSkin.img;
+                      finalCharObj.skinName = randomSkin.name;
+                      if (["Rubino", "Zaffiro", "Shinichi"].includes(randomSkin.name)) {
+                          finalCharObj.name = randomSkin.name;
+                      }
                   }
-                  usedNames.add(charObj.name);
+                  charObj = finalCharObj;
+              }
+              usedNames.add(charObj.name);
                   finalPlayers.push({
                       ...p,
                       character: charObj,
@@ -3143,11 +3370,24 @@
               Object.entries(customAssignments).forEach(([id, teamName]) => {
                   if (!lobby.players.find(p => p.uid === id)) {
                       const charData = ROSTER.find(r => r.name === id);
+                      let finalBotChar = { ...charData };
+                      let botName = finalBotChar.name;
+                      
+                      if (finalBotChar.skins && finalBotChar.skins.length > 0) {
+                          const randomSkin = finalBotChar.skins[Math.floor(Math.random() * finalBotChar.skins.length)];
+                          finalBotChar.img = randomSkin.img;
+                          finalBotChar.skinName = randomSkin.name;
+                          if (["Rubino", "Zaffiro", "Shinichi"].includes(randomSkin.name)) {
+                              finalBotChar.name = randomSkin.name;
+                              botName = randomSkin.name;
+                          }
+                      }
+                      
                       const botId = `bot_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
                       finalPlayers.push({
                           uid: botId,
-                          name: charData.name,
-                          character: charData,
+                          name: botName,
+                          character: finalBotChar,
                           isBot: true,
                           status: 'active',
                           team: teamName,
@@ -3369,6 +3609,30 @@
                        </div>
                    )}
 
+                   {/* MODALE SCELTA SKIN */}
+                   {skinModalChar && (
+                       <div className="fixed inset-0 bg-slate-950/90 z-[100] flex items-center justify-center p-4 animate-in zoom-in">
+                           <div className="bg-slate-900 border-2 border-pink-500 rounded-2xl p-6 max-w-2xl w-full text-center relative shadow-[0_0_30px_rgba(236,72,153,0.4)]">
+                               <button onClick={() => setSkinModalChar(null)} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full text-slate-300 hover:text-white"><X size={20}/></button>
+                               <h2 className="text-3xl font-black text-pink-400 mb-6 flex items-center justify-center gap-2">
+                                   Stili per {skinModalChar.name}
+                               </h2>
+                               <div className="flex flex-wrap justify-center gap-6">
+                                   {skinModalChar.skins.map((skin, idx) => (
+                                       <button
+                                           key={idx}
+                                           onClick={() => selectCharacter(skinModalChar, skin)}
+                                           className="flex flex-col items-center bg-slate-800 p-3 rounded-2xl border-2 border-slate-600 hover:border-pink-400 hover:bg-slate-700 transition-all hover:scale-105 group"
+                                       >
+                                           <img src={skin.img} className="w-28 h-40 object-cover rounded-xl mb-3 shadow-lg group-hover:shadow-[0_0_15px_rgba(236,72,153,0.6)]" alt={skin.name}/>
+                                           <span className="font-bold text-sm text-pink-100 bg-pink-900/50 px-3 py-1 rounded-full border border-pink-500/30">{skin.name}</span>
+                                       </button>
+                                   ))}
+                               </div>
+                           </div>
+                       </div>
+                   )}
+
                    <h3 className="text-xl font-bold mb-4 text-center text-yellow-400 flex-shrink-0">SCEGLI IL TUO PERSONAGGIO</h3>
                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
                      {ROSTER.filter(char => {
@@ -3419,7 +3683,7 @@
                        return (
                          <button 
                            key={char.name}
-                           onClick={() => selectCharacter(char)}
+                           onClick={() => handleCharacterClick(char)}
                            disabled={!!takenBy}
                            className={`relative rounded-lg overflow-hidden border-2 aspect-[3/4] transition-all duration-300 ${auraShadow} ${isMe ? 'border-green-500 ring-2 ring-green-500' : takenBy ? 'border-red-900 opacity-40' : auraBorder}`}
                          >
@@ -3598,6 +3862,11 @@
                           if (myPlayer?.character?.name) {
                               updateAchievement(`title_${myPlayer.character.name}`, 1, 3);
                           }
+                      }
+
+                      // Achievement: Donne al Potere
+                      if (FEMALES.includes(myPlayer?.character?.name)) {
+                          updateAchievement('donnealpotere', 1, 25);
                       }
 
                       // 2. M.V.P. (Maggior numero di immunità)
@@ -4176,6 +4445,9 @@
             const playerObj = lobby.players.find(p => p.uid === currentPlayerId);
 
             if (playerObj?.isBot) {
+                // ANTI-LAG: Se ci sono più di 20 giocatori, i lanci dei dadi diventano super veloci (50ms invece di 1500ms)
+                const rollDelay = lobby.players.length > 20 ? 50 : 1500;
+                
                 const timer = setTimeout(async () => {
                     playSound('roll');
                     const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
@@ -4195,7 +4467,7 @@
                         [`challengeData.rollingIndex`]: rollingIndex + 1,
                         [`players`]: updatedPlayers
                     });
-                }, 1500);
+                }, rollDelay);
                 return () => clearTimeout(timer);
             }
           }, [lobby.challengeData, isHost]);
@@ -4205,24 +4477,29 @@
               if (!isHost || lobby.phase !== 'challenge' || lobby.challengeData?.type !== 'popularity_vote' || lobby.challengeData?.stage !== 'voting') return;
               
               const bots = lobby.players.filter(p => p.status === 'active' && p.isBot);
+              const currentVotes = lobby.challengeData.votes || {};
+              const botsThatNeedToVote = bots.filter(b => !currentVotes[b.uid]);
               
-              bots.forEach(bot => {
-                  if (!lobby.challengeData.votes || !lobby.challengeData.votes[bot.uid]) {
-                      const timer = setTimeout(async () => {
+              // ANTI-LAG: Calcola tutti i voti dei bot localmente e invia UN SINGOLO aggiornamento al database
+              if (botsThatNeedToVote.length > 0) {
+                  const timer = setTimeout(async () => {
+                      let newVotes = { ...currentVotes };
+                      
+                      botsThatNeedToVote.forEach(bot => {
                           let validTargets = lobby.players.filter(p => p.status === 'active' && p.uid !== bot.uid);
                           
                           validTargets.sort(() => Math.random() - 0.5);
                           validTargets.sort((a, b) => (bot.relationships[b.uid] || 0) - (bot.relationships[a.uid] || 0));
                           
-                          const votes = validTargets.slice(0, 2).map(p => p.uid);
-                          
-                          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                              [`challengeData.votes.${bot.uid}`]: votes
-                          });
-                      }, 2000 + Math.random() * 3000);
-                      return () => clearTimeout(timer);
-                  }
-              });
+                          newVotes[bot.uid] = validTargets.slice(0, 2).map(p => p.uid);
+                      });
+                      
+                      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                          [`challengeData.votes`]: newVotes
+                      });
+                  }, 3000); // Unica attesa di 3 secondi per dare l'illusione che stiano pensando
+                  return () => clearTimeout(timer);
+              }
           }, [lobby.challengeData, isHost]);
 
           // --- BOT PURGE SELECTION LOGIC ---
@@ -4432,19 +4709,23 @@
               const candidates = lobby.redemptionData.candidates || [];
               const rolls = lobby.redemptionData.rolls || {};
 
-              candidates.forEach(uid => {
+              // ANTI-LAG: Calcola tutti i lanci dei bot assieme
+              const botsToRoll = candidates.filter(uid => {
                   const p = lobby.players.find(x => x.uid === uid);
-                  if (p && p.isBot && !rolls[uid]) {
-                      const timer = setTimeout(async () => {
-                          const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
-                          const r = Math.floor(Math.random() * maxFaces) + 1;
-                          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                              [`redemptionData.rolls.${uid}`]: r
-                          });
-                      }, 1000 + Math.random() * 2000);
-                      return () => clearTimeout(timer);
-                  }
+                  return p && p.isBot && !rolls[uid];
               });
+
+              if (botsToRoll.length > 0) {
+                  const timer = setTimeout(async () => {
+                      const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
+                      let updates = {};
+                      botsToRoll.forEach(uid => {
+                          updates[`redemptionData.rolls.${uid}`] = Math.floor(Math.random() * maxFaces) + 1;
+                      });
+                      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
+                  }, 2000);
+                  return () => clearTimeout(timer);
+              }
           }, [lobby.redemptionData, isHost, lobby.phase]);
 
           // --- BOT GHOST ISLAND LOGIC ---
@@ -4453,19 +4734,22 @@
               
               const { candidates, rolls } = lobby.ghostIslandData;
 
-              candidates.forEach(uid => {
+              // ANTI-LAG: Calcola tutti i lanci dei bot assieme
+              const botsToRoll = candidates.filter(uid => {
                   const p = lobby.players.find(x => x.uid === uid);
-                  if (p && p.isBot && !rolls[uid]) {
-                      const timer = setTimeout(async () => {
-                          const maxFaces = 10;
-                          const r = Math.floor(Math.random() * maxFaces) + 1;
-                          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                              [`ghostIslandData.rolls.${uid}`]: r
-                          });
-                      }, 1000 + Math.random() * 2000);
-                      return () => clearTimeout(timer);
-                  }
+                  return p && p.isBot && !rolls[uid];
               });
+
+              if (botsToRoll.length > 0) {
+                  const timer = setTimeout(async () => {
+                      let updates = {};
+                      botsToRoll.forEach(uid => {
+                          updates[`ghostIslandData.rolls.${uid}`] = Math.floor(Math.random() * 10) + 1;
+                      });
+                      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
+                  }, 2000);
+                  return () => clearTimeout(timer);
+              }
           }, [lobby.ghostIslandData, isHost, lobby.phase]);
 
 
@@ -6342,6 +6626,86 @@
                   });
                   return;
               }
+              // --- NUOVA ABILITÀ: PIGIAMA PARTY (Tema Girly pop) ---
+              else if (type === 'pigiama_party') {
+                  const [t1Id, t2Id] = payload;
+                  const t1Idx = updatedPlayers.findIndex(p => p.uid === t1Id);
+                  const t2Idx = updatedPlayers.findIndex(p => p.uid === t2Id);
+                  const t1Name = updatedPlayers[t1Idx].name;
+                  const t2Name = updatedPlayers[t2Idx].name;
+
+                  let updates = { players: updatedPlayers };
+
+                  if (Math.random() < 0.6) {
+                      // Successo: +5 con le due invitate
+                      updatedPlayers[t1Idx].relationships[user.uid] = Math.min(10, (updatedPlayers[t1Idx].relationships[user.uid] || 0) + 5);
+                      updatedPlayers[t2Idx].relationships[user.uid] = Math.min(10, (updatedPlayers[t2Idx].relationships[user.uid] || 0) + 5);
+
+                      // Cerca una ragazza non invitata per scatenare il drama su IG
+                      const uninvited = updatedPlayers.filter(p => p.status === 'active' && p.uid !== user.uid && p.uid !== t1Id && p.uid !== t2Id);
+                      let jealousMsg = "";
+
+                      if (uninvited.length > 0) {
+                          const jealousGirl = uninvited[Math.floor(Math.random() * uninvited.length)];
+                          const jIdx = updatedPlayers.findIndex(p => p.uid === jealousGirl.uid);
+                          updatedPlayers[jIdx].relationships[user.uid] = Math.max(-10, (updatedPlayers[jIdx].relationships[user.uid] || 0) - 3);
+                          jealousMsg = `\n\n😱 DRAMA: ${jealousGirl.name} ha visto le storie su IG e non è stata invitata! (-3 amicizia con lei)`;
+                          updates.logs = arrayUnion(`📸 DRAMA! ${jealousGirl.name} ha scoperto di non essere stata invitata al Pigiama Party esclusivo di ${actorName}! (-3 relaz)`);
+                      }
+
+                      setImbroglioResult(`💅 PIGIAMA PARTY PERFETTO!\nIl party con ${t1Name} e ${t2Name} è stato un successo pazzesco! (+5 Amicizia con entrambe)${jealousMsg}`);
+                      if (!jealousMsg) updates.logs = arrayUnion(`💅 Il Pigiama Party di ${actorName} con ${t1Name} e ${t2Name} è andato alla grande!`);
+                  } else {
+                      // Fallimento: nessuna invidia esterna, ma litigano
+                      const unluckyIdx = Math.random() > 0.5 ? t1Idx : t2Idx;
+                      updatedPlayers[unluckyIdx].relationships[user.uid] = Math.max(-10, (updatedPlayers[unluckyIdx].relationships[user.uid] || 0) - 1);
+
+                      setImbroglioResult(`🥱 CHE NOIA...\nIl Pigiama Party è stato un mezzo disastro. Avete litigato per la musica.\n${updatedPlayers[unluckyIdx].name} se n'è andata scocciata (-1 Amicizia).`);
+                      updates.logs = arrayUnion(`🥱 Il Pigiama Party di ${actorName} è stato un flop clamoroso!`);
+                  }
+
+                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
+                  return;
+              }
+              // --- NUOVA ABILITÀ: SPILL THE TEA (Tema Girly pop) ---
+              else if (type === 'spill_the_tea') {
+                  const [targetId, friendId] = payload;
+                  const tIdx = updatedPlayers.findIndex(p => p.uid === targetId);
+                  const fIdx = updatedPlayers.findIndex(p => p.uid === friendId);
+                  const tName = updatedPlayers[tIdx].name;
+                  const fName = updatedPlayers[fIdx].name;
+
+                  let updates = { players: updatedPlayers };
+
+                  if (Math.random() < 0.5) {
+                      // Successo: il target perde 1 di relazione con 2 persone a caso
+                      const others = updatedPlayers.filter(p => p.status === 'active' && p.uid !== targetId);
+                      others.sort(() => Math.random() - 0.5);
+                      const affected = others.slice(0, 2);
+                      let affectedNames = [];
+                      
+                      affected.forEach(p => {
+                          const pIdx = updatedPlayers.findIndex(x => x.uid === p.uid);
+                          updatedPlayers[tIdx].relationships[p.uid] = Math.max(-10, (updatedPlayers[tIdx].relationships[p.uid] || 0) - 1);
+                          updatedPlayers[pIdx].relationships[targetId] = Math.max(-10, (updatedPlayers[pIdx].relationships[targetId] || 0) - 1);
+                          affectedNames.push(p.name);
+                      });
+                      
+                      const namesStr = affectedNames.length > 0 ? affectedNames.join(" e ") : "nessuno";
+                      setImbroglioResult(`☕ TEA VERSATO!\nHai sparlato di ${tName} con la tua amica ${fName}. Le voci sono girate in fretta!\nOra ${tName} ha -1 in amicizia con ${namesStr}!`);
+                      updates.logs = arrayUnion(`☕ ${actorName} e ${fName} hanno sparlato di ${tName}! Le voci girano...`);
+                  } else {
+                      // Fallimento: Target dà -1 a te e alla tua amica
+                      updatedPlayers[tIdx].relationships[user.uid] = Math.max(-10, (updatedPlayers[tIdx].relationships[user.uid] || 0) - 1);
+                      updatedPlayers[tIdx].relationships[friendId] = Math.max(-10, (updatedPlayers[tIdx].relationships[friendId] || 0) - 1);
+
+                      setImbroglioResult(`🚨 SCOPERTE!\n${tName} ha scoperto che tu e ${fName} stavate spettegolando su di lei!\nLa relazione con ${tName} scende di -1 per entrambe.`);
+                      updates.logs = arrayUnion(`🚨 DRAMMA! ${tName} ha beccato ${actorName} e ${fName} a sparlare di lei! (-1 relaz per entrambe)`);
+                  }
+
+                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
+                  return;
+              }
               else if (type === 'spy') {
                   let updates = { players: updatedPlayers };
                   if (Math.random() < 0.5) {
@@ -6729,6 +7093,22 @@
                                    !showRumorSelector && !showTrioSelector && !specialSkillType ? (
                                    <div className="space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar px-1 pb-1">
                                        
+                                       {/* GIRLY POP SKILLS */}
+                                       {lobby.config.theme === 'Girly pop' && (
+                                           <div className="mb-4 p-3 bg-pink-950/80 rounded-xl border-2 border-pink-900/50 shadow-inner">
+                                               <div className="text-[10px] uppercase font-black text-pink-400 mb-2 tracking-widest flex items-center justify-center gap-2">
+                                                   <Crown size={12} className="text-pink-400"/> Azioni Girly Pop
+                                               </div>
+                                               
+                                               <button onClick={() => { setSpecialSkillType('pigiama_party'); setSpecialSkillTargets([selectedPlayer.uid]); }} className="w-full bg-pink-700 border border-pink-400 py-2 rounded-lg font-bold flex justify-center gap-2 hover:bg-pink-600 text-sm mb-2">
+                                                   <Users size={16}/> Pigiama Party (60%)
+                                               </button>
+                                               <button onClick={() => { setSpecialSkillType('spill_the_tea'); setSpecialSkillTargets([selectedPlayer.uid]); }} className="w-full bg-purple-700 border border-purple-400 py-2 rounded-lg font-bold flex justify-center gap-2 hover:bg-purple-600 text-sm">
+                                                   <Coffee size={16}/> Spill the Tea (50%)
+                                               </button>
+                                           </div>
+                                       )}
+
                                        {/* FACTION SKILLS (Solo in tema Eroi vs Villains) */}
                                        {lobby.config.theme === 'Eroi vs Villains vs Neutrali' && (
                                            <div className="mb-4 p-3 bg-slate-950/80 rounded-xl border-2 border-indigo-900/50 shadow-inner">
@@ -6825,7 +7205,9 @@
                                           {/* MULTI-SELECT PER ABILITA DI FAZIONE */}
                                           {(() => {
                                               const isDoppio = specialSkillType === 'doppio_gioco';
-                                              const reqCount = isDoppio ? 2 : 3;
+                                              const isPigiama = specialSkillType === 'pigiama_party';
+                                              const isSpill = specialSkillType === 'spill_the_tea';
+                                              const reqCount = (isDoppio || isPigiama || isSpill) ? 2 : 3;
                                               const currentCount = specialSkillTargets.length;
                                               const isReady = currentCount === reqCount;
                                               
@@ -6839,12 +7221,12 @@
 
                                               return (
                                                   <>
-                                                  <div className={`text-sm font-black mb-2 flex items-center justify-between ${isDoppio ? 'text-slate-300' : 'text-blue-400'}`}>
-                                                      <span>{isDoppio ? "⚖️ DOPPIO GIOCO" : "🦸 ATTO EROICO"}</span>
+                                                  <div className={`text-sm font-black mb-2 flex items-center justify-between ${isDoppio ? 'text-slate-300' : isPigiama ? 'text-pink-400' : isSpill ? 'text-purple-400' : 'text-blue-400'}`}>
+                                                      <span>{isDoppio ? "⚖️ DOPPIO GIOCO" : isPigiama ? "💅 PIGIAMA PARTY" : isSpill ? "☕ SPILL THE TEA" : "🦸 ATTO EROICO"}</span>
                                                       <span className="bg-black/50 px-2 py-0.5 rounded">{currentCount}/{reqCount} Selezionati</span>
                                                   </div>
                                                   <p className="text-xs text-slate-400 mb-4">
-                                                      {isDoppio ? "Scegli 2 giocatori per provare a fare amicizia contemporaneamente." : "Scegli 3 giocatori da salvare. (Effetti casuali: +2, +1, -1)"}
+                                                      {isDoppio ? "Scegli 2 giocatori per provare a fare amicizia contemporaneamente." : isPigiama ? "Invita 2 amiche al Pigiama Party per consolidare i legami." : isSpill ? `Scegli 1 amica con cui sparlare di ${lobby.players.find(p => p.uid === specialSkillTargets[0])?.name}.` : "Scegli 3 giocatori da salvare. (Effetti casuali: +2, +1, -1)"}
                                                   </p>
                                                   
                                                   <div className="grid grid-cols-3 gap-2 mb-4 max-h-48 overflow-y-auto custom-scrollbar">
@@ -6853,16 +7235,18 @@
                                                           .map(p => {
                                                               const isSelected = specialSkillTargets.includes(p.uid);
                                                               const isDisabled = !isSelected && currentCount >= reqCount;
+                                                              const isPrimaryTarget = isSpill && specialSkillTargets[0] === p.uid;
                                                               
                                                               return (
                                                               <button 
                                                                   key={p.uid} 
-                                                                  onClick={() => toggleTarget(p.uid)} 
-                                                                  disabled={isDisabled}
-                                                                  className={`p-2 rounded-xl flex flex-col items-center border-2 transition-all ${isSelected ? (isDoppio ? 'bg-slate-700 border-white shadow-lg scale-105' : 'bg-blue-900 border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.8)] scale-105') : isDisabled ? 'opacity-30 border-transparent bg-slate-800' : 'bg-slate-800 border-slate-700 hover:border-slate-500'}`}
+                                                                  onClick={() => { if(!isPrimaryTarget) toggleTarget(p.uid); }} 
+                                                                  disabled={isDisabled || isPrimaryTarget}
+                                                                  className={`p-2 rounded-xl flex flex-col items-center border-2 transition-all relative ${isSelected ? (isPrimaryTarget ? 'bg-red-900 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)] scale-105 opacity-80 cursor-not-allowed' : isDoppio ? 'bg-slate-700 border-white shadow-lg scale-105' : isPigiama ? 'bg-pink-900 border-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.8)] scale-105' : isSpill ? 'bg-purple-900 border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.8)] scale-105' : 'bg-blue-900 border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.8)] scale-105') : isDisabled ? 'opacity-30 border-transparent bg-slate-800' : 'bg-slate-800 border-slate-700 hover:border-slate-500'}`}
                                                               >
                                                                   <img src={p.character.img} className="w-10 h-10 rounded-full mb-1 object-cover"/>
                                                                   <span className="text-[10px] truncate w-full leading-tight text-center font-bold">{p.name}</span>
+                                                                  {isPrimaryTarget && <span className="text-[8px] bg-red-600 text-white px-1 py-0.5 rounded absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap shadow-md">BERSAGLIO</span>}
                                                               </button>
                                                               )
                                                           })
@@ -6872,7 +7256,7 @@
                                                   <button 
                                                       onClick={() => handleInteraction(specialSkillType, specialSkillTargets)}
                                                       disabled={!isReady}
-                                                      className={`w-full py-3 rounded-xl font-black mb-2 transition-all ${isReady ? (isDoppio ? 'bg-slate-200 text-black hover:bg-white' : 'bg-blue-500 text-white hover:bg-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.6)]') : 'bg-slate-800 text-slate-500'}`}
+                                                      className={`w-full py-3 rounded-xl font-black mb-2 transition-all ${isReady ? (isDoppio ? 'bg-slate-200 text-black hover:bg-white' : isPigiama ? 'bg-pink-500 text-white hover:bg-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.6)]' : isSpill ? 'bg-purple-600 text-white hover:bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.6)]' : 'bg-blue-500 text-white hover:bg-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.6)]') : 'bg-slate-800 text-slate-500'}`}
                                                   >
                                                       CONFERMA AZIONE
                                                   </button>
