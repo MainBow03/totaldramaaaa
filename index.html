@@ -2199,6 +2199,7 @@
                           className="w-full bg-slate-900 border border-slate-600 text-white rounded-xl p-3 focus:border-yellow-500 outline-none font-bold"
                       >
                           <option value="Tutti">Tutti (Roster Completo)</option>
+                          <option value="Chaos">Chaos (Standard + 90% Twist)</option>
                           <option value="Villain Edition">Villain Edition (Solo Cattivi)</option>
                           <option value="Girly pop">Girly pop (Girl Edition, 4 Team)</option>
                           <option value="Brains vs Beauties vs Brawns">Brains vs Beauties vs Brawns</option>
@@ -4273,49 +4274,62 @@
               
               if (unchosenBots.length > 0) {
                   const timer = setTimeout(async () => {
-                      const availableCrates = lobby.idolData.crates.filter(c => c.owner === null);
-                      if (availableCrates.length > 0 && unchosenBots.length > 0) {
-                          const botToAct = unchosenBots[0];
-                          const randomCrate = availableCrates[Math.floor(Math.random() * availableCrates.length)];
-                          
-                          const newCrates = lobby.idolData.crates.map(c => 
-                              c.id === randomCrate.id ? { ...c, owner: botToAct.uid } : c
-                          );
+                      // FIX: Usare runTransaction anche per i bot per evitare la Race Condition con l'host/giocatore umano
+                      const lobbyRef = doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId);
+                      
+                      try {
+                          await runTransaction(db, async (transaction) => {
+                              const snap = await transaction.get(lobbyRef);
+                              if (!snap.exists()) return;
+                              const latestLobby = snap.data();
+                              
+                              const latestAvailable = latestLobby.idolData.crates.filter(c => c.owner === null);
+                              const latestUnchosenBots = latestLobby.players.filter(p => p.isBot && !latestLobby.idolData.crates.some(c => c.owner === p.uid));
+                              
+                              if (latestAvailable.length > 0 && latestUnchosenBots.length > 0) {
+                                  const botToAct = latestUnchosenBots[0];
+                                  const randomCrate = latestAvailable[Math.floor(Math.random() * latestAvailable.length)];
+                                  
+                                  const newCrates = latestLobby.idolData.crates.map(c => 
+                                      c.id === randomCrate.id ? { ...c, owner: botToAct.uid } : c
+                                  );
 
-                          const allTaken = newCrates.every(c => c.owner !== null);
-                          let updates = { [`idolData.crates`]: newCrates };
-                          
-                          if (allTaken) {
-                              updates[`idolData.stage`] = 'reveal';
-                              
-                              let inventory = { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} };
-                              
-                              newCrates.forEach(c => {
-                                  const item = lobby.idolData.itemDistribution[c.id];
-                                  if (item && c.owner) {
-                                      if (item === 'spyDrone') {
-                                          inventory.spyDrones[c.owner] = (inventory.spyDrones[c.owner] || 0) + 3;
-                                      } else if (item === 'safety') {
-                                          inventory.safeties[c.owner] = (inventory.safeties[c.owner] || 0) + 1;
-                                      } else if (item === 'mutiny') {
-                                          inventory.mutinies[c.owner] = (inventory.mutinies[c.owner] || 0) + 1;
-                                      } else if (item === 'legacy') {
-                                          inventory.legacies[c.owner] = (inventory.legacies[c.owner] || 0) + 1;
-                                      } else {
-                                          const key = item + 's';
-                                          inventory[key][c.owner] = (inventory[key][c.owner] || 0) + 1;
-                                      }
+                                  const allTaken = newCrates.every(c => c.owner !== null);
+                                  let updates = { [`idolData.crates`]: newCrates };
+                                  
+                                  if (allTaken) {
+                                      updates[`idolData.stage`] = 'reveal';
+                                      
+                                      let inventory = { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} };
+                                      
+                                      newCrates.forEach(c => {
+                                          const item = latestLobby.idolData.itemDistribution[c.id];
+                                          if (item && c.owner) {
+                                              if (item === 'spyDrone') {
+                                                  inventory.spyDrones[c.owner] = (inventory.spyDrones[c.owner] || 0) + 3;
+                                              } else if (item === 'safety') {
+                                                  inventory.safeties[c.owner] = (inventory.safeties[c.owner] || 0) + 1;
+                                              } else if (item === 'mutiny') {
+                                                  inventory.mutinies[c.owner] = (inventory.mutinies[c.owner] || 0) + 1;
+                                              } else if (item === 'legacy') {
+                                                  inventory.legacies[c.owner] = (inventory.legacies[c.owner] || 0) + 1;
+                                              } else {
+                                                  const key = item + 's';
+                                                  inventory[key][c.owner] = (inventory[key][c.owner] || 0) + 1;
+                                              }
+                                          }
+                                      });
+                                      
+                                      updates[`idolData.inventory`] = inventory;
+                                      if (!latestLobby.idolData.activeEffects) updates[`idolData.activeEffects`] = { legacyDesignations: {} };
+                                      updates[`logs`] = arrayUnion("Tutte le casse sono state assegnate! Apertura in corso...");
                                   }
-                              });
-                              
-                              updates[`idolData.inventory`] = inventory;
-                              if (!lobby.idolData.activeEffects) updates[`idolData.activeEffects`] = { legacyDesignations: {} };
-                              updates[`logs`] = arrayUnion("Tutte le casse sono state assegnate! Apertura in corso...");
-                          }
 
-                          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
-                      }
-                  }, 500); 
+                                  transaction.update(lobbyRef, updates);
+                              }
+                          });
+                      } catch(e) { console.log("Errore bot crate:", e); }
+                  }, 600 + Math.random() * 400); // Ritardo leggermente variabile e rallentato per dare priorità al click dell'umano
                   return () => clearTimeout(timer);
               }
           }, [lobby.idolData, isHost]);
@@ -5331,6 +5345,7 @@
 
             else if (lobby.phase === 'episode_start') {
               const mergeSize = lobby.config.mergeSize || (lobby.config.maxPlayers / 2);
+              const isChaos = lobby.config.theme === 'Chaos';
               
               if (activePlayers.length <= 2) {
                   // ---> TRACKING ACHIEVEMENT FANTASMA PER ECCELLENZA <---
@@ -5411,7 +5426,7 @@
                           };
                           newLogs.push("Chris: È il momento del Test di Popolarità! Assegnate la vostra preferenza a 2 persone. Chi ottiene più cuori sarà immune stasera!");
                       }
-                      else if (rand < 0.06) {
+                      else if (rand < (isChaos ? 0.15 : 0.06)) {
                            const rollers = activePlayers.map(p => p.uid);
                            updates.challengeData = {
                                type: 'sudden_death',
@@ -5424,7 +5439,7 @@
                            newLogs.push("Chris: COLPO DI SCENA! Sfida ad Eliminazione Diretta!");
                            newLogs.push("Chi fa il numero più basso TORNA A CASA. Niente votazioni.");
                       
-                      } else if (rand < 0.14) { 
+                      } else if (rand < (isChaos ? 0.30 : 0.14)) { 
                           const shuffled = [...activePlayers].sort(() => Math.random() - 0.5);
                           const mid = Math.ceil(shuffled.length / 2);
                           const teamA = shuffled.slice(0, mid).map(p => p.uid);
@@ -5446,6 +5461,31 @@
                           newLogs.push("Chris: Oggi sfida speciale! Vi dividerò in due squadre casuali.");
                           newLogs.push("La squadra che totalizza il punteggio più alto vince l'immunità!");
 
+                      } else if (isChaos && rand < 0.45) {
+                           const rollers = activePlayers.map(p => p.uid);
+                           let riskCount = 2;
+                           if (activePlayers.length > 30) riskCount = 5;
+                           else if (activePlayers.length > 20) riskCount = 4;
+                           else if (activePlayers.length > 6) riskCount = 3;
+
+                           updates.challengeData = {
+                               type: 'purge',
+                               players: rollers,
+                               rollingIndex: 0,
+                               rolls: {},
+                               stage: 'rolling',
+                               winner: null,
+                               targetRiskCount: riskCount
+                           };
+                           newLogs.push(`Chris: CHAOS! La Notte del Giudizio! I ${riskCount} peggiori di questa sfida andranno al televoto!`);
+                      } else if (isChaos && rand < 0.60) {
+                           updates.challengeData = {
+                               type: 'popularity_vote',
+                               stage: 'voting',
+                               votes: {},
+                               winner: null
+                           };
+                           newLogs.push("Chris: CHAOS! È il momento del Test di Popolarità! Chi ottiene più cuori sarà immune stasera!");
                       } else {
                           const rollers = activePlayers.map(p => p.uid);
                           updates.challengeData = {
@@ -5456,6 +5496,26 @@
                               stage: 'rolling',
                               winner: null
                           };
+                      }
+                  } else {
+                      if (isChaos && Math.random() < 0.35) {
+                          const activeTeamsList = [...new Set(activePlayers.map(p => p.team))];
+                          if (activeTeamsList.length >= 2) {
+                              const p1 = activePlayers[Math.floor(Math.random() * activePlayers.length)];
+                              const otherTeams = activeTeamsList.filter(t => t !== p1.team);
+                              const newTeam = otherTeams[Math.floor(Math.random() * otherTeams.length)];
+                              if (p1 && newTeam) {
+                                  updates.twistData = {
+                                      type: 'team_swap',
+                                      victimName: p1.name,
+                                      fromTeam: p1.team,
+                                      toTeam: newTeam
+                                  };
+                                  const updatedPlayers = lobby.players.map(p => p.uid === p1.uid ? { ...p, team: newTeam } : p);
+                                  updates.players = updatedPlayers;
+                                  newLogs.push(`Chris: CHAOS! ${p1.name} passa al team ${newTeam}!`);
+                              }
+                          }
                       }
                   }
               }
@@ -5654,17 +5714,38 @@
                   }
               }
               else if (!isMerge) {
+                 const isChaos = lobby.config.theme === 'Chaos';
                  const teams = [...new Set(activePlayers.map(p => p.team))];
                  const winningTeam = teams[Math.floor(Math.random() * teams.length)];
                  const losingTeams = teams.filter(t => t !== winningTeam);
                  
                  const losingTeam = losingTeams[Math.floor(Math.random() * losingTeams.length)]; 
 
-                 const immuneIds = lobby.players.filter(p => p.team === winningTeam && p.status === 'active').map(p => p.uid);
+                 // --- TWIST LOGIC ---
+                 const isKidnapping = Math.random() < (isChaos ? 0.25 : 0.05);
+                 const isJointCeremony = !isKidnapping && Math.random() < (isChaos ? 0.40 : 0.05);
                  
-                 const isJointCeremony = Math.random() < 0.05;
+                 let finalPlayers = [...lobby.players];
+                 let kidnappedPlayer = null;
+
+                 if (isKidnapping) {
+                     const losingMembers = activePlayers.filter(p => p.team === losingTeam);
+                     if (losingMembers.length > 1) { // Deve rimanere almeno uno al falò!
+                         kidnappedPlayer = losingMembers[Math.floor(Math.random() * losingMembers.length)];
+                         finalPlayers = finalPlayers.map(p => 
+                             p.uid === kidnappedPlayer.uid ? { ...p, team: winningTeam, originalTeam: losingTeam } : p
+                         );
+                     }
+                 }
+
+                 const immuneIds = finalPlayers.filter(p => p.team === winningTeam && p.status === 'active').map(p => p.uid);
                  
-                 if (isJointCeremony) {
+                 if (kidnappedPlayer) {
+                     newLogs.push(`IL TEAM ${winningTeam} VINCE L'IMMUNITÀ!`);
+                     newLogs.push(`!!! COLPO DI SCENA !!! Chris: "Il team vincente ha il diritto di RAPIRE un avversario!"`);
+                     newLogs.push(`🚨 ${kidnappedPlayer.name} è stato rapito! Passa al team ${winningTeam} per questo episodio ed è salvo dall'eliminazione!`);
+                     newLogs.push(`Il team ${losingTeam} DEVE VOTARE.`);
+                 } else if (isJointCeremony) {
                      newLogs.push(`IL TEAM ${winningTeam} VINCE!`);
                      newLogs.push("!!! COLPO DI SCENA !!! Chris: 'Stasera TUTTI andranno alla cerimonia!'");
                      newLogs.push("I vincitori sono immuni, ma potranno votare per eliminare qualcuno degli avversari!");
@@ -5673,7 +5754,7 @@
                      newLogs.push(`Il team ${losingTeam} DEVE VOTARE.`);
                  }
 
-                 const { updatedPlayers, newLogs: finalLogs } = generateBotSocialUpdates(lobby.players, newLogs);
+                 const { updatedPlayers, newLogs: finalLogs } = generateBotSocialUpdates(finalPlayers, newLogs);
 
                  updates = {
                     players: updatedPlayers,
@@ -5681,15 +5762,16 @@
                     losingTeam: losingTeam,
                     readyPlayers: [], 
                     phase: 'social',
-                    twistData: isJointCeremony ? { type: 'joint_ceremony' } : null, 
+                    twistData: isJointCeremony ? { type: 'joint_ceremony' } : (kidnappedPlayer ? { type: 'kidnapping', victimId: kidnappedPlayer.uid } : null), 
                     logs: arrayUnion(...finalLogs)
                  };
               }
             }
-
+            
             else if (lobby.phase === 'social') {
+                const isChaos = lobby.config.theme === 'Chaos';
                 let twistData = lobby.twistData; 
-                const killerChance = Math.random() < 0.05; 
+                const killerChance = Math.random() < (isChaos ? 0.25 : 0.05); 
                 
                 if (isMerge && killerChance && lobby.immunity.length === 1 && !twistData) {
                     const killerId = lobby.immunity[0];
@@ -5710,8 +5792,9 @@
             }
 
             else if (lobby.phase === 'voting') {
-                const isDoubleElimination = isMerge && Math.random() < 0.05; 
-                const isOpenVote = Math.random() < 0.05; 
+                const isChaos = lobby.config.theme === 'Chaos';
+                const isDoubleElimination = isMerge && Math.random() < (isChaos ? 0.30 : 0.05); 
+                const isOpenVote = Math.random() < (isChaos ? 0.40 : 0.05); 
                 
                 if (lobby.idolData?.activeEffects?.extraVoteUsedRound === lobby.round) {
                     newLogs.push("Chris: 'Attenzione campeggiatori! Qualcuno ha usato un VOTO EXTRA segreto stasera! I conti potrebbero non tornare...'");
@@ -5957,6 +6040,17 @@
                       }
                       return p;
                   });
+
+                  // --- REVERT RAPIMENTO ---
+                  updatedPlayers = updatedPlayers.map(p => {
+                      if (p.originalTeam && p.status === 'active') {
+                          newLogs.push(`🔄 Il rapimento è finito! ${p.name} torna al suo team originale (${p.originalTeam}).`);
+                          const { originalTeam, ...rest } = p;
+                          return { ...rest, team: originalTeam };
+                      }
+                      return p;
+                  });
+                  // ------------------------
 
                   const nextRound = lobby.round + 1;
                   const redemptionConfig = lobby.config.redemption;
