@@ -2233,8 +2233,10 @@
                        </h3>
                        <div className="space-y-4 text-sm text-slate-300">
                            <div className="border-l-2 border-cyan-500 pl-4 py-1">
-                               <div className="font-bold text-white text-base">Nuove Skin e Aura Abissale!</div>
+                               <div className="font-bold text-white text-base">Amicizie Reciproche, Anti-AFK Giuria e Nuove Skin!</div>
                                <ul className="list-disc pl-4 mt-2 space-y-2">
+                                   <li><strong className="text-red-400">Anti-AFK Giuria:</strong> Aggiunto un pulsante per l'Host durante la finale per <strong className="text-white">forzare lo spoglio dei voti</strong> e calcolare il vincitore nel caso qualche giurato vada AFK!</li>
+                                   <li><strong className="text-pink-400">Aggiornamento Amicizie:</strong> Ora le interazioni sociali positive ("Amicizia" e "Leccapiedi") sono <strong className="text-white">reciproche al 100%</strong>. Se un bot fa il primo passo, i punti affetto saliranno per entrambi!</li>
                                    <li>Aggiunto un nuovo achievement segreto: <strong className="text-purple-400">"Tu sì che sei un perdente"</strong>. Sbloccalo per ottenere l'esclusiva e rarissima <strong className="text-purple-400">Aura Abissale</strong>!</li>
                                    <li>Aggiunte tantissime <strong className="text-yellow-400">nuove skin</strong> nel roster per: Gwen, Lightning, Rias Gremory, Peridot, Marge, Bart, Alejandro, Heather (Pelatona!), Bowie, Julia (Nuova Default), Duncan, Bloom, Skipper e altri!</li>
                                </ul>
@@ -4221,16 +4223,25 @@
                      const action = actions[Math.floor(Math.random() * actions.length)];
 
                      const targetIdx = updatedPlayers.findIndex(p => p.uid === target.uid);
+                     const botIdx = updatedPlayers.findIndex(p => p.uid === bot.uid);
 
                      if (action === 'friend') {
                          if (isSeasonVillain || Math.random() > 0.5) { // Villain ha il 100% di chance
                              const newVal = Math.min(5, (updatedPlayers[targetIdx].relationships[bot.uid] || 0) + 1);
                              updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [bot.uid]: newVal };
+                             
+                             const newValBot = Math.min(5, (updatedPlayers[botIdx].relationships[target.uid] || 0) + 1);
+                             updatedPlayers[botIdx].relationships = { ...updatedPlayers[botIdx].relationships, [target.uid]: newValBot };
+
                              newLogs.push(`🤖 ${bot.name} ha stretto amicizia con ${target.name}.`);
                          }
                      } else if (action === 'suckup' && Math.random() < 0.60) {
                          const newVal = Math.min(10, (updatedPlayers[targetIdx].relationships[bot.uid] || 0) + 2);
                          updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [bot.uid]: newVal };
+                         
+                         const newValBot = Math.min(10, (updatedPlayers[botIdx].relationships[target.uid] || 0) + 2);
+                         updatedPlayers[botIdx].relationships = { ...updatedPlayers[botIdx].relationships, [target.uid]: newValBot };
+
                          newLogs.push(`🤖 ${bot.name} ha fatto il leccapiedi con ${target.name}.`);
                      } else if (action === 'rumor' && Math.random() > 0.5) {
                           const victim = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
@@ -5150,6 +5161,29 @@
              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   [`ghostIslandData.rolls.${user.uid}`]: roll
              });
+          };
+
+          const forceJuryReveal = async () => {
+              if (!isHost || lobby.phase !== 'jury_vote' || lobby.juryData?.stage !== 'voting') return;
+              const jd = lobby.juryData;
+              let p1Votes = 0;
+              let p2Votes = 0;
+              Object.values(jd.votes || {}).forEach(v => {
+                  if (v === jd.finalist1) p1Votes++;
+                  else p2Votes++;
+              });
+              
+              let winnerId = jd.finalist1;
+              if (p2Votes > p1Votes) winnerId = jd.finalist2;
+              else if (p1Votes === p2Votes) winnerId = Math.random() > 0.5 ? jd.finalist1 : jd.finalist2;
+
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`juryData.stage`]: 'revealing',
+                  [`juryData.p1Votes`]: p1Votes,
+                  [`juryData.p2Votes`]: p2Votes,
+                  [`juryData.winnerId`]: winnerId,
+                  logs: arrayUnion(`Lo spoglio dei voti è stato forzato dall'Host!`)
+              });
           };
 
           const claimCrate = async (crateId) => {
@@ -6356,15 +6390,20 @@
                     if (Object.keys(jd.votes || {}).length >= jd.jurors.length) {
                         let p1Votes = 0;
                         let p2Votes = 0;
-                        Object.values(jd.votes).forEach(v => {
+                        Object.values(jd.votes || {}).forEach(v => {
                             if (v === jd.finalist1) p1Votes++;
                             else p2Votes++;
                         });
+                        
+                        let winnerId = jd.finalist1;
+                        if (p2Votes > p1Votes) winnerId = jd.finalist2;
+                        else if (p1Votes === p2Votes) winnerId = Math.random() > 0.5 ? jd.finalist1 : jd.finalist2;
+
                         updates = { 
                             [`juryData.stage`]: 'revealing',
                             [`juryData.p1Votes`]: p1Votes,
                             [`juryData.p2Votes`]: p2Votes,
-                            [`juryData.winnerId`]: p1Votes > p2Votes ? jd.finalist1 : jd.finalist2
+                            [`juryData.winnerId`]: winnerId
                         };
                     }
                 }
@@ -6856,6 +6895,10 @@
                           if (Math.random() > 0.5) {
                               const newVal = Math.min(5, (updatedPlayers[targetIdx].relationships[user.uid] || 0) + 1);
                               updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [user.uid]: newVal };
+                              
+                              const myNewVal = Math.min(5, (updatedPlayers[myIdx].relationships[targetId] || 0) + 1);
+                              updatedPlayers[myIdx].relationships = { ...updatedPlayers[myIdx].relationships, [targetId]: myNewVal };
+                              
                               msg = `Hai stretto amicizia con ${updatedPlayers[targetIdx].name}.`;
                               achieved = 'farfallasociale';
                           } else msg = `${updatedPlayers[targetIdx].name} ti ha ignorato.`;
@@ -6936,6 +6979,13 @@
                                   ...updatedPlayers[targetIdx].relationships, 
                                   [user.uid]: Math.min(10, currentRel + 2) 
                               };
+                              
+                              const myCurrentRel = updatedPlayers[myIdx].relationships[targetId] || 0;
+                              updatedPlayers[myIdx].relationships = {
+                                  ...updatedPlayers[myIdx].relationships,
+                                  [targetId]: Math.min(10, myCurrentRel + 2)
+                              };
+                              
                               msg = `👅 Hai fatto il leccapiedi con ${targetName}. I tuoi complimenti esagerati hanno funzionato! (+2 Relazione)`;
                           } else {
                               const tRel = updatedPlayers[targetIdx].relationships[user.uid] || 0;
@@ -8996,6 +9046,14 @@
                                      <h3 className="text-2xl font-bold mb-2">Votazioni in Corso...</h3>
                                      <p className="text-slate-400">La giuria sta decidendo chi vincerà questa stagione.</p>
                                      <div className="mt-4 font-mono text-yellow-400 text-xl font-black">Voti confermati: {Object.keys(lobby.juryData.votes || {}).length} / {lobby.juryData.jurors.length}</div>
+                                     {isHost && Object.keys(lobby.juryData.votes || {}).length > 0 && (
+                                         <button 
+                                             onClick={forceJuryReveal}
+                                             className="mt-4 bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg flex items-center justify-center gap-2 mx-auto transition-colors"
+                                         >
+                                             <AlertTriangle size={18}/> FORZA INIZIO SPOGLIO (Salta AFK)
+                                         </button>
+                                     )}
                                  </div>
                              )}
 
