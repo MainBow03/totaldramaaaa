@@ -473,6 +473,32 @@
             animation: flashCamera 2s infinite;
         }
 
+        /* 21. Schiappa: Triste, grigio e nuvola di pioggia */
+        .cosmetic-schiappa {
+            border: 3px solid #64748b !important;
+            box-shadow: 0 0 15px rgba(100, 116, 139, 0.8), inset 0 0 15px rgba(148, 163, 184, 0.4) !important;
+            filter: grayscale(0.6) brightness(0.8);
+        }
+        .cosmetic-schiappa::before {
+            content: '🌧️';
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 36px;
+            z-index: 20;
+            animation: rainCloud 2s infinite alternate;
+        }
+        .cosmetic-schiappa::after {
+            content: '🤡';
+            position: absolute;
+            bottom: -12px;
+            right: -12px;
+            font-size: 26px;
+            z-index: 20;
+            transform: rotate(-15deg);
+        }
+
         /* --- ANIMAZIONI PER TUTTI I COSMETICI --- */
         @keyframes crownFloat {
             0%, 100% { transform: translate(-50%, 0) scale(1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7)); }
@@ -562,6 +588,10 @@
             95% { filter: drop-shadow(0 0 20px white) brightness(2) scale(1.2); }
             100% { filter: drop-shadow(0 0 0px white) brightness(1); }
         }
+        @keyframes rainCloud {
+            0% { transform: translateX(-50%) translateY(0); filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+            100% { transform: translateX(-50%) translateY(5px); filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); }
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white">
@@ -596,7 +626,7 @@
           Heart, Users, Play, LogOut, MessageSquare, Skull, 
           Trophy, Crown, UserPlus, Shield, Swords, Flame, 
           AlertTriangle, ArrowRight, Dices, Send, X, Vote, ListOrdered, Coffee, ChevronDown, Award, CheckCircle, Undo2,
-          Package, Gem, Lock, Unlock, Target, Users2, AlertOctagon, Shuffle, Gavel, Zap, Hammer, UserMinus, Mic, Eye, RefreshCw, DoorOpen, Link, Volume2, VolumeX, Scroll, Ghost, Star, Camera, Search
+          Package, Gem, Lock, Unlock, Target, Users2, AlertOctagon, Shuffle, Gavel, Zap, Hammer, UserMinus, Mic, Eye, RefreshCw, DoorOpen, Link, Volume2, VolumeX, Scroll, Ghost, Star, Camera, Search, Megaphone
         } from 'lucide-react';
 
         // --- TUE CHIAVI FIREBASE INSERITE ---
@@ -686,7 +716,8 @@
                 'itremoschettieri': 'cosmetic-moschettieri', // Effetto spade incrociate
                 'ineluttabile': 'cosmetic-ineluttabile', // Aura stile Gemme dell'Infinito
                 'donnealpotere': 'cosmetic-donnealpotere', // Coroncina dorata e aura rosa
-                'spotlight': 'cosmetic-spotlight' // Effetto VIP con fotocamera
+                'spotlight': 'cosmetic-spotlight', // Effetto VIP con fotocamera
+                'schiappa': 'cosmetic-schiappa' // Aura triste con nuvola e naso da clown
             };
             return cosmetics[cosmeticId] || '';
         };
@@ -698,31 +729,31 @@
           { name: "Adrien", img: "https://i.pinimg.com/1200x/5c/2d/c7/5c2dc740ed2fe906b6afaf1320bf4273.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/5c/2d/c7/5c2dc740ed2fe906b6afaf1320bf4273.jpg" }, { name: "Chat Noir", img: "https://i.pinimg.com/736x/b8/27/6a/b8276a7767c008ced6c9ef7b9f569250.jpg" }], speeches: ["Sono sempre stato prigioniero di mio padre, votatemi cosi posso dimostrargli di brillare anche da solo!", "Ho giocato in modo pulito e ottimale, spero lo possiate riconoscere, votate per me!"] },
 		  { name: "Alya", img: "https://i.pinimg.com/736x/3e/3b/99/3e3b99fc26e6b2cb8bf7359c53acca24.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/3e/3b/99/3e3b99fc26e6b2cb8bf7359c53acca24.jpg" }, { name: "Rena Rouge", img: "https://i.pinimg.com/736x/3b/52/7e/3b527e80e1a63f7dd83e80f4d67d65d6.jpg" }], speeches: ["Grazie alle mie doti giornalistiche sono riuscita ad arrivare fin qui, votatemi e non ve ne pentirete!", "Miraggio! Guardate cosa so fare? Direi che mi merito il voto."] },
           { name: "Argos", img: "https://i.pinimg.com/736x/61/a0/d7/61a0d70a9cba0c930bb2ed13e95f6e87.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/61/a0/d7/61a0d70a9cba0c930bb2ed13e95f6e87.jpg" }, { name: "Felix", img: "https://i.pinimg.com/736x/48/ac/11/48ac1194c4797527ba21db8a3135642e.jpg" }, { name: "Flairmidable", img: "https://i.pinimg.com/736x/b5/f9/59/b5f959382a40c29d13a338d05504b6c7.jpg" }], speeches: ["Non ho bisogno dei vostri finti sorrisi. Voglio solo il premio per i miei veri obiettivi.", "Ho manipolato le ombre e i cuori per arrivare in vetta. Questa vittoria è il mio riscatto."], alignment: 'villain', isNew: true },
-          { name: "Heartfixer", img: "https://i.pinimg.com/736x/fe/82/7c/fe827caedc137c8832fd7b313209cc55.jpg", speeches: ["Ho riparato ogni cuore spezzato su quest'isola, ma il premio spetta solo a me! Votatemi!", "Non c'è bisogno di essere akumatizzati per capire che sono io la vera vincitrice. Datemi i vostri voti!"], alignment: 'villain' },
-          { name: "Chrysalis", img: "https://i.pinimg.com/736x/c1/8e/6a/c18e6a45d98eee60c330d37bb2f4e562.jpg", speeches: ["Vi ho manipolati tutti dall'inizio alla fine con le mie bugie perfette. Sono io la regina dell'inganno e merito la corona.", "Un bravo prestigiatore non rivela mai i suoi trucchi... ma vi assicuro che la mia vittoria era scritta fin dal primo giorno."], alignment: 'villain' },
+          { name: "Heartfixer", img: "https://i.pinimg.com/736x/fe/82/7c/fe827caedc137c8832fd7b313209cc55.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/fe/82/7c/fe827caedc137c8832fd7b313209cc55.jpg" }, { name: "Heartfixer 1", img: "https://i.pinimg.com/736x/26/76/23/267623367ccd03e77e17430c840fdbcb.jpg" }], speeches: ["Ho riparato ogni cuore spezzato su quest'isola, ma il premio spetta solo a me! Votatemi!", "Non c'è bisogno di essere akumatizzati per capire che sono io la vera vincitrice. Datemi i vostri voti!"], alignment: 'villain' },
+          { name: "Chrysalis", img: "https://i.pinimg.com/736x/c1/8e/6a/c18e6a45d98eee60c330d37bb2f4e562.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/c1/8e/6a/c18e6a45d98eee60c330d37bb2f4e562.jpg" }, { name: "Lila", img: "https://i.pinimg.com/736x/ca/0a/2c/ca0a2c5ff946f1233add9d3761425696.jpg" }, { name: "Cerise", img: "https://i.pinimg.com/736x/a9/ce/01/a9ce01f15a2ce3df6de49483f31795bd.jpg" }], speeches: ["Vi ho manipolati tutti dall'inizio alla fine con le mie bugie perfette. Sono io la regina dell'inganno e merito la corona.", "Un bravo prestigiatore non rivela mai i suoi trucchi... ma vi assicuro che la mia vittoria era scritta fin dal primo giorno."], alignment: 'villain' },
           { name: "Nathalie", img: "https://i.pinimg.com/736x/ad/8e/68/ad8e68f410c0379c3b5412b8afeef3dc.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/ad/8e/68/ad8e68f410c0379c3b5412b8afeef3dc.jpg" }, { name: "Mayura", img: "https://i.pinimg.com/1200x/30/75/d0/3075d0bd5b41bd8be9a7c5c6bfee9a25.jpg" }], speeches: ["Ho sempre agito con fredda efficienza e logica impeccabile. I risultati parlano da soli, il vostro voto dovrebbe essere per me.", "Ho sacrificato molto per arrivare fin qui. Non siate irrazionali, sono l'unica che merita questo premio."] },
           { name: "Luka", img: "https://i.pinimg.com/736x/16/40/f3/1640f3c6c2b14e00c110316e02e86c7f.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/16/40/f3/1640f3c6c2b14e00c110316e02e86c7f.jpg" }, { name: "Viperion", img: "https://i.pinimg.com/736x/2c/ee/63/2cee6368e413f58540e762802cf01791.jpg" }], speeches: ["Ho giocato in modo pulito, chiaro e cristallino come il suono della mia musica. Votate per me :)", "*suona la chitarra* Spero che questa melodia possa convincervi."] },
           { name: "Kagami", img: "https://i.pinimg.com/736x/56/e2/ad/56e2adc6421c613a6d00b393abd1a6c1.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/56/e2/ad/56e2adc6421c613a6d00b393abd1a6c1.jpg" }, { name: "Ryuko", img: "https://i.pinimg.com/1200x/e2/95/a3/e295a335ae87848200859130529cbdec.jpg" }], speeches: ["Ho vinto molte sfide e non ho mai dato potere alle mie emozioni. Mi merito questo voto.", "Votatemi, grazie."] },
-          { name: "Re Julien", img: "https://i.pinimg.com/736x/1e/17/19/1e17194ef5b383e4202fbb4875cfbd81.jpg", speeches: ["Votate per il vostro Re! Se vinco, faremo una festa indimenticabile!", "I piedi di Mortino non sono nulla in confronto a questi milioni di dollari!"] },
+          { name: "Re Julien", img: "https://i.pinimg.com/736x/1e/17/19/1e17194ef5b383e4202fbb4875cfbd81.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/1e/17/19/1e17194ef5b383e4202fbb4875cfbd81.jpg" }, { name: "Re Julien 1", img: "https://i.pinimg.com/736x/01/31/39/01313976c2658162531c6f8d5ab59b02.jpg" }], speeches: ["Votate per il vostro Re! Se vinco, faremo una festa indimenticabile!", "I piedi di Mortino non sono nulla in confronto a questi milioni di dollari!"] },
           { name: "Mortino", img: " https://i.pinimg.com/736x/b9/56/ec/b956ec4741a1ba90c7176478e203f78b.jpg" },
-		  { name: "Skipper", img: "https://i.pinimg.com/736x/e6/f0/5b/e6f05b20dda962344721db983c882679.jpg", speeches: ["Carini e coccolosi ragazzi, carini e coccolosi. Ora datemi quei soldi per finanziare le operazioni.", "Ho gestito questa isola come un'operazione militare tattica. Vittoria meritata."] },
+		  { name: "Skipper", img: "https://i.pinimg.com/736x/e6/f0/5b/e6f05b20dda962344721db983c882679.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/e6/f0/5b/e6f05b20dda962344721db983c882679.jpg" }, { name: "Goffo Skipper", img: "https://i.pinimg.com/736x/b1/ba/b6/b1bab6b3e5a2accd22546f93ea5afd06.jpg" }, { name: "Mummia Skipper", img: "https://i.pinimg.com/1200x/6e/e4/30/6ee4304ae9fd07c8504e1a00d02e6216.jpg" }], speeches: ["Carini e coccolosi ragazzi, carini e coccolosi. Ora datemi quei soldi per finanziare le operazioni.", "Ho gestito questa isola come un'operazione militare tattica. Vittoria meritata."] },
           { name: "Rico", img: "https://i.pinimg.com/736x/a8/fe/a5/a8fea5d9ce18a230a1ea6b996cef8bb8.jpg", speeches: ["Kaboom?! Kaboom!", "*Vomita un candelotto di dinamite* Ecco il mio discorso!"], alignment: 'villain' },
-		  { name: "Kowalski", img: "https://i.pinimg.com/736x/e7/bc/38/e7bc382c57bfb2f3de7f44a0cce39fcd.jpg" },
-		  { name: "Soldato", img: "https://i.pinimg.com/1200x/5e/3f/0d/5e3f0d06b262dc18869f550806d1bdb4.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/5e/3f/0d/5e3f0d06b262dc18869f550806d1bdb4.jpg" }, { name: "Baby Soldato", img: "https://i.pinimg.com/736x/81/3c/57/813c57fcb969d58fac1672594da05532.jpg" }] },
-          { name: "Gwen", img: "https://i.pinimg.com/1200x/59/d7/15/59d71578cd5f889ae898bbc83dda29dc.jpg", speeches: ["Non mi importa molto dei soldi, ma ho giocato pulito. A differenza di certa gente.", "Ho sopportato tutti voi per settimane, questo è il minimo premio che mi spetta."] },
-          { name: "Julia", img: "https://i.pinimg.com/736x/80/c2/83/80c283f82be806cdd40e71d303d09474.jpg", speeches: ["Guardatemi. Sono stupenda, intelligente e vi ho distrutti tutti. Votate per la regina.", "Non fatemi perdere tempo, sapete tutti che i soldi spettano a me. Ciao follower!"], alignment: 'villain' },
-          { name: "Duncan", img: "https://i.pinimg.com/736x/3f/2d/e1/3f2de1cd71448e1413ab3ccafbed5b4d.jpg", speeches: ["Votate per me o vi farò pentire di essere nati, chiaro?", "Ho giocato duro e ho fregato chi dovevo fregare. Date a me i soldi o vi picchio."], alignment: 'villain' },
-		  { name: "Heather", img: "https://i.pinimg.com/736x/81/5b/b6/815bb632721e7d38f26d35801466dd30.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/81/5b/b6/815bb632721e7d38f26d35801466dd30.jpg" }, { name: "Heather 1", img: "https://i.pinimg.com/736x/d1/64/4a/d1644a80241078f0461f048fecae65b1.jpg" }, { name: "Heather 2", img: "https://i.pinimg.com/736x/68/0b/fb/680bfb4da66a5d468309ddf6205fdf55.jpg" }], speeches: ["Io mi merito la vittoria poichè sono la villain migliore della stagione, ammettetelo.", "Se non votate per me non avete buon gusto, sappiatelo. Siete solo comparse nel mio show!"], alignment: 'villain' },
-          { name: "Alejandro", img: "https://i.pinimg.com/736x/42/68/90/42689043c52c2a7402ab46de85988ff1.jpg", speeches: ["Le mie abilità e il mio fascino mi hanno portato in cima. Votate per me, por favor.", "Ho giocato con tutti voi, e ora chiedo umilmente il vostro voto."], alignment: 'villain' },
-          { name: "Owen", img: "https://i.pinimg.com/1200x/d8/67/6b/d8676b6ca40fa5a14aabace2a6542a39.jpg", speeches: ["Amici! Se vinco questi soldi prometto una festa gigante con pizza e formaggio per tutti!", "Ahahahah! Non ci credo di essere in finale! Siete i migliori, votate per me!"] },
-          { name: "Lightning", img: "https://i.pinimg.com/736x/44/af/e7/44afe7a858a67cbd1458cebee28693aa.jpg", speeches: ["Sha-bam! Lightning colpisce ancora! Merito di vincere perché sono il più forte!", "Nessuno può fermare Lightning! Votate per il campione assoluto! Sha-vittoria!"], alignment: 'villain' },
+		  { name: "Kowalski", img: "https://i.pinimg.com/736x/e7/bc/38/e7bc382c57bfb2f3de7f44a0cce39fcd.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/e7/bc/38/e7bc382c57bfb2f3de7f44a0cce39fcd.jpg" }, { name: "Cervellone Kowalski", img: "https://i.pinimg.com/736x/a1/7b/b2/a17bb24bc7a72e31041b1855cf95427c.jpg" }] },
+          { name: "Soldato", img: "https://i.pinimg.com/1200x/5e/3f/0d/5e3f0d06b262dc18869f550806d1bdb4.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/5e/3f/0d/5e3f0d06b262dc18869f550806d1bdb4.jpg" }, { name: "Baby Soldato", img: "https://i.pinimg.com/736x/81/3c/57/813c57fcb969d58fac1672594da05532.jpg" }] },
+          { name: "Gwen", img: "https://i.pinimg.com/1200x/7d/21/31/7d2131c0b714ee83c941a59ed55a820b.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/7d/21/31/7d2131c0b714ee83c941a59ed55a820b.jpg" }, { name: "Pijama", img: "https://i.pinimg.com/1200x/59/d7/15/59d71578cd5f889ae898bbc83dda29dc.jpg" }, { name: "Crazy", img: "https://i.pinimg.com/1200x/6b/4a/60/6b4a608f96d83a706c516a7b7bf667b7.jpg" }], speeches: ["Non mi importa molto dei soldi, ma ho giocato pulito. A differenza di certa gente.", "Ho sopportato tutti voi per settimane, questo è il minimo premio che mi spetta."] },
+          { name: "Julia", img: "https://i.pinimg.com/1200x/a1/ef/d7/a1efd74f161fa4041cbc6b75bfd9e6b5.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/a1/ef/d7/a1efd74f161fa4041cbc6b75bfd9e6b5.jpg" }, { name: "Winter Julia", img: "https://i.pinimg.com/736x/80/c2/83/80c283f82be806cdd40e71d303d09474.jpg" }, { name: "Bunnytail Julia", img: "https://i.pinimg.com/736x/24/6c/0c/246c0c94516249834318b2447a490dd0.jpg" }, { name: "Fashion Julia", img: "https://i.pinimg.com/1200x/7f/49/cc/7f49cc3bdf92a483d1c86a3ccf5ec576.jpg" }], speeches: ["Guardatemi. Sono stupenda, intelligente e vi ho distrutti tutti. Votate per la regina.", "Non fatemi perdere tempo, sapete tutti che i soldi spettano a me. Ciao follower!"], alignment: 'villain' },
+          { name: "Duncan", img: "https://i.pinimg.com/736x/3f/2d/e1/3f2de1cd71448e1413ab3ccafbed5b4d.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/3f/2d/e1/3f2de1cd71448e1413ab3ccafbed5b4d.jpg" }, { name: "Shirtless Duncan", img: "https://i.pinimg.com/736x/02/d7/91/02d791566e56a2ec94defbc5b3bbf9c2.jpg" }], speeches: ["Votate per me o vi farò pentire di essere nati, chiaro?", "Ho giocato duro e ho fregato chi dovevo fregare. Date a me i soldi o vi picchio."], alignment: 'villain' },
+          { name: "Heather", img: "https://i.pinimg.com/736x/81/5b/b6/815bb632721e7d38f26d35801466dd30.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/81/5b/b6/815bb632721e7d38f26d35801466dd30.jpg" }, { name: "Heather 1", img: "https://i.pinimg.com/736x/d1/64/4a/d1644a80241078f0461f048fecae65b1.jpg" }, { name: "Heather 2", img: "https://i.pinimg.com/736x/68/0b/fb/680bfb4da66a5d468309ddf6205fdf55.jpg" }, { name: "Pelatona Heather", img: "https://i.pinimg.com/736x/7f/86/10/7f8610c41ab4184e079d9eae736dcd93.jpg" }, { name: "Pelatona 2", img: "https://i.pinimg.com/736x/2e/6a/f6/2e6af6d735c8fbe7ef214f86b40765eb.jpg" }], speeches: ["Io mi merito la vittoria poichè sono la villain migliore della stagione, ammettetelo.", "Se non votate per me non avete buon gusto, sappiatelo. Siete solo comparse nel mio show!"], alignment: 'villain' },
+          { name: "Alejandro", img: "https://i.pinimg.com/736x/42/68/90/42689043c52c2a7402ab46de85988ff1.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/42/68/90/42689043c52c2a7402ab46de85988ff1.jpg" }, { name: "Shirtless Alejandro", img: "https://i.pinimg.com/736x/d4/02/f7/d402f744f6b3e0023005e804bd32ec8c.jpg" }, { name: "Shirtless 2", img: "https://i.pinimg.com/1200x/53/e6/c3/53e6c3d817aeff9a2378b4da938d578e.jpg" }, { name: "Codino", img: "https://i.pinimg.com/736x/3e/1e/bd/3e1ebd0b5cf00f874f6353c071de35f6.jpg" }, { name: "Stylish", img: "https://i.pinimg.com/736x/73/11/00/7311007f6fbe66db29e9ddae04fb69f1.jpg" }], speeches: ["Le mie abilità e il mio fascino mi hanno portato in cima. Votate per me, por favor.", "Ho giocato con tutti voi, e ora chiedo umilmente il vostro voto."], alignment: 'villain' },
+          { name: "Owen", img: "https://i.pinimg.com/1200x/d8/67/6b/d8676b6ca40fa5a14aabace2a6542a39.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/d8/67/6b/d8676b6ca40fa5a14aabace2a6542a39.jpg" }, { name: "Ragno Owen", img: "https://i.pinimg.com/1200x/ed/eb/0e/edeb0e5756c6fc9bdf0a9173a0a5d048.jpg" }, { name: "Barbone Owen", img: "https://i.pinimg.com/1200x/a1/6f/06/a16f0697480a0081319060280bb0bcfd.jpg" }], speeches: ["Amici! Se vinco questi soldi prometto una festa gigante con pizza e formaggio per tutti!", "Ahahahah! Non ci credo di essere in finale! Siete i migliori, votate per me!"] },
+          { name: "Lightning", img: "https://i.pinimg.com/736x/44/af/e7/44afe7a858a67cbd1458cebee28693aa.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/44/af/e7/44afe7a858a67cbd1458cebee28693aa.jpg" }, { name: "Tanktop Lightning", img: "https://i.pinimg.com/736x/b8/70/14/b87014c8fb299de4ff535db74ce959a2.jpg" }], speeches: ["Sha-bam! Lightning colpisce ancora! Merito di vincere perché sono il più forte!", "Nessuno può fermare Lightning! Votate per il campione assoluto! Sha-vittoria!"], alignment: 'villain' },
 		  { name: "Courtney", img: "https://i.pinimg.com/736x/ad/94/34/ad9434468d4a502c89ea01c0249e8899.jpg", speeches: ["Sono l'unica qui con un vero piano d'investimento per questi soldi. Votatemi, è la scelta logica.", "Se non vinco io, chiamerò i miei avvocati e vi farò causa tutti quanti!"], alignment: 'villain' },
 		  { name: "Lindsay", img: "https://i.pinimg.com/736x/d7/bf/82/d7bf8237867c96050d1244518ce1ffef.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/d7/bf/82/d7bf8237867c96050d1244518ce1ffef.jpg" }, { name: "Lindsay Wonder Woman", img: "https://i.pinimg.com/1200x/ed/96/df/ed96df179eaa7030663473c575067cb4.jpg" }], speeches: ["Dovete votare per me perché i miei capelli sono stati perfetti per tutto il tempo! Grazie!", "Aspetta, ma se vinco io... divento la regina dell'isola? Siii, votatemi! Ciao Tyson!"] },
-		  { name: "Bowie", img: "https://i.pinimg.com/1200x/03/6c/0f/036c0ffe4fcd39d5840ed60a2fb104c3.jpg", speeches: ["Ammettetelo, senza di me questa stagione sarebbe stata noiosissima. Merito la corona.", "Ho manipolato le votazioni dal giorno uno. Sono il re strategico di questa edizione."], alignment: 'villain' },
+		  { name: "Bowie", img: "https://i.pinimg.com/1200x/03/6c/0f/036c0ffe4fcd39d5840ed60a2fb104c3.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/03/6c/0f/036c0ffe4fcd39d5840ed60a2fb104c3.jpg" }, { name: "Sunglasses Bowie", img: "https://i.pinimg.com/736x/d3/91/42/d391428a22df64623c40c21e5f7180c7.jpg" }], speeches: ["Ammettetelo, senza di me questa stagione sarebbe stata noiosissima. Merito la corona.", "Ho manipolato le votazioni dal giorno uno. Sono il re strategico di questa edizione."], alignment: 'villain' },
 		  { name: "Raj", img: "https://i.pinimg.com/736x/05/b2/97/05b297c32cd4507adbd7b0c7ce84fb3a.jpg" },
           { name: "Conan", img: "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg" }, { name: "Shinichi", img: "https://i.pinimg.com/736x/7f/b5/48/7fb54863b62a2b153990cb87901be037.jpg" }] },
           { name: "Ran", img: "https://i.pinimg.com/1200x/46/ee/c7/46eec75f3a3eeb4846216dfdd7083ff4.jpg" },
-          { name: "Rias", img: "https://i.pinimg.com/736x/d1/a7/df/d1a7df7bfe5769c39e9b66041144e4eb.jpg" },
+          { name: "Rias", img: "https://i.pinimg.com/736x/d1/a7/df/d1a7df7bfe5769c39e9b66041144e4eb.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/d1/a7/df/d1a7df7bfe5769c39e9b66041144e4eb.jpg" }, { name: "Rias 1", img: "https://i.pinimg.com/736x/1a/78/25/1a78254f10cf901400c8c53ab7aedacf.jpg" }, { name: "Rias 2", img: "https://i.pinimg.com/736x/38/f3/d5/38f3d5d530a3409b0062d4af99c8bc14.jpg" }, { name: "Rias 3", img: "https://i.pinimg.com/736x/3f/d3/3d/3fd33de23e28a9579097a87a9611662a.jpg" }, { name: "Rias 4", img: "https://i.pinimg.com/736x/55/af/c3/55afc32a82bd924c48e336e891acc1f3.jpg" }] },
           { name: "Bayonetta", img: "https://i.pinimg.com/1200x/60/fc/c0/60fcc064dc97d24b96a9517f726c1970.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/60/fc/c0/60fcc064dc97d24b96a9517f726c1970.jpg" }, { name: "Bayonetta 1", img: "https://i.pinimg.com/736x/fb/3e/82/fb3e829ce315d7f75b5cda5e13d7661e.jpg" }, { name: "Bayonetta 2", img: "https://i.pinimg.com/736x/c0/8d/38/c08d38e8e76763eb42428bfc13da8848.jpg" }] },
           { name: "Yoshi", img: "https://i.pinimg.com/736x/f3/05/7f/f3057f14de68b0afe682ffe93dcc479b.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/f3/05/7f/f3057f14de68b0afe682ffe93dcc479b.jpg" }, { name: "Blu Yoshi", img: "https://static.wikia.nocookie.net/p__/images/7/73/Blue_Yoshi.png/revision/latest/scale-to-width-down/1200?cb=20170328222728&path-prefix=protagonist" }, { name: "Red Yoshi", img: "https://static.wikia.nocookie.net/p__/images/1/16/Redyoshi.png/revision/latest/scale-to-width-down/250?cb=20241018153604&path-prefix=protagonist" }, { name: "Yellow Yoshi", img: "https://static.wikia.nocookie.net/mario/images/b/b3/Yellow_Yoshi_Wonder.webp/revision/latest?cb=20230927002120" }, { name: "Pink Yoshi", img: "https://static.wikia.nocookie.net/p__/images/0/0b/MKT_Artwork_Pink_Yoshi.png/revision/latest/thumbnail/width/360/height/360?cb=20250222234458&path-prefix=protagonist" }], speeches: ["Yoshi! Yoshi yoshi! (Traduzione: Se mi votate, vi farò fare un giro sulla mia schiena!)", "Yoooshiii! (Traduzione: Ho superato ogni ostacolo per arrivare fin qui, merito il premio!)"] },
           { name: "Rosalinda", img: "https://i.pinimg.com/736x/09/14/f0/0914f029e712e92de9d4f0081a5da032.jpg", speeches: ["Le stelle mi hanno guidato fino a questa finale. Spero che la vostra luce mi faccia vincere.", "Ho protetto il cosmo, posso sicuramente gestire questo show. Votatemi, mie piccole stelle."] },
@@ -742,15 +773,15 @@
           { name: "Steven", img: "https://i.pinimg.com/736x/2b/fd/20/2bfd202ab782611ea6a0fb0cdcdc37ab.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/2b/fd/20/2bfd202ab782611ea6a0fb0cdcdc37ab.jpg" }, { name: "Pink Steven", img: "https://i.pinimg.com/1200x/68/75/33/687533a8484d2d771dda9a04fe86ba35.jpg" }, { name: "Kid Steven", img: "https://i.pinimg.com/736x/85/be/8f/85be8fc24e6fb68cac79e0ba317c2808.jpg" }], speeches: ["Ho sempre cercato di vedere il lato buono di tutti voi! Anche se abbiamo lottato, possiamo essere amici... e potete votarmi!", "Abbiamo imparato tanto in questa stagione. Per favore, credete in me, così come io ho sempre creduto in voi!"] },
           { name: "Perla", img: "https://i.pinimg.com/736x/59/e8/b6/59e8b66977255dc52fd925228a5cf86e.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/59/e8/b6/59e8b66977255dc52fd925228a5cf86e.jpg" }, { name: "OG Perla", img: "https://i.pinimg.com/1200x/bf/d3/78/bfd378c4c8921a30ee00cf48bdb7fa11.jpg" }, { name: "Icon Perla", img: "https://i.pinimg.com/1200x/58/68/e4/5868e49b9763a89303aae13fa6ba5776.jpg" }], speeches: ["Ho dimostrato eleganza, tattica e una precisione assoluta in ogni singola sfida. La mia vittoria è la conclusione più logica.", "Tutto quello che faccio, lo faccio con dedizione. Votatemi e vi dimostrerò che il duro lavoro ripaga sempre!"] },
 		  { name: "Garnet", img: "https://i.pinimg.com/736x/3f/8a/05/3f8a05bdbc4a7622f521eb294f51d4c8.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/3f/8a/05/3f8a05bdbc4a7622f521eb294f51d4c8.jpg" }, { name: "Rubino", img: "https://i.pinimg.com/1200x/5a/0c/55/5a0c55765a113325ccc60642f0b766d2.jpg" }, { name: "Zaffiro", img: "https://i.pinimg.com/1200x/f7/b6/14/f7b614d8de72f8ddcb6b5dfe7ba627f5.jpg" }], speeches: ["Sono fatta di amore, e so già come andrà a finire. Ho visto la mia vittoria con la visione futura.", "Non mi serve dire molto. Voi conoscete la mia forza e sapete che merito questa vittoria. La scelta è vostra."] },
-		  { name: "Peridot", img: "https://i.pinimg.com/736x/d5/3e/f6/d53ef6f0ec684f7f0f888971dded59fb.jpg", speeches: ["Ovviamente dovreste votare per me, tonti! Sono chiaramente il concorrente intellettualmente superiore su quest'isola!", "Ho analizzato tutte le probabilità e i dati confermano che io, Peridot, sono la legittima vincitrice. Non discutete la scienza!"] },
+		  { name: "Peridot", img: "https://i.pinimg.com/736x/d5/3e/f6/d53ef6f0ec684f7f0f888971dded59fb.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/d5/3e/f6/d53ef6f0ec684f7f0f888971dded59fb.jpg" }, { name: "OG Peridot", img: "https://i.pinimg.com/736x/9c/ba/0f/9cba0f960a09b3f2e89f125251bf5cf0.jpg" }, { name: "Cool Peridot", img: "https://i.pinimg.com/736x/59/d6/c3/59d6c3ca70ddbcce5bb46196f154c282.jpg" }], speeches: ["Ovviamente dovreste votare per me, tonti! Sono chiaramente il concorrente intellettualmente superiore su quest'isola!", "Ho analizzato tutte le probabilità e i dati confermano che io, Peridot, sono la legittima vincitrice. Non discutete la scienza!"] },
 		  { name: "Lapis", img: "https://i.pinimg.com/736x/88/0f/a5/880fa555f1f954dbca08aded1be846d2.jpg", speeches: ["Ho sopportato abbastanza drammi in passato, non mi interessa molto, ma... visto che sono qui, tanto vale vincere.", "L'acqua ricorda tutto, e io ricordo chi mi ha tradito e chi no. Ma se mi votate... potrei essere indulgente."] },
           { name: "Ametista", img: "https://i.pinimg.com/736x/b4/e4/45/b4e445061d31ec75fa4ee63e20ebf87e.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/b4/e4/45/b4e445061d31ec75fa4ee63e20ebf87e.jpg" }, { name: "Og Ametista", img: "https://i.pinimg.com/736x/df/e8/c4/dfe8c4007fd488741070100364a45278.jpg" }, { name: "Ponytail Ametista", img: "https://i.pinimg.com/736x/73/ad/f6/73adf60da16e715913742998440b3a4e.jpg" }], speeches: ["Ehi belli! Mi sono divertita un mondo a distruggere roba nelle sfide! Datemi i soldi così ci mangiamo una pizza gigante!", "Non ho seguito le regole, ma ehi, sono arrivata in finale lo stesso! Votatemi, sarà uno spasso!"] },
           { name: "Nicole", img: "https://i.pinimg.com/736x/4e/ac/70/4eac705ff7feba9202c200de511c8583.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/4e/ac/70/4eac705ff7feba9202c200de511c8583.jpg" }, { name: "Nicole Anime", img: "https://i.pinimg.com/736x/3c/26/25/3c2625a4ad2bb8a6329804ddbc20aa82.jpg" }, { name: "Nicole 25s/30s", img: "https://i.pinimg.com/736x/d8/fa/f8/d8faf8b165f067efbb32c0cee54356fd.jpg" }] },
           { name: "Gumball", img: "https://i.pinimg.com/736x/ae/88/e3/ae88e329120b3edc196af1ebbfd8fe07.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/ae/88/e3/ae88e329120b3edc196af1ebbfd8fe07.jpg" }, { name: "Pop Gumball", img: "https://i.pinimg.com/736x/62/ce/47/62ce4764e2fe37b763656912252fb8e0.jpg" }, { name: "Street Gumball", img: "https://i.pinimg.com/736x/71/d8/3d/71d83dba424832514ea213b497184407.jpg" }, { name: "Baddie Gumball", img: "https://i.pinimg.com/736x/d2/a6/fd/d2a6fdd98fdb2e57429a9e3f869f183b.jpg" }] },
           { name: "Anais", img: "https://i.pinimg.com/736x/0a/8b/ab/0a8bab3e6151e894a2d9b96749d63e61.jpg" },
           { name: "Lisa", img: "https://i.pinimg.com/736x/e5/2d/fe/e52dfee5a58f5dad19f9e0592c63a7cd.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/e5/2d/fe/e52dfee5a58f5dad19f9e0592c63a7cd.jpg" }, { name: "Teenager Lisa", img: "https://i.pinimg.com/736x/48/20/52/482052e2fa62928ed3174f78219d2867.jpg" }], speeches: ["Ho analizzato statisticamente le probabilità e votare per me è l'unica scelta razionale e moralmente corretta.", "Se vinco io, donerò una parte del premio in beneficenza... e il resto per andare al college. Siate ragionevoli, votatemi!"] },
-          { name: "Bart", img: "https://i.pinimg.com/1200x/cf/dc/86/cfdc8641fb98a49c0e731a8e6c002b02.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/cf/dc/86/cfdc8641fb98a49c0e731a8e6c002b02.jpg" }, { name: "Teenager Bart", img: "https://i.pinimg.com/1200x/f0/cb/f0/f0cbf0a2fa4fafa4f20e331f6465af09.jpg" }], speeches: ["Ciucciati il calzino! Sapevo dall'inizio che vi avrei stracciato tutti.", "Ho causato più caos di chiunque altro qui dentro. Voglio la mia ricompensa!"] },
-          { name: "Marge", img: "https://i.pinimg.com/736x/77/6d/41/776d41748c4c9ae5940d8a9b10db881a.jpg", speeches: ["Mmmh... spero davvero che nessuno si sia fatto male in questa stagione. Se mi votate, preparerò i biscotti per tutti!", "Ho dovuto sopportare Homer per anni, sopravvivere a quest'isola è stata una passeggiata. Spero mi diate il vostro voto, cari."] },
+          { name: "Bart", img: "https://i.pinimg.com/1200x/cf/dc/86/cfdc8641fb98a49c0e731a8e6c002b02.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/cf/dc/86/cfdc8641fb98a49c0e731a8e6c002b02.jpg" }, { name: "Teenager Bart", img: "https://i.pinimg.com/1200x/f0/cb/f0/f0cbf0a2fa4fafa4f20e331f6465af09.jpg" }, { name: "Teenager Bart 2", img: "https://i.pinimg.com/736x/59/cc/93/59cc932f2fb8a2268dd71ae64e8daea6.jpg" }], speeches: ["Ciucciati il calzino! Sapevo dall'inizio che vi avrei stracciato tutti.", "Ho causato più caos di chiunque altro qui dentro. Voglio la mia ricompensa!"] },
+          { name: "Marge", img: "https://i.pinimg.com/736x/77/6d/41/776d41748c4c9ae5940d8a9b10db881a.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/77/6d/41/776d41748c4c9ae5940d8a9b10db881a.jpg" }, { name: "Liscia", img: "https://i.pinimg.com/1200x/6d/5d/18/6d5d1840d5e0ee87b5db397dd73e92b6.jpg" }, { name: "Mossi", img: "https://i.pinimg.com/736x/c7/10/61/c710611ddd1f7a03261ccc6af059a607.jpg" }, { name: "Elegante", img: "https://i.pinimg.com/1200x/15/2e/3f/152e3fba61bd86aaebeea63aa43d7dc3.jpg" }], speeches: ["Mmmh... spero davvero che nessuno si sia fatto male in questa stagione. Se mi votate, preparerò i biscotti per tutti!", "Ho dovuto sopportare Homer per anni, sopravvivere a quest'isola è stata una passeggiata. Spero mi diate il vostro voto, cari."] },
           { name: "Ned", img: "https://i.pinimg.com/1200x/4e/12/0e/4e120eb01e572b2ad08af6552214ce82.jpg", speeches: ["Salve salvino vicini di reality! Sarebbe un vero miracolo ricevere il vostro voto, che il Signore vi benedica!", "Ho porto l'altra guancia per tutta la stagione! Spero che la mia onestà venga ripagata con una bella votatina-ina-ina!"] },
           { name: "Neera", img: "https://i.pinimg.com/736x/49/15/3c/49153c31d0b41814b3c862a98d848b40.jpg" },
           { name: "Perry", img: "https://i.pinimg.com/736x/3e/02/28/3e02284ed84c86d445b3bee5639c81f6.jpg", speeches: ["*Grrrrrrr* (Traduzione: Ho sventato i piani di Doofenshmirtz, vincere questo show era il mio incarico secondario).", "*Grrr grrr grrrrr* (Traduzione: Scegliete l'Agente P. L'O.W.C.A. vi ringrazia per la collaborazione)."] },
@@ -773,7 +804,7 @@
           { name: "Johnny Bravo", img: "https://i.pinimg.com/736x/4a/62/70/4a6270678f7adcf130672bcd0af41fdf.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/4a/62/70/4a6270678f7adcf130672bcd0af41fdf.jpg" }, { name: "Johnny 1", img: "https://i.pinimg.com/736x/3d/5c/33/3d5c33a6cb34d1a80d9d4a5200e350fd.jpg" }] },
           { name: "Daphne", img: "https://i.pinimg.com/736x/aa/91/39/aa9139e32492a07712926dbd0db0b521.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/aa/91/39/aa9139e32492a07712926dbd0db0b521.jpg" }, { name: "Bunny Daphne", img: "https://i.pinimg.com/1200x/84/c6/e2/84c6e20e97f13ca24fc2333c2144c59f.jpg" }] },
           { name: "Shaggy", img: "https://i.pinimg.com/1200x/0e/46/70/0e46703bcf03ff84420b0b71474c9ed7.jpg", speeches: ["Ehi amico, votami e comprerò un'infinita fornitura di Scooby Snacks per tutti noi!", "Sono scappato da un sacco di mostri in questa stagione, merito di vincere, giuro!"] },
-          { name: "Fred", img: "https://i.pinimg.com/736x/d2/8c/36/d28c36ac805792e5624f41c3c19dcebb.jpg", speeches: ["Bene gang, dividiamoci e... ah no, ho già vinto io! Votatemi e risolveremo questo mistero con stile!", "Le trappole che ho preparato in questa stagione sono state perfette. Ammettetelo, merito di vincere!"] },
+          { name: "Fred", img: "https://i.pinimg.com/736x/d2/8c/36/d28c36ac805792e5624f41c3c19dcebb.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/d2/8c/36/d28c36ac805792e5624f41c3c19dcebb.jpg" }, { name: "Shirtless Fred", img: "https://i.pinimg.com/736x/a3/e6/e7/a3e6e718baa751006dbf05f552f93d24.jpg" }, { name: "Camicia Fred", img: "https://i.pinimg.com/736x/ab/da/b3/abdab3e6482a6ff30481512a39f2ad04.jpg" }], speeches: ["Bene gang, dividiamoci e... ah no, ho già vinto io! Votatemi e risolveremo questo mistero con stile!", "Le trappole che ho preparato in questa stagione sono state perfette. Ammettetelo, merito di vincere!"] },
           { name: "Velma", img: "https://i.pinimg.com/736x/2d/58/ff/2d58fffc72c416245a2768b455c177af.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/2d/58/ff/2d58fffc72c416245a2768b455c177af.jpg" }, { name: "OG Velma", img: "https://i.pinimg.com/736x/75/1e/64/751e64d1715b79f34366f9222e42cd80.jpg" }], speeches: ["Jinkies! Ho dedotto la strategia di ogni singolo concorrente. Sono chiaramente la mente superiore di questa finale.", "I miei calcoli indicano che ho il 99.9% di probabilità di vincere. Non siate l'anomalia statistica, votate per me!"] },
           { name: "Francine", img: "https://i.pinimg.com/736x/b3/b5/f6/b3b5f6849a52b4daed92424650a98f7f.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/b3/b5/f6/b3b5f6849a52b4daed92424650a98f7f.jpg" }, { name: "Hot Francine", img: "https://i.pinimg.com/736x/62/81/87/6281879259b7161bce9a30665c14cbdf.jpg" }, { name: "Francine in black", img: "https://i.pinimg.com/736x/2b/9c/c8/2b9cc8451d125ae8dbe83d5f18b75a32.jpg" }] },
           { name: "Hayley", img: "https://i.pinimg.com/originals/9d/58/70/9d58707a635942c60ee7fd1afc8403bd.gif" },
@@ -787,9 +818,9 @@
           { name: "Tess", img: "https://i.pinimg.com/736x/3f/bc/a9/3fbca9cb61b70f4d58c83598f0236764.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/3f/bc/a9/3fbca9cb61b70f4d58c83598f0236764.jpg" }, { name: "Tom&Jake Tess", img: "https://i.pinimg.com/736x/60/cd/d5/60cdd50951b48eb087460196f22ba3ab.jpg" }, { name: "CowGirl Tess", img: "https://i.pinimg.com/736x/0a/bc/02/0abc02a18225778202c70c4d2faa63ed.jpg" }, { name: "Swimsuit Tess", img: "https://i.pinimg.com/736x/ec/6a/39/ec6a39dda81cb0a73e99ebc8afcd8aaf.jpg" }], speeches: ["Se volete votarmi, ne sarò orgogliosa. Grazie a chi lo farà.", "Ringrazio tutti coloro che decideranno di votarmi, siete stati tutti una parte importante di questa stagione."] },
 		  { name: "Hunter", img: "https://i.pinimg.com/736x/0d/f2/73/0df2731820fb9f74774f5e8607556625.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/0d/f2/73/0df2731820fb9f74774f5e8607556625.jpg" }, { name: "Hunter elegante", img: "https://i.pinimg.com/736x/62/7a/95/627a95e9004f5d212b980a384bde97c1.jpg" }, { name: "Hunter Cowboy", img: "https://i.pinimg.com/736x/4b/c5/f1/4bc5f1bdc36d1f73bd84e3c2cfd7f19f.jpg" }, { name: "Cold Hunter", img: "https://i.pinimg.com/736x/88/ac/57/88ac57507aff9b28d589be3ca6ae1eeb.jpg" }], speeches: ["Sono stato uno dei migliori durante le sfide fisiche, dovete riconoscerlo, solo per questo mi merito un voto.", "Hey ho sempre giocato in modo pulito al contrario di altri, penso di meritarmi questa vittoria, no?"] },
 		  { name: "Jake DC", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/bc/a0/76/bca0765eaa0f1e88b0070a5b92c22de7.jpg" }, { name: "Vampiro", img: "https://i.pinimg.com/736x/16/4d/56/164d56da68e35ea1ede705ad0d3967b4.jpg" }, { name: "Cowboy", img: "https://i.pinimg.com/736x/4b/ea/11/4bea11e33391d0c89671491baebec99a.jpg" }, { name: "Sciolto", img: "https://i.pinimg.com/736x/28/3b/2d/283b2d85ccb4762668e7d6138c6684f9.jpg" }, { name: "Jake in white", img: "https://i.pinimg.com/736x/1e/16/36/1e1636d0aa70d64ebb6bd431e547c33f.jpg" }], speeches: ["Wow.. non mi sarei mai aspettato di arrivare in finale. Se volete votarmi siate liberissimi di farlo hahaha", "Marika so che credi in me cercherò di vincere per te e per Tom."] },
-		  { name: "Tom", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg" }, { name: "Tom mascherato", img: "https://i.pinimg.com/1200x/51/0f/2f/510f2f0a851676123017e67e2a6a25aa.jpg" }, { name: "Tom nuovo", img: "https://i.pinimg.com/736x/d9/90/fb/d990fb60a0cce807a8277c840afcee32.jpg" }, { name: "Tom sportivo", img: "https://i.pinimg.com/736x/4e/4d/74/4e4d74918a43da3de0444d3c52c347a8.jpg" }], speeches: ["Jake, dedicherò questa vittoria per te", "Una spia come me sa di meritarsi questa vittoria, se mi votate farete la scelta giusta"] },
+          { name: "Tom", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/c2/21/a8/c221a8a2ae866afe53a53843efcfc05c.jpg" }, { name: "Tom mascherato", img: "https://i.pinimg.com/1200x/51/0f/2f/510f2f0a851676123017e67e2a6a25aa.jpg" }, { name: "Tom nuovo", img: "https://i.pinimg.com/736x/d9/90/fb/d990fb60a0cce807a8277c840afcee32.jpg" }, { name: "Tom sportivo", img: "https://i.pinimg.com/736x/4e/4d/74/4e4d74918a43da3de0444d3c52c347a8.jpg" }], speeches: ["Jake, dedicherò questa vittoria per te", "Una spia come me sa di meritarsi questa vittoria, se mi votate farete la scelta giusta"] },
           { name: "Aiden", img: "https://i.pinimg.com/736x/c8/f3/df/c8f3dfa06d4270eaf3a323d6230cf963.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/c8/f3/df/c8f3dfa06d4270eaf3a323d6230cf963.jpg" }, { name: "Season 2 Aiden", img: "https://i.pinimg.com/736x/e3/d9/0f/e3d90fde0d8ebfbb645339bbdfe8f4d2.jpg" }, { name: "Singer Aiden", img: "https://i.pinimg.com/736x/7a/e1/b1/7ae1b1c163f1b340e2b9b231a179b388.jpg" }, { name: "Streetwear Aiden", img: "https://i.pinimg.com/736x/0d/c9/7d/0dc97d79545b87929b62f519536f82d4.jpg" }], speeches: ["Ragazzi, vi prego, ho dato tutto me stesso in queste sfide! Votatemi!", "Se vinco, porterò James in vacanza!"] },
-          { name: "Bloom", img: "https://i.pinimg.com/1200x/82/75/ea/8275ea943107e01992901cfbdc5f9c33.jpg", speeches: ["La Fiamma del Drago brucia in me, ho dimostrato di meritare la vittoria!", "Winx Club per sempre! Scegliete me e la magia trionferà!"] },
+          { name: "Bloom", img: "https://i.pinimg.com/1200x/82/75/ea/8275ea943107e01992901cfbdc5f9c33.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/82/75/ea/8275ea943107e01992901cfbdc5f9c33.jpg" }, { name: "Fantasy Bloom", img: "https://i.pinimg.com/736x/d4/9e/6e/d49e6e60f8481ee4f9113aec05346f68.jpg" }, { name: "Capelli legati Bloom", img: "https://i.pinimg.com/736x/14/b7/cd/14b7cd63bbe6476c9e464a0e099ae619.jpg" }, { name: "Winter Bloom", img: "https://i.pinimg.com/736x/97/79/3f/97793f8ed051c6a99a2fa91b68f1ed05.jpg" }], speeches: ["La Fiamma del Drago brucia in me, ho dimostrato di meritare la vittoria!", "Winx Club per sempre! Scegliete me e la magia trionferà!"] },
 		  { name: "Ashley", img: "https://i.pinimg.com/736x/d1/c5/5f/d1c55f57218baecf0c2e160155e80c61.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/d1/c5/5f/d1c55f57218baecf0c2e160155e80c61.jpg" }, { name: "Ashley 1", img: "https://i.pinimg.com/736x/9c/a9/a0/9ca9a02a39ea02cb260c1fd21a0d4cc9.jpg" }, { name: "Ashley 2", img: "https://i.pinimg.com/736x/d5/ee/74/d5ee741ccb171d3c4e871db3b6259910.jpg" }], speeches: ["Eccomi qui in finale! Sono molto emozionata e spero davvero di aggiudicarmi i vostri voti ♥", "Buona fortuna per la finale mio caro avversario ma non pensare che sia finita"] },
 		  { name: "Grett", img: "https://i.pinimg.com/736x/fa/fb/5d/fafb5de75578a12b0eb2eb5efb035d23.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/fa/fb/5d/fafb5de75578a12b0eb2eb5efb035d23.jpg" }, { name: "Singer Grett", img: "https://i.pinimg.com/736x/c8/78/3e/c8783e22983928a79770c44e88a0d543.jpg" }, { name: "Aqua Grett", img: "https://i.pinimg.com/736x/ba/43/84/ba438483f8892a5b38f7b30bd606df05.jpg" }, { name: "Cowgirl Grett", img: "https://i.pinimg.com/736x/ba/8f/1f/ba8f1fbc34e792266ad440c5f5001a46.jpg" }, { name: "OG Grett", img: "https://i.pinimg.com/1200x/fb/92/cf/fb92cf6eed18aa1716a00bb38ca222d0.jpg" }], speeches: ["Non dirò molto, solo che ovviamente mi merito questa vittoria.", "Beh siate obiettivi, non sarò la piu simpatica, ma questa vittoria me la merito."], alignment: 'villain' },
 		  { name: "Fiore", img: "https://i.pinimg.com/736x/78/79/43/787943ad5e0e1991f0a8f30189d0969f.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/78/79/43/787943ad5e0e1991f0a8f30189d0969f.jpg" }, { name: "Fiore 1", img: "https://i.pinimg.com/736x/0a/1c/86/0a1c863f3fd688c8cade6b87d2d9907b.jpg" }, { name: "Fiore 2", img: "https://i.pinimg.com/736x/69/2a/0f/692a0f19d1f7a08ba4f5c97d7804497d.jpg" }], speeches: ["Hey.. grazie a tutti per.. nah al diavolo. Votatemi bastardi.", "O mi votate o vi conviene dormire con un occhio aperto questa notte."], alignment: 'villain' },
@@ -954,6 +985,14 @@
             },
             "Chrysalis": {
                 name: "Bugiardo",
+                style: "bg-gradient-to-r from-lime-500 via-green-500 to-emerald-600 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(34,197,94,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Lila": {
+                name: "Bugiarda",
+                style: "bg-gradient-to-r from-lime-500 via-green-500 to-emerald-600 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(34,197,94,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Cerise": {
+                name: "Bugiarda",
                 style: "bg-gradient-to-r from-lime-500 via-green-500 to-emerald-600 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(34,197,94,0.4)] tracking-widest font-black text-[11px]"
             },
             "Nathalie": {
@@ -1757,6 +1796,7 @@
                   ineluttabile: { progress: 0, unlocked: false },
                   donnealpotere: { progress: 0, unlocked: false },
                   spotlight: { progress: 0, unlocked: false },
+                  schiappa: { progress: 0, unlocked: false },
                   title_Marinette: { progress: 0, unlocked: false }
               };
               
@@ -2175,6 +2215,29 @@
                        ))
                      )}
                    </div>
+
+                   {/* SEZIONE PATCH NOTES */}
+                   <div className="mt-8 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                       <h3 className="text-xl font-black text-cyan-400 mb-4 flex items-center gap-2">
+                           <Megaphone size={24} /> PATCH NOTES
+                       </h3>
+                       <div className="space-y-4 text-sm text-slate-300">
+                           <div className="border-l-2 border-cyan-500 pl-4 py-1">
+                               <div className="font-bold text-white text-base">Nuove Skin e Aura Abissale!</div>
+                               <ul className="list-disc pl-4 mt-2 space-y-2">
+                                   <li>Aggiunto un nuovo achievement segreto: <strong className="text-purple-400">"Tu sì che sei un perdente"</strong>. Sbloccalo per ottenere l'esclusiva e rarissima <strong className="text-purple-400">Aura Abissale</strong>!</li>
+                                   <li>Aggiunte tantissime <strong className="text-yellow-400">nuove skin</strong> nel roster per: Gwen, Lightning, Rias Gremory, Peridot, Marge, Bart, Alejandro, Heather (Pelatona!), Bowie, Julia (Nuova Default), Duncan, Bloom, Skipper e altri!</li>
+                               </ul>
+                           </div>
+                           <div className="border-l-2 border-slate-600 pl-4 py-1 opacity-60 hover:opacity-100 transition-opacity">
+                               <div className="font-bold text-white text-base">Aggiornamento Modalità Chaos</div>
+                               <ul className="list-disc pl-4 mt-2 space-y-2">
+                                   <li>Aggiunto il nuovo tema <strong className="text-orange-400">"Chaos"</strong>! I twist (sconvolgimenti delle regole ed eventi casuali) sono stati implementati al 90%.</li>
+                               </ul>
+                           </div>
+                       </div>
+                   </div>
+
                 </>
               ) : (
                 <div className="bg-slate-800 p-8 rounded-2xl shadow-2xl border-2 border-yellow-500 max-w-lg mx-auto">
@@ -2999,6 +3062,32 @@
                                  </div>
                               </div>
 
+                              {/* ACHIEVEMENT: SCHIAPPA */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.schiappa?.unlocked ? 'border-slate-400 bg-slate-700/30 shadow-[0_0_20px_rgba(148,163,184,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.schiappa?.unlocked ? 'text-slate-300 drop-shadow-[0_0_5px_rgba(255,255,255,0.4)]' : 'text-slate-300'}`}>
+                                         <AlertOctagon size={20} className={achievements.schiappa?.unlocked ? 'text-slate-400' : 'text-slate-500'}/> Schiappa
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-slate-400 font-bold">
+                                         {achievements.schiappa?.progress || 0} / 15
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Fatti eliminare per primo (Round 1) in 15 stagioni diverse. Complimenti!</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.schiappa?.unlocked ? 'bg-slate-400 shadow-[0_0_10px_#94a3b8]' : 'bg-slate-500'}`} style={{ width: `${((achievements.schiappa?.progress || 0) / 15) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.schiappa?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('schiappa')}
+                                             className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'schiappa' ? 'bg-slate-300 text-black border-white shadow-[0_0_15px_rgba(148,163,184,1)]' : 'bg-slate-800 text-slate-300 border-slate-400 hover:bg-slate-700'}`}
+                                         >
+                                             {equippedCosmetic === 'schiappa' ? 'EQUIPAGGIATO' : 'AURA TRISTE'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+
                               <div className="p-4 border-2 border-dashed border-slate-700 bg-slate-800/50 rounded-xl text-center">
                                   <Lock size={24} className="mx-auto text-slate-500 mb-2"/>
                                   <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Altri trofei in arrivo...</p>
@@ -3093,7 +3182,7 @@
             if (selectedSkin) {
                 finalChar.img = selectedSkin.img;
                 finalChar.skinName = selectedSkin.name;
-                if (["Rubino", "Zaffiro", "Shinichi", "Girly", "Wendy", "Larry"].includes(selectedSkin.name)) {
+                if (["Rubino", "Zaffiro", "Shinichi", "Girly", "Wendy", "Larry", "Lila", "Cerise"].includes(selectedSkin.name)) {
                     finalChar.name = selectedSkin.name;
                 }
             }
@@ -3140,7 +3229,7 @@
                     const randomSkin = finalBotChar.skins[Math.floor(Math.random() * finalBotChar.skins.length)];
                     finalBotChar.img = randomSkin.img;
                     finalBotChar.skinName = randomSkin.name;
-                    if (["Rubino", "Zaffiro", "Shinichi", "Girly", "Wendy", "Larry"].includes(randomSkin.name)) {
+                    if (["Rubino", "Zaffiro", "Shinichi", "Girly", "Wendy", "Larry", "Lila", "Cerise"].includes(randomSkin.name)) {
                         finalBotChar.name = randomSkin.name;
                     }
                 }
@@ -3226,7 +3315,7 @@
                   const randomSkin = finalBotChar.skins[Math.floor(Math.random() * finalBotChar.skins.length)];
                   finalBotChar.img = randomSkin.img;
                   finalBotChar.skinName = randomSkin.name;
-                  if (["Rubino", "Zaffiro", "Shinichi", "Girly", "Wendy", "Larry"].includes(randomSkin.name)) {
+                  if (["Rubino", "Zaffiro", "Shinichi", "Girly", "Wendy", "Larry", "Lila", "Cerise"].includes(randomSkin.name)) {
                       finalBotChar.name = randomSkin.name;
                       if (botName === randomChar.name) {
                           botName = randomSkin.name;
@@ -3395,7 +3484,7 @@
                       const randomSkin = finalCharObj.skins[Math.floor(Math.random() * finalCharObj.skins.length)];
                       finalCharObj.img = randomSkin.img;
                       finalCharObj.skinName = randomSkin.name;
-                      if (["Rubino", "Zaffiro", "Shinichi", "Girly", "Wendy", "Larry"].includes(randomSkin.name)) {
+                      if (["Rubino", "Zaffiro", "Shinichi", "Girly", "Wendy", "Larry", "Lila", "Cerise"].includes(randomSkin.name)) {
                           finalCharObj.name = randomSkin.name;
                       }
                   }
@@ -3420,7 +3509,7 @@
                           const randomSkin = finalBotChar.skins[Math.floor(Math.random() * finalBotChar.skins.length)];
                           finalBotChar.img = randomSkin.img;
                           finalBotChar.skinName = randomSkin.name;
-                          if (["Rubino", "Zaffiro", "Shinichi", "Girly", "Wendy", "Larry"].includes(randomSkin.name)) {
+                          if (["Rubino", "Zaffiro", "Shinichi", "Girly", "Wendy", "Larry", "Lila", "Cerise"].includes(randomSkin.name)) {
                               finalBotChar.name = randomSkin.name;
                               botName = randomSkin.name;
                           }
@@ -3804,6 +3893,9 @@
           
           const [mySpeech, setMySpeech] = useState("");
 
+          // --- FIX: FEEDBACK ISTANTANEO CACCIA AL TESORO ---
+          const [claimingCrateId, setClaimingCrateId] = useState(null);
+
           // --- NUOVI STATI PER ABILITÀ FAZIONI ---
           const [specialSkillType, setSpecialSkillType] = useState(null); 
           const [specialSkillTargets, setSpecialSkillTargets] = useState([]);
@@ -3814,6 +3906,13 @@
 
           const [isProcessing, setIsProcessing] = useState(false);
           const processedAchievements = useRef(new Set()); // Riferimento per evitare conteggi doppi
+
+          // --- RESET FEEDBACK ISTANTANEO ---
+          useEffect(() => {
+              if (lobby.phase !== 'idol_hunt' || lobby.idolData?.stage !== 'selection') {
+                  setClaimingCrateId(null);
+              }
+          }, [lobby.phase, lobby.idolData?.stage]);
 
           // --- PREVIENE BLOCCO HOST DURANTE SETUP STAGIONE IN CASO DI REFRESH ---
           useEffect(() => {
@@ -3965,6 +4064,20 @@
                   }
               }
           }, [lobby.phase, lobby.top6Data, myPlayer?.name, lobbyId, updateAchievement]);
+
+          // --- TRACKING ACHIEVEMENT: SCHIAPPA ---
+          useEffect(() => {
+              if (!lobby || !myPlayer) return;
+
+              // Controlla se lo stato del giocatore è diventato eliminato nel Primissimo round
+              if (myPlayer.status === 'eliminated' && lobby.round === 1) {
+                  const eventKey = `schiappa_${lobbyId}_${lobby.currentSeasonIndex}`;
+                  if (!processedAchievements.current.has(eventKey)) {
+                      updateAchievement('schiappa', 1, 15);
+                      processedAchievements.current.add(eventKey);
+                  }
+              }
+          }, [myPlayer?.status, lobby?.round, lobbyId, lobby?.currentSeasonIndex, updateAchievement]);
 
           // --- TRACKING ACHIEVEMENT: PUGNALATORE & IDOLO ---
           useEffect(() => {
@@ -4359,7 +4472,7 @@
                               }
                           });
                       } catch(e) { console.log("Errore bot crate:", e); }
-                  }, 600 + Math.random() * 400); // Ritardo leggermente variabile e rallentato per dare priorità al click dell'umano
+                  }, 800 + Math.random() * 500); // Ritardo aumentato per dare ancora più priorità all'umano ed evitare conflitti (Race Condition)
                   return () => clearTimeout(timer);
               }
           }, [lobby.idolData, isHost]);
@@ -5033,6 +5146,11 @@
               if (lobby.phase !== 'idol_hunt' || lobby.idolData.stage !== 'selection') return;
               if (myPlayer.status !== 'active') return;
               if (lobby.idolData.crates.some(c => c.owner === user.uid)) return; 
+              if (claimingCrateId) return; // Evita doppi click
+              
+              // --- OPTIMISTIC UI: Aggiornamento Istantaneo ---
+              setClaimingCrateId(crateId);
+              playSound('success');
               
               // --- FIX MULTIPLAYER ONLINE ---
               // Utilizziamo le transazioni (runTransaction) per evitare la "Race Condition"
@@ -5088,10 +5206,10 @@
                       transaction.update(lobbyRef, updates);
                   });
                   
-                  playSound('success');
                   updateAchievement('cacciatoredivantaggi', 1, 20);
               } catch(e) {
-                  console.log("Cassa non riscattabile:", e);
+                  console.log("Cassa non riscattabile (già presa da un bot):", e);
+                  setClaimingCrateId(null); // Reset del feedback se la transazione fallisce
               }
           };
 
@@ -7982,8 +8100,8 @@
                             
                             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
                                 {lobby.idolData.crates.map(c => {
-                                    const isMine = c.owner === user.uid;
-                                    const isTaken = c.owner !== null;
+                                    const isMine = c.owner === user.uid || claimingCrateId === c.id;
+                                    const isTaken = c.owner !== null || claimingCrateId === c.id;
                                     const isRevealed = lobby.idolData.stage === 'reveal';
                                     
                                     const itemType = lobby.idolData.itemDistribution?.[c.id];
@@ -8003,7 +8121,7 @@
                                         <button 
                                             key={c.id} 
                                             onClick={() => claimCrate(c.id)}
-                                            disabled={isTaken}
+                                            disabled={isTaken || claimingCrateId !== null}
                                             className={`
                                                 relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl flex flex-col items-center justify-center border-2 transition-all duration-500
                                                 ${isMine 
