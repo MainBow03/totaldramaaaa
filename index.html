@@ -1769,7 +1769,7 @@
 
         const App = () => {
           const [user, setUser] = useState(null);
-          const [nickname, setNickname] = useState('');
+          const [nickname, setNickname] = useState(() => localStorage.getItem('td_nickname') || '');
           const [currentView, setCurrentView] = useState('auth');
           const [lobbies, setLobbies] = useState([]);
           const [currentLobbyId, setCurrentLobbyId] = useState(null);
@@ -1777,6 +1777,7 @@
           const [errorMsg, setErrorMsg] = useState('');
           const [muted, setMuted] = useState(false);
           const [topCharacters, setTopCharacters] = useState(null);
+          const [isReconnecting, setIsReconnecting] = useState(true); // NUOVO STATO
           
           // STATO COSMETICO EQUIPAGGIATO
           const [equippedCosmetic, setEquippedCosmetic] = useState(() => localStorage.getItem('td_equipped_cosmetic') || null);
@@ -1910,6 +1911,39 @@
             }
           }, []);
 
+          // RICONNESSIONE AUTOMATICA
+          useEffect(() => {
+              const tryReconnect = async () => {
+                  if (!user || !db) return;
+                  
+                  const savedLobbyId = localStorage.getItem('td_current_lobby');
+                  if (savedLobbyId) {
+                      try {
+                          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', savedLobbyId);
+                          const snap = await getDoc(docRef);
+                          if (snap.exists()) {
+                              const data = snap.data();
+                              // Verifica se l'utente faceva effettivamente parte di questa lobby
+                              if (data.players.some(p => p.uid === user.uid)) {
+                                  setCurrentLobbyId(savedLobbyId);
+                                  // Se la partita era già iniziata, portalo dritto in gioco!
+                                  setCurrentView(data.status === 'playing' ? 'game' : 'lobby');
+                                  setIsReconnecting(false);
+                                  return;
+                              }
+                          }
+                          // Se la lobby non esiste più o l'utente è stato buttato fuori
+                          localStorage.removeItem('td_current_lobby');
+                      } catch (e) {
+                          console.error("Errore durante la riconnessione:", e);
+                      }
+                  }
+                  setIsReconnecting(false);
+              };
+              
+              tryReconnect();
+          }, [user]);
+
           // FETCH LOBBIES E CLEANUP
           useEffect(() => {
             if (!user || !db) return;
@@ -1991,6 +2025,7 @@
                 setLobbyData(null);
                 setCurrentLobbyId(null);
                 setCurrentView('browser');
+                localStorage.removeItem('td_current_lobby'); // Rimuove se la lobby viene chiusa
               }
             });
             return () => unsub();
@@ -2049,6 +2084,7 @@
 
             await setDoc(newLobbyRef, initialData);
             setCurrentLobbyId(newLobbyRef.id);
+            localStorage.setItem('td_current_lobby', newLobbyRef.id); // Salva ID Lobby
             setCurrentView('lobby');
           };
 
@@ -2080,6 +2116,7 @@
               })
             });
             setCurrentLobbyId(lobbyId);
+            localStorage.setItem('td_current_lobby', lobbyId); // Salva ID Lobby
             setCurrentView('lobby');
           };
 
@@ -2093,13 +2130,29 @@
               );
           }
 
+          if (isReconnecting && user) {
+              return (
+                  <div className="flex items-center justify-center h-screen bg-slate-900 text-white p-8 text-center">
+                      <div className="animate-pulse">
+                          <h1 className="text-3xl font-black text-yellow-400 mb-4 tracking-widest uppercase">Riconnessione...</h1>
+                          <p className="text-slate-400">Sto recuperando il tuo show...</p>
+                      </div>
+                  </div>
+              );
+          }
+
+          const handleAuthEnter = () => {
+              localStorage.setItem('td_nickname', nickname);
+              setCurrentView('browser');
+          };
+
           return (
             <div className="min-h-screen bg-slate-900 text-slate-100 font-sans relative">
               <button onClick={toggleMute} className="fixed top-4 left-4 z-[9999] bg-black/70 p-3 rounded-full text-white hover:bg-black transition border border-white/20 shadow-lg" title={muted ? "Attiva Suoni" : "Disattiva Suoni"}>
                   {muted ? <VolumeX size={20}/> : <Volume2 size={20}/>}
               </button>
               {currentView === 'auth' && (
-                <AuthScreen nickname={nickname} setNickname={setNickname} onEnter={() => setCurrentView('browser')} />
+                <AuthScreen nickname={nickname} setNickname={setNickname} onEnter={handleAuthEnter} />
               )}
               {currentView === 'browser' && (
                 <BrowserScreen 
@@ -2116,13 +2169,13 @@
               {currentView === 'lobby' && lobbyData && (
                 <LobbyRoom 
                   lobby={lobbyData} user={user} lobbyId={currentLobbyId} 
-                  onLeave={() => { setCurrentLobbyId(null); setCurrentView('browser'); }} 
+                  onLeave={() => { localStorage.removeItem('td_current_lobby'); setCurrentLobbyId(null); setCurrentView('browser'); }} 
                 />
               )}
               {currentView === 'game' && lobbyData && (
                 <GameRoom 
                   lobby={lobbyData} user={user} lobbyId={currentLobbyId} 
-                  onLeave={() => { setCurrentLobbyId(null); setCurrentView('browser'); }}
+                  onLeave={() => { localStorage.removeItem('td_current_lobby'); setCurrentLobbyId(null); setCurrentView('browser'); }}
                   updateAchievement={updateAchievement}
                   setAchievementProgress={setAchievementProgress}
                 />
@@ -2233,8 +2286,9 @@
                        </h3>
                        <div className="space-y-4 text-sm text-slate-300">
                            <div className="border-l-2 border-cyan-500 pl-4 py-1">
-                               <div className="font-bold text-white text-base">Rework Twist a Coppie e Anti-Softlock</div>
+                               <div className="font-bold text-white text-base">Riconnessione Automatica & Rework Twist</div>
                                <ul className="list-disc pl-4 mt-2 space-y-2">
+                                   <li><strong className="text-green-400">Riconnessione Automatica:</strong> Se ricarichi la pagina per sbaglio o cade la connessione, il gioco si ricorderà di te e ti riporterà automaticamente all'interno della tua partita in corso (saltando il login)!</li>
                                    <li><strong className="text-orange-400">Sfida a Coppie 2.0:</strong> La coppia peggiore andrà a rischio eliminazione, ma il componente col punteggio più alto della coppia vincente dovrà nominare un <strong className="text-white">bersaglio extra</strong>! Aggiunti anche i bordi di colore dinamici ai mini-team.</li>
                                    <li><strong className="text-red-400">Sicurezza (Guardrails):</strong> Prevenuti potenziali bug di softlock a fine gioco! I twist "Sfida a Coppie" e "Doppia Eliminazione" verranno saltati se si raggiungono rispettivamente la Top 4 o la Top 3.</li>
                                    <li><strong className="text-blue-400">Stabilità Dadi:</strong> Risolto lo sfarfallio visivo che rimescolava le posizioni dei giocatori a schermo durante l'animazione dei dadi.</li>
