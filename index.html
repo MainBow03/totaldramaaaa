@@ -2233,18 +2233,20 @@
                        </h3>
                        <div className="space-y-4 text-sm text-slate-300">
                            <div className="border-l-2 border-cyan-500 pl-4 py-1">
+                               <div className="font-bold text-white text-base">Rework Twist a Coppie e Anti-Softlock</div>
+                               <ul className="list-disc pl-4 mt-2 space-y-2">
+                                   <li><strong className="text-orange-400">Sfida a Coppie 2.0:</strong> La coppia peggiore andrà a rischio eliminazione, ma il componente col punteggio più alto della coppia vincente dovrà nominare un <strong className="text-white">bersaglio extra</strong>! Aggiunti anche i bordi di colore dinamici ai mini-team.</li>
+                                   <li><strong className="text-red-400">Sicurezza (Guardrails):</strong> Prevenuti potenziali bug di softlock a fine gioco! I twist "Sfida a Coppie" e "Doppia Eliminazione" verranno saltati se si raggiungono rispettivamente la Top 4 o la Top 3.</li>
+                                   <li><strong className="text-blue-400">Stabilità Dadi:</strong> Risolto lo sfarfallio visivo che rimescolava le posizioni dei giocatori a schermo durante l'animazione dei dadi.</li>
+                               </ul>
+                           </div>
+                           <div className="border-l-2 border-slate-600 pl-4 py-1 opacity-60 hover:opacity-100 transition-opacity">
                                <div className="font-bold text-white text-base">Amicizie Reciproche, Anti-AFK Giuria e Nuove Skin!</div>
                                <ul className="list-disc pl-4 mt-2 space-y-2">
                                    <li><strong className="text-red-400">Anti-AFK Giuria:</strong> Aggiunto un pulsante per l'Host durante la finale per <strong className="text-white">forzare lo spoglio dei voti</strong> e calcolare il vincitore nel caso qualche giurato vada AFK!</li>
                                    <li><strong className="text-pink-400">Aggiornamento Amicizie:</strong> Ora le interazioni sociali positive ("Amicizia" e "Leccapiedi") sono <strong className="text-white">reciproche al 100%</strong>. Se un bot fa il primo passo, i punti affetto saliranno per entrambi!</li>
                                    <li>Aggiunto un nuovo achievement segreto: <strong className="text-purple-400">"Tu sì che sei un perdente"</strong>. Sbloccalo per ottenere l'esclusiva e rarissima <strong className="text-purple-400">Aura Abissale</strong>!</li>
-                                   <li>Aggiunte tantissime <strong className="text-yellow-400">nuove skin</strong> nel roster per: Gwen, Lightning, Rias Gremory, Peridot, Marge, Bart, Alejandro, Heather (Pelatona!), Bowie, Julia (Nuova Default), Duncan, Bloom, Skipper e altri!</li>
-                               </ul>
-                           </div>
-                           <div className="border-l-2 border-slate-600 pl-4 py-1 opacity-60 hover:opacity-100 transition-opacity">
-                               <div className="font-bold text-white text-base">Aggiornamento Modalità Chaos</div>
-                               <ul className="list-disc pl-4 mt-2 space-y-2">
-                                   <li>Aggiunto il nuovo tema <strong className="text-orange-400">"Chaos"</strong>! I twist (sconvolgimenti delle regole ed eventi casuali) sono stati implementati al 90%.</li>
+                                   <li>Aggiunte tantissime <strong className="text-yellow-400">nuove skin</strong> nel roster per svariati personaggi e nuove icone default per Julia.</li>
                                </ul>
                            </div>
                        </div>
@@ -4544,22 +4546,30 @@
 
                  // --- LOGICA SFIDA A SQUADRE ---
                  if (lobby.challengeData.type === 'team') {
-                     const teamScores = { A: 0, B: 0 };
+                     const teamScores = {};
                      const teams = lobby.challengeData.teams;
 
                      Object.entries(rolls).forEach(([uid, r]) => {
                          const team = teams[uid];
-                         if (team) teamScores[team] += r;
+                         if (team) {
+                             teamScores[team] = (teamScores[team] || 0) + r;
+                         }
                      });
 
-                     let winnerTeam = null;
-                     if (teamScores.A > teamScores.B) winnerTeam = 'A';
-                     else if (teamScores.B > teamScores.A) winnerTeam = 'B';
-                     else winnerTeam = Math.random() > 0.5 ? 'A' : 'B';
+                     let maxScore = -1;
+                     let winningTeams = [];
+                     Object.entries(teamScores).forEach(([team, score]) => {
+                         if (score > maxScore) { maxScore = score; winningTeams = [team]; }
+                         else if (score === maxScore) { winningTeams.push(team); }
+                     });
+
+                     const winnerTeam = winningTeams[Math.floor(Math.random() * winningTeams.length)];
 
                      const immunePlayers = Object.keys(teams).filter(uid => teams[uid] === winnerTeam);
                      
-                     const { updatedPlayers, newLogs } = generateBotSocialUpdates(lobby.players, [`La Squadra ${winnerTeam === 'A' ? 'ROSSA' : 'BLU'} vince la sfida a squadre! (${teamScores[winnerTeam]} vs ${teamScores[winnerTeam === 'A' ? 'B' : 'A']})`]);
+                     const winMsg = `La Squadra ${winnerTeam === 'A' ? 'ROSSA' : 'BLU'} vince la sfida a squadre! (${teamScores[winnerTeam]} vs ${teamScores[winnerTeam === 'A' ? 'B' : 'A']})`;
+                     
+                     const { updatedPlayers, newLogs } = generateBotSocialUpdates(lobby.players, [winMsg]);
 
                      updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                          players: updatedPlayers,
@@ -4569,6 +4579,55 @@
                          losingTeam: "MERGE",
                          readyPlayers: [], 
                          phase: 'social',
+                         logs: arrayUnion(...newLogs)
+                     });
+                     return;
+                 }
+
+                 // --- LOGICA SFIDA A COPPIE ---
+                 if (lobby.challengeData.type === 'pairs') {
+                     const teamScores = {};
+                     const teams = lobby.challengeData.teams;
+
+                     Object.entries(rolls).forEach(([uid, r]) => {
+                         const team = teams[uid];
+                         if (team) {
+                             teamScores[team] = (teamScores[team] || 0) + r;
+                         }
+                     });
+
+                     let minScore = 999999;
+                     let losingTeams = [];
+                     Object.entries(teamScores).forEach(([team, score]) => {
+                         if (score < minScore) { minScore = score; losingTeams = [team]; }
+                         else if (score === minScore) { losingTeams.push(team); }
+                     });
+
+                     const loserTeam = losingTeams[Math.floor(Math.random() * losingTeams.length)];
+
+                     const atRiskPlayers = Object.keys(teams).filter(uid => teams[uid] === loserTeam);
+                     const immunePlayers = lobby.players.filter(p => p.status === 'active' && !atRiskPlayers.includes(p.uid)).map(p => p.uid);
+                     
+                     const winMsg = `La ${loserTeam.toUpperCase()} fa il punteggio più basso (${teamScores[loserTeam]} pt)! Solo loro andranno al televoto, tutti gli altri sono SALVI!`;
+                     
+                     const updatedPlayersTemp = lobby.players.map(p => {
+                         if (immunePlayers.includes(p.uid)) {
+                             return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
+                         }
+                         return p;
+                     });
+
+                     const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [winMsg]);
+
+                     updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                         players: updatedPlayers,
+                         [`challengeData.stage`]: 'finished',
+                         [`challengeData.winner`]: immunePlayers,
+                         immunity: immunePlayers,
+                         losingTeam: "MERGE",
+                         readyPlayers: [], 
+                         phase: 'social',
+                         twistData: { type: 'purge', targets: atRiskPlayers }, // Usa la logica 'purge' per forzare il voto sui perdenti
                          logs: arrayUnion(...newLogs)
                      });
                      return;
@@ -5658,7 +5717,45 @@
                           newLogs.push("Chris: Oggi sfida speciale! Vi dividerò in due squadre casuali.");
                           newLogs.push("La squadra che totalizza il punteggio più alto vince l'immunità!");
 
-                      } else if (isChaos && rand < 0.45) {
+                      } else if (rand < (isChaos ? 0.44 : 0.20) && activePlayers.length > 4) { 
+                          const shuffled = [...activePlayers].sort(() => Math.random() - 0.5);
+                          const tempTeams = {};
+                          const playersArr = [];
+                          let pairIndex = 1;
+
+                          for (let i = 0; i < shuffled.length; i += 2) {
+                              const p1 = shuffled[i];
+                              const p2 = shuffled[i+1];
+                              const teamName = `Coppia ${pairIndex}`;
+
+                              tempTeams[p1.uid] = teamName;
+                              playersArr.push(p1.uid);
+
+                              if (p2) {
+                                  tempTeams[p2.uid] = teamName;
+                                  playersArr.push(p2.uid);
+                              } else {
+                                  // Se c'è un numero dispari di giocatori, l'ultimo forma un trio con la coppia precedente
+                                  if (pairIndex > 1) {
+                                       tempTeams[p1.uid] = `Coppia ${pairIndex - 1}`;
+                                  }
+                              }
+                              pairIndex++;
+                          }
+
+                          updates.challengeData = {
+                              type: 'pairs', 
+                              teams: tempTeams,
+                              players: playersArr, 
+                              rollingIndex: 0,
+                              rolls: {},
+                              stage: 'rolling',
+                              winner: null
+                          };
+                          newLogs.push("Chris: Oggi sfida a coppie! Vi dividerò in minigruppi casuali.");
+                          newLogs.push("Tutti saranno salvi TRANNE la coppia che farà il punteggio più basso! Loro due andranno al ballottaggio!");
+
+                      } else if (isChaos && rand < 0.58) {
                            const rollers = activePlayers.map(p => p.uid);
                            let riskCount = 2;
                            if (activePlayers.length > 30) riskCount = 5;
@@ -5675,7 +5772,7 @@
                                targetRiskCount: riskCount
                            };
                            newLogs.push(`Chris: CHAOS! La Notte del Giudizio! I ${riskCount} peggiori di questa sfida andranno al televoto!`);
-                      } else if (isChaos && rand < 0.60) {
+                      } else if (isChaos && rand < 0.73) {
                            updates.challengeData = {
                                type: 'popularity_vote',
                                stage: 'voting',
@@ -5990,7 +6087,7 @@
 
             else if (lobby.phase === 'voting') {
                 const isChaos = lobby.config.theme === 'Chaos';
-                const isDoubleElimination = isMerge && Math.random() < (isChaos ? 0.30 : 0.05); 
+                const isDoubleElimination = isMerge && activePlayers.length > 3 && Math.random() < (isChaos ? 0.30 : 0.05); 
                 const isOpenVote = Math.random() < (isChaos ? 0.40 : 0.05); 
                 
                 if (lobby.idolData?.activeEffects?.extraVoteUsedRound === lobby.round) {
@@ -8668,6 +8765,7 @@
                                         {lobby.challengeData.type === 'sudden_death' && <span className="text-red-500 font-black">ELIMINAZIONE DIRETTA (LOWEST ROLL)</span>}
                                         {lobby.challengeData.type === 'purge' && <span className="text-red-500 font-black">SFIDA PURGA (I {lobby.challengeData.targetRiskCount || 2} PEGGIORI A RISCHIO)</span>}
                                         {lobby.challengeData.type === 'team' && "SFIDA A SQUADRE (50% IMMUNITÀ)"}
+                                        {lobby.challengeData.type === 'pairs' && "SFIDA A COPPIE (SOLO LA PEGGIORE VA AL FALÒ)"}
                                         {lobby.challengeData.type === 'individual' && "SFIDA INDIVIDUALE"}
                                     </h2>
                                     
@@ -8698,16 +8796,41 @@
                                     )}
 
                                     <div className="flex flex-wrap gap-4 justify-center">
-                                        {lobby.challengeData.type === 'team' ? (
-                                            <div className="flex w-full gap-8 justify-center">
-                                                {['A', 'B'].map(team => {
-                                                    const teamMembers = Object.entries(lobby.challengeData.teams).filter(([u, t]) => t === team).map(([u]) => u);
+                                        {lobby.challengeData.type === 'team' || lobby.challengeData.type === 'pairs' ? (
+                                            <div className="flex w-full gap-8 justify-center flex-wrap">
+                                                {[...new Set(lobby.challengeData.players.map(uid => lobby.challengeData.teams[uid]).filter(Boolean))].map((team, idx) => {
+                                                    const teamMembers = lobby.challengeData.players.filter(uid => lobby.challengeData.teams[uid] === team);
                                                     const teamScore = teamMembers.reduce((acc, uid) => acc + (lobby.challengeData.rolls[uid] || 0), 0);
                                                     
+                                                    // Palette colori dinamica per le coppie
+                                                    const pairColors = [
+                                                        { border: 'border-purple-500', text: 'text-purple-400' },
+                                                        { border: 'border-emerald-500', text: 'text-emerald-400' },
+                                                        { border: 'border-pink-500', text: 'text-pink-400' },
+                                                        { border: 'border-amber-500', text: 'text-amber-400' },
+                                                        { border: 'border-cyan-500', text: 'text-cyan-400' },
+                                                        { border: 'border-rose-500', text: 'text-rose-400' },
+                                                        { border: 'border-lime-500', text: 'text-lime-400' },
+                                                        { border: 'border-indigo-500', text: 'text-indigo-400' },
+                                                        { border: 'border-teal-500', text: 'text-teal-400' },
+                                                        { border: 'border-fuchsia-500', text: 'text-fuchsia-400' }
+                                                    ];
+
+                                                    let borderColor = 'border-slate-500';
+                                                    let textColor = 'text-slate-400';
+
+                                                    if (team === 'A') { borderColor = 'border-red-500'; textColor = 'text-red-400'; }
+                                                    else if (team === 'B') { borderColor = 'border-blue-500'; textColor = 'text-blue-400'; }
+                                                    else if (team.startsWith('Coppia')) {
+                                                        const colorObj = pairColors[idx % pairColors.length];
+                                                        borderColor = colorObj.border;
+                                                        textColor = colorObj.text;
+                                                    }
+                                                    
                                                     return (
-                                                        <div key={team} className={`flex-1 bg-slate-800/50 p-4 rounded-xl border-4 ${team === 'A' ? 'border-red-500' : 'border-blue-500'}`}>
-                                                            <div className={`text-2xl font-black mb-4 ${team === 'A' ? 'text-red-400' : 'text-blue-400'}`}>
-                                                                {team === 'A' ? "SQUADRA ROSSA" : "SQUADRA BLU"} ({teamScore})
+                                                        <div key={team} className={`flex-1 min-w-[200px] max-w-[300px] bg-slate-800/50 p-4 rounded-xl border-4 ${borderColor}`}>
+                                                            <div className={`text-2xl font-black mb-4 ${textColor}`}>
+                                                                {team === 'A' ? "SQUADRA ROSSA" : team === 'B' ? "SQUADRA BLU" : team.toUpperCase()} ({teamScore})
                                                             </div>
                                                             <div className="flex flex-wrap justify-center gap-2">
                                                                 {teamMembers.map(uid => {
@@ -8749,7 +8872,10 @@
                                                     }
                                                 }
                                                 
-                                                return entries.map(([uid, val]) => {
+                                                const rolledPlayers = lobby.challengeData.players.filter(uid => lobby.challengeData.rolls[uid] !== undefined);
+                                                
+                                                return rolledPlayers.map(uid => {
+                                                    const val = lobby.challengeData.rolls[uid];
                                                     const p = lobby.players.find(pl => pl.uid === uid);
                                                     const isAtRisk = lobby.challengeData.type === 'purge' && atRiskUids.includes(uid);
                                                     
@@ -9118,10 +9244,10 @@
                              {lobby.twistData?.type === 'purge' && (
                                  <div className="bg-red-900/80 border-2 border-red-500 p-4 rounded-xl mb-6 text-center shadow-[0_0_20px_rgba(220,38,38,0.4)] animate-in slide-in-from-top duration-500">
                                      <h3 className="text-2xl font-black text-red-300 uppercase flex items-center justify-center gap-2 mb-2">
-                                        <Skull className="animate-pulse"/> LA NOTTE DEL GIUDIZIO!
+                                        <Skull className="animate-pulse"/> {lobby.challengeData?.type === 'pairs' ? 'BERSAGLI DELLA COPPIA!' : 'LA NOTTE DEL GIUDIZIO!'}
                                      </h3>
                                      <p className="text-white text-lg leading-tight">
-                                         Puoi votare SOLO i giocatori che hanno fatto il punteggio più basso nella sfida di oggi!
+                                         Puoi votare SOLO {lobby.challengeData?.type === 'pairs' ? 'la coppia peggiore e il bersaglio scelto dai vincitori' : 'i giocatori che hanno fatto il punteggio più basso'} nella sfida di oggi!
                                      </p>
                                  </div>
                              )}
