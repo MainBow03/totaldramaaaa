@@ -473,30 +473,31 @@
             animation: flashCamera 2s infinite;
         }
 
-        /* 21. Schiappa: Triste, grigio e nuvola di pioggia */
+        /* 21. Tu sì che sei un perdente: Aura Abissale */
         .cosmetic-schiappa {
-            border: 3px solid #64748b !important;
-            box-shadow: 0 0 15px rgba(100, 116, 139, 0.8), inset 0 0 15px rgba(148, 163, 184, 0.4) !important;
-            filter: grayscale(0.6) brightness(0.8);
+            border: 3px solid #0f172a !important;
+            box-shadow: 0 0 35px rgba(0, 0, 0, 1), inset 0 0 25px rgba(88, 28, 135, 0.9) !important;
+            filter: contrast(1.2) brightness(0.8);
         }
         .cosmetic-schiappa::before {
-            content: '🌧️';
+            content: '👁️‍🗨️';
             position: absolute;
             top: -24px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 36px;
+            font-size: 38px;
             z-index: 20;
-            animation: rainCloud 2s infinite alternate;
+            animation: voidFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(88, 28, 135, 1));
         }
         .cosmetic-schiappa::after {
-            content: '🤡';
+            content: '🌑';
             position: absolute;
             bottom: -12px;
             right: -12px;
-            font-size: 26px;
+            font-size: 28px;
             z-index: 20;
-            transform: rotate(-15deg);
+            animation: pulseVoid 2s infinite alternate;
         }
 
         /* --- ANIMAZIONI PER TUTTI I COSMETICI --- */
@@ -588,9 +589,13 @@
             95% { filter: drop-shadow(0 0 20px white) brightness(2) scale(1.2); }
             100% { filter: drop-shadow(0 0 0px white) brightness(1); }
         }
-        @keyframes rainCloud {
-            0% { transform: translateX(-50%) translateY(0); filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
-            100% { transform: translateX(-50%) translateY(5px); filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); }
+        @keyframes voidFloat {
+            0%, 100% { transform: translate(-50%, 0) scale(1); filter: hue-rotate(0deg) drop-shadow(0 0 10px #581c87); }
+            50% { transform: translate(-50%, -10px) scale(1.2); filter: hue-rotate(45deg) drop-shadow(0 0 25px #000000); }
+        }
+        @keyframes pulseVoid {
+            0% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 5px #000); }
+            100% { transform: scale(1.3) rotate(15deg); filter: drop-shadow(0 0 20px #581c87); }
         }
     </style>
 </head>
@@ -916,7 +921,8 @@
           { name: "Morte", img: "https://i.pinimg.com/1200x/73/31/5b/73315bdbf731c8bd7950793c9ee5979c.jpg", speeches: ["Corri, corri, gatito. Ma non puoi sfuggirmi.", "Io sono la Morte, e non gioco a nascondino. Ma posso vincere un reality show."], alignment: 'villain', isNew: true },
           { name: "Gatto con gli stivali", img: "https://i.pinimg.com/736x/23/7f/73/237f732cfb2b93ce2734135db11e0d67.jpg", speeches: ["Chi osa sfidare il Gatto con gli stivali?!", "Per l'onore e per il premio... la vittoria sarà mia!"], isNew: true },
           { name: "Megara", img: "https://i.pinimg.com/1200x/4f/fb/c6/4ffbc6aa593fad3aa05dcf13d51f2c8c.jpg", speeches: ["Non faccio la damigella in pericolo, so salvarmi da sola.", "Ho venduto la mia anima una volta, non lo farò certo in questo stupido show."], isNew: true },
-          { name: "Sypha", img: "https://i.pinimg.com/736x/68/b6/5a/68b65a3ba9d0f3bbc54a2ed7f89e2576.jpg", speeches: ["Non vi conviene far arrabbiare una Parlatrice.", "Con la mia magia difenderò i miei alleati... ma i soldi spettano a me!"], isNew: true }
+          { name: "Sypha", img: "https://i.pinimg.com/736x/68/b6/5a/68b65a3ba9d0f3bbc54a2ed7f89e2576.jpg", speeches: ["Non vi conviene far arrabbiare una Parlatrice.", "Con la mia magia difenderò i miei alleati... ma i soldi spettano a me!"], isNew: true },
+          { name: "Banana Barbara", img: "https://i.pinimg.com/736x/08/38/28/0838283d8d82e79706028350d500bd7a.jpg", speeches: ["Il futuro è già dipinto sui miei quadri... so chi vincerà.", "Una banana non si arrende mai. Votatemi!"], isNew: true }
         ];
 
         // Frasi fallback generiche per i bot che non ne hanno una specifica
@@ -947,15 +953,15 @@
           "Brains", "Beauties", "Brawns", "Eroi", "Villains", "Neutrali"
         ];
 
-        const BRAINS = ["Marinette", "Kowalski", "Conan", "Shinichi", "Anais", "Peridot", "Dr Doofenshmirtz", "Corvina GO", "Corvina TT", "Velma", "Stewie", "Perla", "Wanda", "Shinobu", "Tails", "Gwen Tennyson", "Gommarosa", "Doraemon", "Azula", "Hiro", "Hiccup", "Sypha"];
+        const BRAINS = ["Marinette", "Kowalski", "Conan", "Shinichi", "Anais", "Peridot", "Dr Doofenshmirtz", "Corvina GO", "Corvina TT", "Velma", "Stewie", "Perla", "Wanda", "Shinobu", "Tails", "Gwen Tennyson", "Gommarosa", "Doraemon", "Azula", "Hiro", "Hiccup", "Sypha", "Banana Barbara"];
         const BEAUTIES = ["Heartfixer", "Gwen", "Heather", "Rias", "Penny", "Stellarubia GO", "Fred", "Anastasia", "Ellis", "Tengen", "Zuko", "Ariana Grande", "Poison Ivy", "Simba", "Leon", "Alya", "Shizuka", "Sdentato", "Helga", "Megara", "Aiden", "Bloom"];
         const BRAWNS = ["Kagami", "Alejandro", "Lightning", "Bowser", "Brago", "Garnet", "Rubino", "Zaffiro", "Nicole", "Johnny Bravo", "Robin TT", "Hunter", "Tom", "Tanjiro", "Superboy", "Kratos", "Po", "Argos", "Baki", "Sephiroth", "Clark", "Legoshi", "Morte", "Gatto con gli stivali"];
 
         const HEROES = ["Marinette", "Adrien", "Owen", "Lindsay", "Yoshi", "Luigi", "Zatch Bell", "Steven", "Ponygon", "Jake DC", "Finn", "Mortino", "Spongebob", "Sonic", "Robin TT", "Aang", "Alya", "Gommarosa", "Doraemon", "Shizuka", "Clark", "Hiro", "Hiccup", "Sdentato", "Gatto con gli stivali", "Megara", "Sypha", "Bloom"];
         const VILLAINS_LIST = ["Dr Eggman", "Chrysalis", "Heather", "Alejandro", "Bowser", "Vicky", "Stewie", "Fiore", "Shego", "Scar", "Yzma", "Malefica", "Ghostface", "Plankton", "Poison Ivy", "Argos", "Azula", "Sephiroth", "Helga", "Morte"];
-        const NEUTRALS = ["Kratos", "Squiddi", "Mr Krab", "Zuko", "Bowser Jr", "Trixie", "Anastasia", "Re Ghiaccio", "Francine", "Dr Doofenshmirtz", "Vanessa", "Bart", "Brago", "Wario", "Waluigi", "Duncan", "Baki", "Legoshi", "Aiden"];
+        const NEUTRALS = ["Kratos", "Squiddi", "Mr Krab", "Zuko", "Bowser Jr", "Trixie", "Anastasia", "Re Ghiaccio", "Francine", "Dr Doofenshmirtz", "Vanessa", "Bart", "Brago", "Wario", "Waluigi", "Duncan", "Baki", "Legoshi", "Aiden", "Banana Barbara"];
 
-        const FEMALES = ["Marinette", "Alya", "Heartfixer", "Chrysalis", "Nathalie", "Kagami", "Gwen", "Julia", "Heather", "Courtney", "Lindsay", "Ran", "Rias", "Bayonetta", "Rosalinda", "Peach", "Daisy", "Pauline", "Tio", "Penny", "Perla", "Garnet", "Rubino", "Zaffiro", "Peridot", "Lapis", "Ametista", "Nicole", "Anais", "Lisa", "Marge", "Neera", "Candace", "Vanessa", "Isabella", "Nonnina", "Corvina GO", "Corvina TT", "Stellarubia GO", "Daphne", "Velma", "Francine", "Hayley", "Lois", "Leela", "Kim", "Tess", "Ashley", "Grett", "Fiore", "Ally", "Isabelle", "Anastasia", "Trixie", "Vicky", "Fiona", "Cake", "Gommarosa", "Marceline", "Zoey", "Rochelle", "Nezuko", "Shinobu", "Katara", "Toph", "Miss Martian", "Zatanna", "Draculaura", "Clawdeen", "Frankie", "Shego", "Ariana Grande", "Will", "Poison Ivy", "Malefica", "Yzma", "Aurora", "Gardevoir", "Roserade", "Clover", "Sam", "Gwen Tennyson", "Shizuka", "Helga", "Megara", "Sypha", "Bloom"];
+        const FEMALES = ["Marinette", "Alya", "Heartfixer", "Chrysalis", "Nathalie", "Kagami", "Gwen", "Julia", "Heather", "Courtney", "Lindsay", "Ran", "Rias", "Bayonetta", "Rosalinda", "Peach", "Daisy", "Pauline", "Tio", "Penny", "Perla", "Garnet", "Rubino", "Zaffiro", "Peridot", "Lapis", "Ametista", "Nicole", "Anais", "Lisa", "Marge", "Neera", "Candace", "Vanessa", "Isabella", "Nonnina", "Corvina GO", "Corvina TT", "Stellarubia GO", "Daphne", "Velma", "Francine", "Hayley", "Lois", "Leela", "Kim", "Tess", "Ashley", "Grett", "Fiore", "Ally", "Isabelle", "Anastasia", "Trixie", "Vicky", "Fiona", "Cake", "Gommarosa", "Marceline", "Zoey", "Rochelle", "Nezuko", "Shinobu", "Katara", "Toph", "Miss Martian", "Zatanna", "Draculaura", "Clawdeen", "Frankie", "Shego", "Ariana Grande", "Will", "Poison Ivy", "Malefica", "Yzma", "Aurora", "Gardevoir", "Roserade", "Clover", "Sam", "Gwen Tennyson", "Shizuka", "Helga", "Megara", "Sypha", "Bloom", "Banana Barbara"];
 
         // --- TITOLI PERSONAGGI ---
         const CHARACTER_TITLES = {
@@ -1754,6 +1760,10 @@
             "Sypha": {
                 name: "Voce degli Elementi",
                 style: "bg-gradient-to-r from-blue-400 via-amber-400 to-cyan-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(56,189,248,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Banana Barbara": {
+                name: "Banana",
+                style: "bg-gradient-to-r from-yellow-300 via-yellow-500 to-amber-600 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(245,158,11,0.4)] tracking-widest font-black text-[11px]"
             }
         };
 
@@ -3062,27 +3072,27 @@
                                  </div>
                               </div>
 
-                              {/* ACHIEVEMENT: SCHIAPPA */}
-                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.schiappa?.unlocked ? 'border-slate-400 bg-slate-700/30 shadow-[0_0_20px_rgba(148,163,184,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                              {/* ACHIEVEMENT: SCHIAPPA (ORA AURA ABISSALE) */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.schiappa?.unlocked ? 'border-purple-900 bg-slate-950/90 shadow-[0_0_25px_rgba(88,28,135,0.6)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
                                  <div className="flex justify-between items-center mb-2">
-                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.schiappa?.unlocked ? 'text-slate-300 drop-shadow-[0_0_5px_rgba(255,255,255,0.4)]' : 'text-slate-300'}`}>
-                                         <AlertOctagon size={20} className={achievements.schiappa?.unlocked ? 'text-slate-400' : 'text-slate-500'}/> Schiappa
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.schiappa?.unlocked ? 'text-purple-500 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-slate-300'}`}>
+                                         <Skull size={20} className={achievements.schiappa?.unlocked ? 'text-purple-600' : 'text-slate-500'}/> Tu sì che sei un perdente
                                      </span>
-                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-slate-400 font-bold">
+                                     <span className="text-xs font-mono bg-black/80 px-2 py-1 rounded text-purple-500 font-bold border border-purple-900">
                                          {achievements.schiappa?.progress || 0} / 15
                                      </span>
                                  </div>
-                                 <p className="text-sm text-slate-400 mb-3">Fatti eliminare per primo (Round 1) in 15 stagioni diverse. Complimenti!</p>
+                                 <p className="text-sm text-slate-400 mb-3">Fatti eliminare per primo (Round 1) in 15 stagioni diverse. Assorbi il vuoto della sconfitta.</p>
                                  <div className="flex items-center justify-between mt-2">
                                      <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
-                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.schiappa?.unlocked ? 'bg-slate-400 shadow-[0_0_10px_#94a3b8]' : 'bg-slate-500'}`} style={{ width: `${((achievements.schiappa?.progress || 0) / 15) * 100}%` }}></div>
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.schiappa?.unlocked ? 'bg-gradient-to-r from-purple-900 to-black shadow-[0_0_10px_#581c87]' : 'bg-slate-500'}`} style={{ width: `${((achievements.schiappa?.progress || 0) / 15) * 100}%` }}></div>
                                      </div>
                                      {achievements.schiappa?.unlocked && (
                                          <button 
                                              onClick={() => toggleEquipCosmetic('schiappa')}
-                                             className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'schiappa' ? 'bg-slate-300 text-black border-white shadow-[0_0_15px_rgba(148,163,184,1)]' : 'bg-slate-800 text-slate-300 border-slate-400 hover:bg-slate-700'}`}
+                                             className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'schiappa' ? 'bg-black text-purple-500 border-purple-600 shadow-[0_0_15px_rgba(88,28,135,1)]' : 'bg-slate-900 text-purple-700 border-purple-900 hover:bg-black hover:text-purple-500'}`}
                                          >
-                                             {equippedCosmetic === 'schiappa' ? 'EQUIPAGGIATO' : 'AURA TRISTE'}
+                                             {equippedCosmetic === 'schiappa' ? 'EQUIPAGGIATA' : 'AURA ABISSALE'}
                                          </button>
                                      )}
                                  </div>
