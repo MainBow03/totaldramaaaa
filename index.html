@@ -4489,71 +4489,79 @@
           useEffect(() => {
               if (!isHost || lobby.phase !== 'idol_hunt' || !lobby.idolData || lobby.idolData.stage !== 'selection') return;
 
-              const bots = lobby.players.filter(p => p.isBot);
-              const unchosenBots = bots.filter(b => !lobby.idolData.crates.some(c => c.owner === b.uid));
-              
-              if (unchosenBots.length > 0) {
-                  const timer = setTimeout(async () => {
-                      // FIX: Usare runTransaction anche per i bot per evitare la Race Condition con l'host/giocatore umano
-                      const lobbyRef = doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId);
-                      
-                      try {
-                          await runTransaction(db, async (transaction) => {
-                              const snap = await transaction.get(lobbyRef);
-                              if (!snap.exists()) return;
-                              const latestLobby = snap.data();
+              const timer = setTimeout(async () => {
+                  const lobbyRef = doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId);
+                  
+                  try {
+                      await runTransaction(db, async (transaction) => {
+                          const snap = await transaction.get(lobbyRef);
+                          if (!snap.exists()) return;
+                          const latestLobby = snap.data();
+                          
+                          // Doppio controllo di sicurezza all'interno della transazione
+                          if (latestLobby.phase !== 'idol_hunt' || latestLobby.idolData.stage !== 'selection') return;
+                          
+                          const latestAvailable = latestLobby.idolData.crates.filter(c => c.owner === null);
+                          const latestUnchosenBots = latestLobby.players.filter(p => p.isBot && !latestLobby.idolData.crates.some(c => c.owner === p.uid));
+                          
+                          // Se ci sono bot che devono scegliere e casse disponibili
+                          if (latestAvailable.length > 0 && latestUnchosenBots.length > 0) {
+                              let newCrates = [...latestLobby.idolData.crates];
+                              let availablePool = [...latestAvailable];
                               
-                              const latestAvailable = latestLobby.idolData.crates.filter(c => c.owner === null);
-                              const latestUnchosenBots = latestLobby.players.filter(p => p.isBot && !latestLobby.idolData.crates.some(c => c.owner === p.uid));
+                              // Mescola le casse disponibili per assegnarle casualmente
+                              availablePool.sort(() => Math.random() - 0.5);
                               
-                              if (latestAvailable.length > 0 && latestUnchosenBots.length > 0) {
-                                  const botToAct = latestUnchosenBots[0];
-                                  const randomCrate = latestAvailable[Math.floor(Math.random() * latestAvailable.length)];
-                                  
-                                  const newCrates = latestLobby.idolData.crates.map(c => 
-                                      c.id === randomCrate.id ? { ...c, owner: botToAct.uid } : c
-                                  );
-
-                                  const allTaken = newCrates.every(c => c.owner !== null);
-                                  let updates = { [`idolData.crates`]: newCrates };
-                                  
-                                  if (allTaken) {
-                                      updates[`idolData.stage`] = 'reveal';
-                                      
-                                      let inventory = { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} };
-                                      
-                                      newCrates.forEach(c => {
-                                          const item = latestLobby.idolData.itemDistribution[c.id];
-                                          if (item && c.owner) {
-                                              if (item === 'spyDrone') {
-                                                  inventory.spyDrones[c.owner] = (inventory.spyDrones[c.owner] || 0) + 3;
-                                              } else if (item === 'safety') {
-                                                  inventory.safeties[c.owner] = (inventory.safeties[c.owner] || 0) + 1;
-                                              } else if (item === 'mutiny') {
-                                                  inventory.mutinies[c.owner] = (inventory.mutinies[c.owner] || 0) + 1;
-                                              } else if (item === 'legacy') {
-                                                  inventory.legacies[c.owner] = (inventory.legacies[c.owner] || 0) + 1;
-                                              } else {
-                                                  const key = item + 's';
-                                                  inventory[key][c.owner] = (inventory[key][c.owner] || 0) + 1;
-                                              }
-                                          }
-                                      });
-                                      
-                                      updates[`idolData.inventory`] = inventory;
-                                      if (!latestLobby.idolData.activeEffects) updates[`idolData.activeEffects`] = { legacyDesignations: {} };
-                                      updates[`logs`] = arrayUnion("Tutte le casse sono state assegnate! Apertura in corso...");
+                              // Assegna in un colpo solo una cassa a TUTTI i bot rimanenti
+                              latestUnchosenBots.forEach(bot => {
+                                  if (availablePool.length > 0) {
+                                      const assignedCrate = availablePool.pop();
+                                      const crateIndex = newCrates.findIndex(c => c.id === assignedCrate.id);
+                                      if (crateIndex !== -1) {
+                                          newCrates[crateIndex] = { ...newCrates[crateIndex], owner: bot.uid };
+                                      }
                                   }
+                              });
 
-                                  transaction.update(lobbyRef, updates);
+                              const allTaken = newCrates.every(c => c.owner !== null);
+                              let updates = { [`idolData.crates`]: newCrates };
+                              
+                              if (allTaken) {
+                                  updates[`idolData.stage`] = 'reveal';
+                                  
+                                  let inventory = { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} };
+                                  
+                                  newCrates.forEach(c => {
+                                      const item = latestLobby.idolData.itemDistribution[c.id];
+                                      if (item && c.owner) {
+                                          if (item === 'spyDrone') {
+                                              inventory.spyDrones[c.owner] = (inventory.spyDrones[c.owner] || 0) + 3;
+                                          } else if (item === 'safety') {
+                                              inventory.safeties[c.owner] = (inventory.safeties[c.owner] || 0) + 1;
+                                          } else if (item === 'mutiny') {
+                                              inventory.mutinies[c.owner] = (inventory.mutinies[c.owner] || 0) + 1;
+                                          } else if (item === 'legacy') {
+                                              inventory.legacies[c.owner] = (inventory.legacies[c.owner] || 0) + 1;
+                                          } else {
+                                              const key = item + 's';
+                                              inventory[key][c.owner] = (inventory[key][c.owner] || 0) + 1;
+                                          }
+                                      }
+                                  });
+                                  
+                                  updates[`idolData.inventory`] = inventory;
+                                  if (!latestLobby.idolData.activeEffects) updates[`idolData.activeEffects`] = { legacyDesignations: {} };
+                                  updates[`logs`] = arrayUnion("Tutte le casse sono state assegnate! Apertura in corso...");
                               }
-                          });
-                      } catch(e) { console.log("Errore bot crate:", e); }
-                  }, 800 + Math.random() * 500); // Ritardo aumentato per dare ancora più priorità all'umano ed evitare conflitti (Race Condition)
-                  return () => clearTimeout(timer);
-              }
-          }, [lobby.idolData, isHost]);
 
+                              transaction.update(lobbyRef, updates);
+                          }
+                      });
+                  } catch(e) { console.log("Errore aggiornamento di massa casse bot:", e); }
+              }, 4000); // Attende 4 secondi per dare assoluta priorità alla scelta dei giocatori umani
+              
+              return () => clearTimeout(timer);
+          }, [lobby.phase, lobby.idolData?.stage, isHost]); // Dipendenze ridotte: si attiva solo una volta all'inizio della caccia
 
           // SEQUENTIAL DICE ANIMATION E RISOLUZIONE
           useEffect(() => {
