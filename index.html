@@ -2224,7 +2224,7 @@
               difficulty: 'Normale',
               finaleType: 'Casuale',
               redemption: { enabled: false, count: 1, episodes: "" },
-              advantages: { idol: 1, extraVote: 1, advantage: 1, voteSteal: 1, spyDrone: 1, mutiny: 1, safety: 1, immunitySteal: 1, legacy: 1 }
+              advantages: { idol: 1, extraVote: 1, advantage: 1, voteSteal: 1, spyDrone: 1, mutiny: 1, safety: 1, immunitySteal: 1, legacy: 1, crystalBall: 1 }
           });
           const [joinCode, setJoinCode] = useState('');
 
@@ -2499,7 +2499,8 @@
                                 mutiny: { icon: <RefreshCw size={14} className="text-orange-400"/>, label: 'Ammutinamento' },
                                 safety: { icon: <DoorOpen size={14} className="text-teal-400"/>, label: 'Salvacondotto' },
                                 immunitySteal: { icon: <Link size={14} className="text-rose-400"/>, label: 'Ladro Collane' },
-                                legacy: { icon: <Scroll size={14} className="text-amber-500"/>, label: 'Testamento' }
+                                legacy: { icon: <Scroll size={14} className="text-amber-500"/>, label: 'Testamento' },
+                                crystalBall: { icon: <span className="text-[14px] leading-none">🔮</span>, label: 'Sfera di Cristallo' }
                             }).map(([key, info]) => (
                                 <div key={key} className="bg-slate-800 p-2 rounded flex items-center justify-between border border-slate-700">
                                     <div className="flex items-center gap-1 text-xs">{info.icon} <span>{info.label}</span></div>
@@ -3484,7 +3485,7 @@
               idolData: {
                   active: true,
                   itemDistribution,
-                  inventory: { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} },
+                  inventory: { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {}, crystalBalls: {} },
                   activeEffects: { legacyDesignations: {} },
                   crates: initialCrates,
                   stage: 'selection'
@@ -3646,7 +3647,7 @@
                   idolData: {
                       active: true,
                       itemDistribution,
-                      inventory: { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} },
+                      inventory: { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {}, crystalBalls: {} },
                       activeEffects: { legacyDesignations: {} },
                       crates: initialCrates,
                       stage: 'selection'
@@ -3977,6 +3978,8 @@
 
           const [showLegacyModal, setShowLegacyModal] = useState(false);
           const [legacyTarget, setLegacyTarget] = useState("");
+
+          const [showCrystalBallModal, setShowCrystalBallModal] = useState(false);
           
           const [mySpeech, setMySpeech] = useState("");
 
@@ -4436,6 +4439,14 @@
               setLegacyTarget("");
           };
 
+          const handleActivateCrystalBall = async () => {
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`idolData.inventory.crystalBalls.${user.uid}`]: lobby.idolData.inventory.crystalBalls[user.uid] - 1,
+                  [`idolData.activeEffects.crystalBallActive_${user.uid}`]: lobby.round,
+                  logs: arrayUnion(`🔮 Un misterioso bagliore avvolge la cabina elettorale... Qualcuno sta leggendo il futuro nell'urna!`)
+              });
+          };
+
           const submitJuryVote = async (finalistId) => {
               if (lobby.phase !== 'jury_vote' || lobby.juryData?.stage !== 'voting') return;
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
@@ -4539,13 +4550,15 @@
                                   if (allTaken) {
                                       updates[`idolData.stage`] = 'reveal';
                                       
-                                      let inventory = { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} };
+                                      let inventory = { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {}, crystalBalls: {} };
                                       
                                       newCrates.forEach(c => {
                                           const item = latestLobby.idolData.itemDistribution[c.id];
                                           if (item && c.owner) {
                                               if (item === 'spyDrone') {
                                                   inventory.spyDrones[c.owner] = (inventory.spyDrones[c.owner] || 0) + 3;
+                                              } else if (item === 'crystalBall') {
+                                                  inventory.crystalBalls[c.owner] = (inventory.crystalBalls[c.owner] || 0) + 3;
                                               } else if (item === 'safety') {
                                                   inventory.safeties[c.owner] = (inventory.safeties[c.owner] || 0) + 1;
                                               } else if (item === 'mutiny') {
@@ -5353,13 +5366,15 @@
                       if (allTaken) {
                           updates[`idolData.stage`] = 'reveal';
                           
-                          let inventory = { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} };
+                          let inventory = { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {}, crystalBalls: {} };
                           
                           newCrates.forEach(c => {
                               const item = latestLobby.idolData.itemDistribution[c.id];
                               if (item && c.owner) {
                                   if (item === 'spyDrone') {
                                       inventory.spyDrones[c.owner] = (inventory.spyDrones[c.owner] || 0) + 3;
+                                  } else if (item === 'crystalBall') {
+                                      inventory.crystalBalls[c.owner] = (inventory.crystalBalls[c.owner] || 0) + 3;
                                   } else if (item === 'safety') {
                                       inventory.safeties[c.owner] = (inventory.safeties[c.owner] || 0) + 1;
                                   } else if (item === 'mutiny') {
@@ -5557,7 +5572,7 @@
                idolData: {
                   active: true,
                   itemDistribution,
-                  inventory: { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {} },
+                  inventory: { idols: {}, extraVotes: {}, advantages: {}, voteSteals: {}, spyDrones: {}, mutinies: {}, safeties: {}, immunitySteals: {}, legacies: {}, crystalBalls: {} },
                   activeEffects: { legacyDesignations: {} },
                   crates: initialCrates,
                   stage: 'selection'
@@ -7792,6 +7807,44 @@
                     </div>
                 )}
 
+               {/* MODALE SFERA DI CRISTALLO */}
+               {showCrystalBallModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+                       <div className="bg-slate-900 rounded-2xl border-2 border-fuchsia-500 max-w-md w-full relative p-6 shadow-[0_0_30px_rgba(217,70,239,0.3)]">
+                           <button onClick={() => setShowCrystalBallModal(false)} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full hover:bg-black transition"><X size={20}/></button>
+                           <h2 className="text-2xl font-black mb-2 text-fuchsia-400 flex items-center gap-2">
+                               <span className="text-3xl animate-pulse">🔮</span> VISIONE FUTURA
+                           </h2>
+                           <p className="text-sm text-slate-300 mb-6">La nebbia si dirada... Ecco i voti depositati nell'urna finora. Attenzione: qualcuno potrebbe ancora votare o cambiare idea!</p>
+                           
+                           <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                               {Object.keys(lobby.votes || {}).length === 0 ? (
+                                   <div className="text-slate-500 italic text-center py-4 bg-slate-800/50 rounded-xl">L'urna è vuota. Nessuno ha ancora votato.</div>
+                               ) : (
+                                   Object.entries(lobby.votes).map(([voterId, targetId]) => {
+                                       const voter = lobby.players.find(p => p.uid === voterId);
+                                       const target = lobby.players.find(p => p.uid === targetId);
+                                       return (
+                                           <div key={voterId} className="bg-slate-800 p-3 rounded-xl flex justify-between items-center border border-slate-700">
+                                               <span className="font-bold text-white flex items-center gap-2">
+                                                   <img src={voter?.character?.img} className="w-6 h-6 rounded-full object-cover" />
+                                                   {voter?.name}
+                                               </span>
+                                               <span className="text-xs text-slate-500 mx-2 uppercase tracking-widest font-bold">Vota</span>
+                                               <span className="font-black text-red-400 flex items-center gap-2">
+                                                   {target?.name || "Sconosciuto"}
+                                                   <img src={target?.character?.img} className="w-6 h-6 rounded-full object-cover border border-red-500" />
+                                               </span>
+                                           </div>
+                                       )
+                                   })
+                               )}
+                           </div>
+                           <button onClick={() => setShowCrystalBallModal(false)} className="w-full mt-6 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl transition border border-slate-600">Chiudi Sfera</button>
+                       </div>
+                    </div>
+                )}
+
                {selectedPlayer && lobby.phase === 'social' && (
                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
                        <div className="bg-slate-900 rounded-2xl border-2 border-yellow-500 max-w-sm w-full relative">
@@ -8357,6 +8410,7 @@
                                     const hasSafety = itemType === 'safety';
                                     const hasImmunitySteal = itemType === 'immunitySteal';
                                     const hasLegacy = itemType === 'legacy';
+                                    const hasCrystalBall = itemType === 'crystalBall';
 
                                     const ownerName = isTaken ? lobby.players.find(p => p.uid === c.owner)?.name : "";
 
@@ -8393,6 +8447,8 @@
                                                     <Link size={40} className="text-rose-400 animate-bounce drop-shadow-lg" />
                                                 ) : hasLegacy ? (
                                                     <Scroll size={40} className="text-amber-500 animate-bounce drop-shadow-lg" />
+                                                ) : hasCrystalBall ? (
+                                                    <span className="text-4xl animate-bounce drop-shadow-[0_0_10px_rgba(217,70,239,0.8)]">🔮</span>
                                                 ) : (
                                                     <Skull size={40} className="text-slate-500" />
                                                 )
@@ -8407,8 +8463,8 @@
                                             )}
                                             
                                             {isRevealed && isMine && (
-                                                <div className={`absolute -bottom-6 text-[10px] font-bold ${hasIdol ? 'text-purple-400' : hasExtraVote ? 'text-green-400' : hasAdvantage ? 'text-yellow-400' : hasVoteSteal ? 'text-cyan-400' : hasSpyDrone ? 'text-indigo-400' : hasMutiny ? 'text-orange-400' : hasSafety ? 'text-teal-400' : hasImmunitySteal ? 'text-rose-400' : hasLegacy ? 'text-amber-500' : 'text-slate-500'}`}>
-                                                    {hasIdol ? "IMMUNITÀ!" : hasExtraVote ? "VOTO EXTRA!" : hasAdvantage ? "BONUS +3!" : hasVoteSteal ? "RUBA-VOTO!" : hasSpyDrone ? "DRONE SPIA!" : hasMutiny ? "AMMUTINAMENTO!" : hasSafety ? "SALVACONDOTTO!" : hasImmunitySteal ? "LADRO COLLANE!" : hasLegacy ? "TESTAMENTO!" : "VUOTO"}
+                                                <div className={`absolute -bottom-6 text-[10px] font-bold ${hasIdol ? 'text-purple-400' : hasExtraVote ? 'text-green-400' : hasAdvantage ? 'text-yellow-400' : hasVoteSteal ? 'text-cyan-400' : hasSpyDrone ? 'text-indigo-400' : hasMutiny ? 'text-orange-400' : hasSafety ? 'text-teal-400' : hasImmunitySteal ? 'text-rose-400' : hasLegacy ? 'text-amber-500' : hasCrystalBall ? 'text-fuchsia-400' : 'text-slate-500'}`}>
+                                                    {hasIdol ? "IMMUNITÀ!" : hasExtraVote ? "VOTO EXTRA!" : hasAdvantage ? "BONUS +3!" : hasVoteSteal ? "RUBA-VOTO!" : hasSpyDrone ? "DRONE SPIA!" : hasMutiny ? "AMMUTINAMENTO!" : hasSafety ? "SALVACONDOTTO!" : hasImmunitySteal ? "LADRO COLLANE!" : hasLegacy ? "TESTAMENTO!" : hasCrystalBall ? "SFERA DI CRISTALLO!" : "VUOTO"}
                                                 </div>
                                             )}
                                             
@@ -9431,6 +9487,36 @@
                                              </button>
                                          </div>
                                      </div>
+                                 )}
+
+                                 {/* --- INTERFACCIA SFERA DI CRISTALLO --- */}
+                                 {myPlayer.status === 'active' && lobby.twistData?.type !== 'killer' && (
+                                     (lobby.idolData?.inventory?.crystalBalls?.[user.uid] > 0 || lobby.idolData?.activeEffects?.[`crystalBallActive_${user.uid}`] === lobby.round) && (
+                                         <div className="mb-6 bg-slate-800 p-4 rounded-xl border border-fuchsia-500 shadow-[0_0_15px_rgba(217,70,239,0.3)] animate-in slide-in-from-top w-full max-w-md">
+                                             <div className="flex items-center justify-between">
+                                                  <div className="flex items-center gap-3">
+                                                      <span className="text-3xl leading-none">🔮</span>
+                                                      <div>
+                                                          <h3 className="font-bold text-fuchsia-400 text-lg leading-tight">SFERA DI CRISTALLO</h3>
+                                                          <p className="text-xs text-slate-400 mt-1">
+                                                              {lobby.idolData?.activeEffects?.[`crystalBallActive_${user.uid}`] === lobby.round
+                                                                  ? "La Sfera è attiva per questo round!"
+                                                                  : `Ne hai ${lobby.idolData.inventory.crystalBalls[user.uid]}. Spia i voti attuali.`}
+                                                          </p>
+                                                      </div>
+                                                  </div>
+                                                  {lobby.idolData?.activeEffects?.[`crystalBallActive_${user.uid}`] === lobby.round ? (
+                                                      <button onClick={() => setShowCrystalBallModal(true)} className="px-4 py-2 rounded-lg font-bold bg-fuchsia-600 hover:bg-fuchsia-500 text-white shadow-[0_0_10px_rgba(217,70,239,0.6)] animate-pulse transition">
+                                                          GUARDA SFERA
+                                                      </button>
+                                                  ) : (
+                                                      <button onClick={handleActivateCrystalBall} className="px-4 py-2 rounded-lg font-bold bg-slate-700 text-slate-300 hover:bg-slate-600 border border-fuchsia-500 transition hover:text-fuchsia-300">
+                                                          ATTIVA ORA
+                                                      </button>
+                                                  )}
+                                             </div>
+                                         </div>
+                                     )
                                  )}
                                  
                                  {lobby.twistData?.type === 'killer' && user.uid !== lobby.twistData.killerId ? (
