@@ -4652,37 +4652,36 @@
 
                      let minScore = 999999;
                      let losingTeams = [];
+                     let maxScore = -1;
+                     let winningTeams = [];
+
                      Object.entries(teamScores).forEach(([team, score]) => {
                          if (score < minScore) { minScore = score; losingTeams = [team]; }
                          else if (score === minScore) { losingTeams.push(team); }
+
+                         if (score > maxScore) { maxScore = score; winningTeams = [team]; }
+                         else if (score === maxScore) { winningTeams.push(team); }
                      });
 
                      const loserTeam = losingTeams[Math.floor(Math.random() * losingTeams.length)];
+                     const winnerTeam = winningTeams[Math.floor(Math.random() * winningTeams.length)];
 
                      const atRiskPlayers = Object.keys(teams).filter(uid => teams[uid] === loserTeam);
-                     const immunePlayers = lobby.players.filter(p => p.status === 'active' && !atRiskPlayers.includes(p.uid)).map(p => p.uid);
+                     const winnerTeamPlayers = Object.keys(teams).filter(uid => teams[uid] === winnerTeam);
                      
-                     const winMsg = `La ${loserTeam.toUpperCase()} fa il punteggio più basso (${teamScores[loserTeam]} pt)! Solo loro andranno al televoto, tutti gli altri sono SALVI!`;
-                     
-                     const updatedPlayersTemp = lobby.players.map(p => {
-                         if (immunePlayers.includes(p.uid)) {
-                             return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
-                         }
-                         return p;
+                     let decider = winnerTeamPlayers[0];
+                     let bestRoll = -1;
+                     winnerTeamPlayers.forEach(uid => {
+                         if (rolls[uid] > bestRoll) { bestRoll = rolls[uid]; decider = uid; }
                      });
 
-                     const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [winMsg]);
-
                      updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                         players: updatedPlayers,
-                         [`challengeData.stage`]: 'finished',
-                         [`challengeData.winner`]: immunePlayers,
-                         immunity: immunePlayers,
-                         losingTeam: "MERGE",
-                         readyPlayers: [], 
-                         phase: 'social',
-                         twistData: { type: 'purge', targets: atRiskPlayers }, // Usa la logica 'purge' per forzare il voto sui perdenti
-                         logs: arrayUnion(...newLogs)
+                         [`challengeData.stage`]: 'purge_selection',
+                         [`challengeData.winner`]: winnerTeamPlayers,
+                         [`challengeData.decider`]: decider,
+                         [`challengeData.autoTargets`]: atRiskPlayers,
+                         [`challengeData.targetRiskCount`]: atRiskPlayers.length + 1,
+                         logs: arrayUnion(`I dadi sono tratti! La ${loserTeam.toUpperCase()} ha fatto il punteggio più basso ed è a rischio! Ma la ${winnerTeam.toUpperCase()} vince, e ${lobby.players.find(p=>p.uid===decider).name} dovrà scegliere un bersaglio extra!`)
                      });
                      return;
                  }
@@ -8955,7 +8954,11 @@
                                          <Skull size={40}/> SCELTA DEL BERSAGLIO <Skull size={40}/>
                                      </h2>
                                      <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-                                         I peggiori nei dadi sono automaticamente al falò. Ma manca <span className="font-bold text-yellow-400 bg-black/50 px-2 py-1 rounded">1 BERSAGLIO</span>! Il vincitore dell'immunità deve sceglierlo.
+                                         {lobby.challengeData.type === 'pairs' ? (
+                                             <>La coppia peggiore è al falò. Ma manca <span className="font-bold text-yellow-400 bg-black/50 px-2 py-1 rounded">1 BERSAGLIO</span>! Il migliore della coppia vincente deve sceglierlo.</>
+                                         ) : (
+                                             <>I peggiori nei dadi sono automaticamente al falò. Ma manca <span className="font-bold text-yellow-400 bg-black/50 px-2 py-1 rounded">1 BERSAGLIO</span>! Il vincitore dell'immunità deve sceglierlo.</>
+                                         )}
                                      </p>
                                      
                                      <div className="flex flex-col md:flex-row justify-center gap-8 mb-12">
