@@ -4489,6 +4489,13 @@
           useEffect(() => {
               if (!isHost || lobby.phase !== 'idol_hunt' || !lobby.idolData || lobby.idolData.stage !== 'selection') return;
 
+              // Calcola se ci sono effettivamente bot che devono scegliere e casse libere
+              const unchosenBots = lobby.players.filter(p => p.isBot && !lobby.idolData.crates.some(c => c.owner === p.uid));
+              const availableCrates = lobby.idolData.crates.filter(c => c.owner === null);
+
+              if (unchosenBots.length === 0 || availableCrates.length === 0) return;
+
+              // Timer sfalsato e casuale per simulare la scelta "umana" una alla volta
               const timer = setTimeout(async () => {
                   const lobbyRef = doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId);
                   
@@ -4507,21 +4514,15 @@
                           // Se ci sono bot che devono scegliere e casse disponibili
                           if (latestAvailable.length > 0 && latestUnchosenBots.length > 0) {
                               let newCrates = [...latestLobby.idolData.crates];
-                              let availablePool = [...latestAvailable];
                               
-                              // Mescola le casse disponibili per assegnarle casualmente
-                              availablePool.sort(() => Math.random() - 0.5);
+                              // Prendi UN SOLO bot a caso e UNA SOLA cassa a caso (effetto progressivo)
+                              const randomBot = latestUnchosenBots[Math.floor(Math.random() * latestUnchosenBots.length)];
+                              const randomCrate = latestAvailable[Math.floor(Math.random() * latestAvailable.length)];
                               
-                              // Assegna in un colpo solo una cassa a TUTTI i bot rimanenti
-                              latestUnchosenBots.forEach(bot => {
-                                  if (availablePool.length > 0) {
-                                      const assignedCrate = availablePool.pop();
-                                      const crateIndex = newCrates.findIndex(c => c.id === assignedCrate.id);
-                                      if (crateIndex !== -1) {
-                                          newCrates[crateIndex] = { ...newCrates[crateIndex], owner: bot.uid };
-                                      }
-                                  }
-                              });
+                              const crateIndex = newCrates.findIndex(c => c.id === randomCrate.id);
+                              if (crateIndex !== -1) {
+                                  newCrates[crateIndex] = { ...newCrates[crateIndex], owner: randomBot.uid };
+                              }
 
                               const allTaken = newCrates.every(c => c.owner !== null);
                               let updates = { [`idolData.crates`]: newCrates };
@@ -4557,11 +4558,11 @@
                               transaction.update(lobbyRef, updates);
                           }
                       });
-                  } catch(e) { console.log("Errore aggiornamento di massa casse bot:", e); }
-              }, 4000); // Attende 4 secondi per dare assoluta priorità alla scelta dei giocatori umani
+                  } catch(e) { console.log("Errore assegnazione cassa bot:", e); }
+              }, 150 + Math.random() * 300); // Ritardo molto più breve: tra 0.15 e 0.45 secondi
               
               return () => clearTimeout(timer);
-          }, [lobby.phase, lobby.idolData?.stage, isHost]); // Dipendenze ridotte: si attiva solo una volta all'inizio della caccia
+          }, [lobby.phase, lobby.idolData, lobby.players, isHost, lobbyId]);
 
           // SEQUENTIAL DICE ANIMATION E RISOLUZIONE
           useEffect(() => {
