@@ -2375,7 +2375,15 @@
                            <Megaphone size={24} /> PATCH NOTES
                        </h3>
                        <div className="space-y-4 text-sm text-slate-300">
-                           <div className="border-l-2 border-yellow-500 pl-4 py-1">
+                           <div className="border-l-2 border-fuchsia-500 pl-4 py-1">
+                               <div className="font-bold text-white text-base">Livelli EXP & Statistiche Giocatore! 🚀</div>
+                               <ul className="list-disc pl-4 mt-2 space-y-2">
+                                   <li><strong className="text-purple-400">Profilo Personale:</strong> Aggiunto il pulsante "LE TUE STATISTICHE" nella lobby! Il gioco ora salva i tuoi record in modo permanente: vittorie, round sopravvissuti, immunità, idoli trovati e calcola persino il tuo <em className="text-white">Personaggio Main</em>!</li>
+                                   <li><strong className="text-fuchsia-400">Sistema di Livelli:</strong> Guadagna EXP alla fine di ogni show! (+10 per ogni round sopravvissuto, +50 immunità, +30 idolo, +100 finalista, +300 vittoria). Riempi la barra nella lobby per salire di livello!</li>
+                                   <li><strong className="text-indigo-400">Badge Livello:</strong> Il tuo livello (e quello generato casualmente per i bot) ora è visibile in modo elegante direttamente sulla carta del personaggio durante le sfide e nella lista giocatori a lato!</li>
+                               </ul>
+                           </div>
+                           <div className="border-l-2 border-yellow-500 pl-4 py-1 opacity-60 hover:opacity-100 transition-opacity">
                                <div className="font-bold text-white text-base">Nuovi Vantaggi Segreti & Annullamento Partita</div>
                                <ul className="list-disc pl-4 mt-2 space-y-2">
                                    <li><strong className="text-fuchsia-400">Sfera di Cristallo:</strong> Aggiunto un nuovo potentissimo vantaggio nascosto nelle casse! La <em className="text-white">Sfera di Cristallo</em> ti permette di spiare i voti in diretta nell'urna!</li>
@@ -4822,6 +4830,13 @@
               const unchosenBots = bots.filter(b => !lobby.idolData.crates.some(c => c.owner === b.uid));
               
               if (unchosenBots.length > 0) {
+                  // Velocizza i bot in base al numero di giocatori per non far annoiare l'Host
+                  let baseDelay = 800;
+                  let randDelay = 500;
+                  if (lobby.players.length >= 60) { baseDelay = 50; randDelay = 50; } // Velocissimi (circa 10 casse al secondo)
+                  else if (lobby.players.length >= 30) { baseDelay = 200; randDelay = 100; } // Molto veloci
+                  else if (lobby.players.length >= 15) { baseDelay = 400; randDelay = 200; } // Normali
+
                   const timer = setTimeout(async () => {
                       // FIX: Usare runTransaction anche per i bot per evitare la Race Condition con l'host/giocatore umano
                       const lobbyRef = doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId);
@@ -4880,7 +4895,7 @@
                               }
                           });
                       } catch(e) { console.log("Errore bot crate:", e); }
-                  }, 800 + Math.random() * 500); // Ritardo aumentato per dare ancora più priorità all'umano ed evitare conflitti (Race Condition)
+                  }, baseDelay + Math.random() * randDelay); // Ritardo dinamico in base all'affollamento
                   return () => clearTimeout(timer);
               }
           }, [lobby.idolData, isHost]);
