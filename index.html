@@ -3419,6 +3419,77 @@
                   </div>
               )}
 
+              {/* MODALE TITOLI */}
+              {showTitlesModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in">
+                      <div className="bg-slate-900 border-2 border-blue-500 rounded-2xl max-w-4xl w-full p-6 relative shadow-[0_0_30px_rgba(59,130,246,0.4)]">
+                          <button onClick={() => setShowTitlesModal(false)} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full text-slate-300 hover:text-white"><X size={20}/></button>
+
+                          <div className="text-center mb-6">
+                              <h2 className="text-3xl text-blue-400 font-black flex items-center justify-center gap-2 uppercase tracking-widest">
+                                  <Crown size={28}/> I TUOI TITOLI
+                              </h2>
+                              <p className="text-slate-400 mt-2">Vinci una partita con un personaggio per sbloccare il suo titolo esclusivo!</p>
+                          </div>
+
+                          {/* BARRA DI RICERCA TITOLI */}
+                          <div className="mb-4">
+                              <div className="relative max-w-sm mx-auto">
+                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18}/>
+                                  <input 
+                                      type="text" 
+                                      placeholder="Cerca personaggio..." 
+                                      value={titlesSearchQuery}
+                                      onChange={(e) => setTitlesSearchQuery(e.target.value)}
+                                      className="w-full bg-slate-800 border border-slate-600 rounded-xl py-2 pl-10 pr-4 text-white focus:border-blue-500 outline-none"
+                                  />
+                              </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2 pb-4">
+                              {ROSTER.filter(char => CHARACTER_TITLES[char.name] && char.name.toLowerCase().includes(titlesSearchQuery.toLowerCase()))
+                                     .sort((a, b) => {
+                                         // Mostra prima quelli sbloccati
+                                         const aUnlocked = achievements[`title_${a.name}`]?.unlocked ? 1 : 0;
+                                         const bUnlocked = achievements[`title_${b.name}`]?.unlocked ? 1 : 0;
+                                         return bUnlocked - aUnlocked;
+                                     })
+                                     .map(char => {
+                                  const titleId = `title_${char.name}`;
+                                  const unlocked = achievements[titleId]?.unlocked;
+                                  const titleData = CHARACTER_TITLES[char.name];
+
+                                  return (
+                                      <div key={char.name} className={`p-3 rounded-xl border-2 flex flex-col items-center text-center transition-all ${unlocked ? 'border-blue-500 bg-slate-800 shadow-lg' : 'border-slate-700 bg-slate-900/50 opacity-70'}`}>
+                                          <img src={char.img} className={`w-12 h-12 rounded-full object-cover mb-2 ${unlocked ? 'border-2 border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.4)]' : 'grayscale border-2 border-slate-600'}`} />
+                                          <div className="text-xs font-bold text-white mb-1 truncate w-full">{char.name}</div>
+                                          
+                                          {unlocked ? (
+                                              <>
+                                                  <div className={`mb-3 ${titleData.style} !text-[11px]`}>{titleData.name}</div>
+                                                  <button 
+                                                      onClick={() => toggleEquipTitle(char.name)}
+                                                      className={`w-full text-xs font-bold py-1.5 rounded-lg border transition-all mt-auto ${equippedTitle === char.name ? 'bg-blue-500 text-black border-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.8)]' : 'bg-slate-900 text-blue-400 border-blue-500 hover:bg-slate-800'}`}
+                                                  >
+                                                      {equippedTitle === char.name ? 'EQUIPAGGIATO' : 'INDOSSA'}
+                                                  </button>
+                                              </>
+                                          ) : (
+                                              <>
+                                                  <div className={`mb-3 ${titleData.style} !text-[11px] grayscale opacity-50`}>{titleData.name}</div>
+                                                  <div className="w-full text-[9px] font-bold py-1.5 rounded-lg bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center gap-1 mt-auto">
+                                                      <Lock size={10}/> {achievements[titleId]?.progress || 0}/3 VITTORIE
+                                                  </div>
+                                              </>
+                                          )}
+                                      </div>
+                                  )
+                              })}
+                          </div>
+                      </div>
+                  </div>
+              )}
+
               {/* MODALE STATISTICHE PERSONALI */}
               {showStatsModal && (
                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in">
