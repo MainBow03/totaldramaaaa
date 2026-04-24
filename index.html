@@ -3477,8 +3477,17 @@
                                           ) : (
                                               <>
                                                   <div className={`mb-3 ${titleData.style} !text-[11px] grayscale opacity-50`}>{titleData.name}</div>
-                                                  <div className="w-full text-[9px] font-bold py-1.5 rounded-lg bg-slate-800 text-slate-500 border border-slate-700 flex items-center justify-center gap-1 mt-auto">
-                                                      <Lock size={10}/> {achievements[titleId]?.progress || 0}/3 VITTORIE
+                                                  <div className="w-full mt-auto bg-slate-800 border border-slate-700 rounded-lg p-1.5 flex flex-col gap-1">
+                                                      <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 px-1">
+                                                          <div className="flex items-center gap-1"><Lock size={10}/> VITTORIE</div>
+                                                          <div className={achievements[titleId]?.progress > 0 ? "text-blue-400" : ""}>{achievements[titleId]?.progress || 0}/3</div>
+                                                      </div>
+                                                      <div className="w-full bg-slate-950 rounded-full h-1.5 shadow-inner overflow-hidden border border-slate-800">
+                                                          <div 
+                                                              className="bg-blue-500 h-full rounded-full transition-all duration-500" 
+                                                              style={{ width: `${((achievements[titleId]?.progress || 0) / 3) * 100}%` }}
+                                                          ></div>
+                                                      </div>
                                                   </div>
                                               </>
                                           )}
