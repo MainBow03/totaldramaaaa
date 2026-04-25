@@ -3512,7 +3512,7 @@
                                               </>
                                           ) : (
                                               <>
-                                                  <div className={`mb-3 ${titleData.style} !text-[11px] grayscale opacity-50`}>{titleData.name}</div>
+                                                  <div className={`mb-3 ${titleData.style} !text-[11px]`}>{titleData.name}</div>
                                                   <div className="w-full mt-auto bg-slate-800 border border-slate-700 rounded-lg p-1.5 flex flex-col gap-1">
                                                       <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 px-1">
                                                           <div className="flex items-center gap-1"><Lock size={10}/> VITTORIE</div>
@@ -4650,17 +4650,31 @@
 
           // --- TRACKING ACHIEVEMENT: SCHIAPPA ---
           useEffect(() => {
-              if (!lobby || !myPlayer) return;
+              if (!lobby || !user || !myPlayer) return;
 
-              // Controlla se lo stato del giocatore è diventato eliminato nel Primissimo round
-              if (myPlayer.status === 'eliminated' && lobby.round === 1) {
-                  const eventKey = `schiappa_${lobbyId}_${lobby.currentSeasonIndex}`;
-                  if (!processedAchievements.current.has(eventKey)) {
-                      updateAchievement('schiappa', 1, 15);
-                      processedAchievements.current.add(eventKey);
+              // Caso 1: Eliminato al falò al Round 1
+              if (lobby.phase === 'ceremony' && lobby.ceremonyData?.finalReveal && lobby.round === 1) {
+                  const eliminated = Array.isArray(lobby.ceremonyData.eliminated) ? lobby.ceremonyData.eliminated : [lobby.ceremonyData.eliminated].filter(Boolean);
+                  if (eliminated.includes(user.uid)) {
+                      const eventKey = `schiappa_${lobbyId}_${lobby.currentSeasonIndex}`;
+                      if (!processedAchievements.current.has(eventKey)) {
+                          updateAchievement('schiappa', 1, 15);
+                          processedAchievements.current.add(eventKey);
+                      }
                   }
               }
-          }, [myPlayer?.status, lobby?.round, lobbyId, lobby?.currentSeasonIndex, updateAchievement]);
+              
+              // Caso 2: Eliminato per Sudden Death al Round 1
+              if (lobby.phase === 'challenge' && lobby.challengeData?.type === 'sudden_death' && lobby.challengeData?.stage === 'finished' && lobby.round === 1) {
+                  if (lobby.challengeData.loser === user.uid) {
+                      const eventKey = `schiappa_${lobbyId}_${lobby.currentSeasonIndex}`;
+                      if (!processedAchievements.current.has(eventKey)) {
+                          updateAchievement('schiappa', 1, 15);
+                          processedAchievements.current.add(eventKey);
+                      }
+                  }
+              }
+          }, [lobby?.phase, lobby?.ceremonyData?.finalReveal, lobby?.challengeData?.stage, lobby?.round, lobbyId, lobby?.currentSeasonIndex, user?.uid, updateAchievement]);
 
           // --- TRACKING ACHIEVEMENT: PUGNALATORE & IDOLO ---
           useEffect(() => {
