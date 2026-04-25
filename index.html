@@ -2462,7 +2462,7 @@
                                <div className="font-bold text-white text-base">Livelli EXP & Statistiche Giocatore! 🚀</div>
                                <ul className="list-disc pl-4 mt-2 space-y-2">
                                    <li><strong className="text-purple-400">Profilo Personale:</strong> Aggiunto il pulsante "LE TUE STATISTICHE" nella lobby! Il gioco ora salva i tuoi record in modo permanente: vittorie, round sopravvissuti, immunità, idoli trovati e calcola persino il tuo <em className="text-white">Personaggio Main</em>!</li>
-                                   <li><strong className="text-fuchsia-400">Sistema di Livelli:</strong> Guadagna EXP alla fine di ogni show! (+10 per ogni round sopravvissuto, +50 immunità, +30 idolo, +100 finalista, +300 vittoria). Riempi la barra nella lobby per salire di livello!</li>
+                                   <li><strong className="text-fuchsia-400">Sistema di Livelli:</strong> Guadagna EXP alla fine di ogni show! (+15 per ogni round sopravvissuto, +100 immunità, +50 idolo, +200 finalista, +500 vittoria). Riempi la barra nella lobby per salire di livello!</li>
                                    <li><strong className="text-indigo-400">Badge Livello:</strong> Il tuo livello (e quello generato casualmente per i bot) ora è visibile in modo elegante direttamente sulla carta del personaggio durante le sfide e nella lista giocatori a lato!</li>
                                </ul>
                            </div>
@@ -4364,9 +4364,9 @@
                           const r = myRankings[i];
                           
                           // Calcolo EXP Guadagnata
-                          const gainedExp = (r.episodesSurvived || 0) * 10 + 
-                                            (r.immunities || 0) * 50 + 
-                                            (r.team === 'WINNER' ? 300 : r.team === 'FINALIST' ? 100 : 0);
+                          const gainedExp = (r.episodesSurvived || 0) * 15 + 
+                                            (r.immunities || 0) * 100 + 
+                                            (r.team === 'WINNER' ? 500 : r.team === 'FINALIST' ? 200 : 0);
 
                           updatePersonalStats({
                               stagioniGiocate: 1,
@@ -4392,7 +4392,7 @@
                       if (myCrate) {
                           const item = lobby.idolData.itemDistribution[myCrate.id];
                           if (item === 'idol') {
-                              updatePersonalStats({ idoliTrovati: 1, exp: 30 });
+                              updatePersonalStats({ idoliTrovati: 1, exp: 50 });
                           }
                       }
                       processedAchievements.current.add(eventKey);
@@ -6230,7 +6230,7 @@
                   if (lobby.round === 1) {
                       updates.chat = arrayUnion({
                           sender: "Chris McLean",
-                          text: `Benvenuti al primissimo episodio! Vi ricordo come fare EXP per salire di livello: +10 per ogni round sopravvissuto, +50 immunità, +30 idolo, +100 finalista, +300 vittoria! Dateci dentro! 🎬`,
+                          text: `Benvenuti al primissimo episodio! Vi ricordo come fare EXP per salire di livello: +15 per ogni round sopravvissuto, +100 immunità, +50 idolo, +200 finalista, +500 vittoria! Dateci dentro! 🎬`,
                           team: "Host",
                           ts: Date.now()
                       });
