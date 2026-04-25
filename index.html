@@ -182,29 +182,20 @@
             animation: floatHeart 2.5s ease-in infinite;
         }
 
-        /* 6. MVP: Bordo ciano neon tech, bagliore elettrico */
+        /* 6. MVP: Effetto scanner cibernetico (Niente Emoji) */
         .cosmetic-mvp {
             border: 3px solid #06b6d4 !important;
-            box-shadow: 0 0 30px rgba(6, 182, 212, 0.9), inset 0 0 15px rgba(34, 211, 238, 0.5) !important;
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.9), inset 0 0 15px rgba(34, 211, 238, 0.5) !important;
+            position: relative;
+            overflow: hidden !important; /* Contiene lo scanner */
         }
         .cosmetic-mvp::before {
-            content: '⚡';
+            content: '';
             position: absolute;
-            top: -15px;
-            left: -15px;
-            font-size: 32px;
-            z-index: 20;
-            animation: shockMVP 0.5s infinite alternate;
-        }
-        .cosmetic-mvp::after {
-            content: '🏅';
-            position: absolute;
-            bottom: -12px;
-            right: -12px;
-            font-size: 28px;
-            z-index: 20;
-            filter: drop-shadow(0 0 5px #06b6d4);
-            animation: pulseMedal 3s infinite alternate;
+            top: -100%; left: 0; width: 100%; height: 20px;
+            background: linear-gradient(to bottom, transparent, rgba(34, 211, 238, 0.8), transparent);
+            animation: cyberScan 2s infinite linear;
+            z-index: 20; pointer-events: none;
         }
 
         /* 7. Idolo: Bordo magenta, Tiki */
@@ -223,88 +214,61 @@
             animation: floatTiki 3s ease-in-out infinite;
         }
 
-        /* 8. Agente 007: Radar verde e Pistola */
+        /* 8. Agente 007: Radar verde a scansione (Niente Emoji) */
         .cosmetic-agente007 {
             border: 3px solid #22c55e !important;
-            box-shadow: 0 0 25px rgba(34, 197, 94, 0.8), inset 0 0 15px rgba(74, 222, 128, 0.5) !important;
-        }
-        .cosmetic-agente007::before {
-            content: '👁️‍🗨️';
-            position: absolute;
-            top: -12px;
-            right: -12px;
-            font-size: 30px;
-            z-index: 20;
-            animation: blinkSpy 4s infinite;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.8), inset 0 0 15px rgba(34, 197, 94, 0.5) !important;
+            position: relative;
+            overflow: hidden !important;
         }
         .cosmetic-agente007::after {
-            content: '🔫';
+            content: '';
             position: absolute;
-            bottom: -12px;
-            left: -12px;
-            font-size: 26px;
-            z-index: 20;
-            transform: scaleX(-1);
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent 70%, rgba(34, 197, 94, 0.6) 100%);
+            animation: radarSpin 3s infinite linear;
+            z-index: 20; pointer-events: none; mix-blend-mode: overlay;
         }
 
-        /* 9. Mi Brucia la Mano: Bordo rosso infuocato */
+        /* 9. Mi Brucia la Mano: Glow infuocato dinamico (Niente Emoji) */
         .cosmetic-fire {
             border: 3px solid #ef4444 !important;
-            box-shadow: 0 0 25px rgba(239, 68, 68, 0.8) !important;
-        }
-        .cosmetic-fire::before {
-            content: '🔥';
-            position: absolute;
-            bottom: -18px;
-            right: -15px;
-            font-size: 34px;
-            z-index: 20;
-            animation: firePulse 0.5s infinite alternate;
+            box-shadow: 0 0 15px #ef4444, inset 0 0 20px #f97316 !important;
+            animation: fireFlicker 0.4s infinite alternate;
         }
 
-        /* 10. Mano Incandescente: Bordo giallo/bianco accecante */
+        /* 10. Mano Incandescente: Glow accecante solare (Niente Emoji) */
         .cosmetic-incandescente {
-            border: 3px solid #fef08a !important;
-            box-shadow: 0 0 35px rgba(250, 204, 21, 1), inset 0 0 25px rgba(253, 224, 71, 0.8) !important;
-        }
-        .cosmetic-incandescente::before {
-            content: '☀️';
-            position: absolute;
-            top: -20px;
-            left: -20px;
-            font-size: 38px;
-            z-index: 20;
-            animation: superFirePulse 0.2s infinite alternate;
+            border: 3px solid #fff !important;
+            box-shadow: 0 0 30px #fef08a, 0 0 50px #fff, inset 0 0 30px #fff !important;
+            animation: sunFlare 1s infinite alternate;
+            filter: brightness(1.3) contrast(1.1);
         }
 
-        /* 11. Ladro di Palcoscenico: Ombra rotante e maschera */
+        /* 11. Ladro di Palcoscenico: Ombra vignetta e scanlines (Niente Emoji) */
         .cosmetic-shadow {
-            border: 3px solid #1e293b !important;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(15, 23, 42, 0.8) !important;
+            border: 3px solid #0f172a !important;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 1), inset 0 0 40px rgba(0,0,0,0.9) !important;
+            filter: grayscale(0.4) contrast(1.3);
+            position: relative;
         }
         .cosmetic-shadow::before {
-            content: '🦹';
+            content: '';
             position: absolute;
-            bottom: -15px;
-            left: -15px;
-            font-size: 34px;
-            z-index: 20;
-            animation: floatGhost 3s infinite alternate;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px);
+            z-index: 20; pointer-events: none;
         }
 
-        /* 12. Fantasma: Teal aura, ghost */
+        /* 12. Fantasma d'eccellenza: Trasparenza eterea (Niente Emoji) */
         .cosmetic-ghost {
             border: 3px solid #2dd4bf !important;
             box-shadow: 0 0 25px rgba(45, 212, 191, 0.8), inset 0 0 20px rgba(20, 184, 166, 0.5) !important;
+            animation: floatGhost 3s infinite ease-in-out alternate;
+            opacity: 0.85;
         }
-        .cosmetic-ghost::before {
-            content: '👻';
-            position: absolute;
-            top: -18px;
-            right: -15px;
-            font-size: 34px;
-            z-index: 20;
-            animation: floatGhost 2s ease-in-out infinite alternate;
+        .cosmetic-ghost img {
+            filter: sepia(1) hue-rotate(140deg) saturate(1.5) opacity(0.8) !important;
         }
 
         /* 13. Cacciatore: Diamante e cassa */
@@ -355,43 +319,40 @@
             z-index: 20;
         }
 
-        /* 15. Drama Queen: Tossico */
+        /* 15. Drama Queen: Effetto acido/bolle velenose (Niente Emoji) */
         .cosmetic-toxic {
             border: 3px solid #84cc16 !important;
-            box-shadow: 0 0 25px rgba(132, 204, 22, 0.8), inset 0 0 20px rgba(101, 163, 13, 0.5) !important;
+            box-shadow: 0 0 25px rgba(132, 204, 22, 0.8), inset 0 -25px 20px rgba(101, 163, 13, 0.7) !important;
+            position: relative;
+            overflow: hidden !important;
         }
         .cosmetic-toxic::before {
-            content: '🐍';
+            content: '';
             position: absolute;
-            bottom: -18px;
-            left: -15px;
-            font-size: 36px;
-            z-index: 20;
-            animation: floatBubbles 3s infinite;
-        }
-        .cosmetic-toxic::after {
-            content: '🎭';
-            position: absolute;
-            top: -12px;
-            right: -12px;
-            font-size: 26px;
-            z-index: 20;
-            transform: rotate(15deg);
+            bottom: -20px; left: 20%; width: 10px; height: 10px;
+            background: #a3e635; border-radius: 50%;
+            box-shadow: 30px -10px 0 2px #84cc16, 15px -30px 0 -1px #bef264;
+            animation: toxicBubbles 3s infinite linear;
+            z-index: 20; pointer-events: none; opacity: 0.7;
         }
 
-        /* 16. Ti Sei Offeso: Ghiaccio */
+        /* 16. Ti Sei Offeso: Frosted glass / Congelato (Niente Emoji) */
         .cosmetic-ice {
-            border: 3px solid #38bdf8 !important;
-            box-shadow: 0 0 25px rgba(56, 189, 248, 0.8), inset 0 0 20px rgba(186, 230, 253, 0.4) !important;
+            border: 3px solid #e0f2fe !important;
+            box-shadow: 0 0 20px #38bdf8, inset 0 0 25px #bae6fd !important;
+            position: relative;
         }
-        .cosmetic-ice::before {
-            content: '❄️';
+        .cosmetic-ice::after {
+            content: '';
             position: absolute;
-            top: -18px;
-            right: -15px;
-            font-size: 36px;
-            z-index: 20;
-            animation: spinIce 4s linear infinite;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 40%, rgba(255,255,255,0.2) 100%);
+            border-top: 2px solid rgba(255,255,255,0.8);
+            border-left: 2px solid rgba(255,255,255,0.8);
+            border-radius: inherit; z-index: 20; pointer-events: none;
+        }
+        .cosmetic-ice img {
+            filter: saturate(0.5) hue-rotate(180deg) brightness(1.2) !important;
         }
 
         /* 17. Moschettieri: Spade */
@@ -449,55 +410,27 @@
             animation: twinkleStar 2s infinite alternate;
         }
 
-        /* 20. Spotlight: VIP */
+        /* 20. Spotlight: Flash dei paparazzi puro CSS (Niente Emoji) */
         .cosmetic-spotlight {
-            border: 3px solid #fde047 !important;
-            box-shadow: 0 0 30px rgba(253, 224, 71, 0.8), inset 0 0 20px rgba(250, 204, 21, 0.6) !important;
+            border: 3px solid #facc15 !important;
+            box-shadow: 0 0 30px #fde047 !important;
+            position: relative;
         }
         .cosmetic-spotlight::before {
-            content: '⭐';
+            content: '';
             position: absolute;
-            top: -20px;
-            left: -15px;
-            font-size: 34px;
-            z-index: 20;
-            animation: twinkleStar 1.5s ease-in-out infinite alternate;
-        }
-        .cosmetic-spotlight::after {
-            content: '📸';
-            position: absolute;
-            bottom: -15px;
-            right: -15px;
-            font-size: 28px;
-            z-index: 20;
-            animation: flashCamera 2s infinite;
+            inset: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, transparent 50%);
+            animation: paparazziFlash 2s infinite;
+            z-index: 20; pointer-events: none; mix-blend-mode: overlay;
         }
 
-        /* 21. Tu sì che sei un perdente: Aura Abissale */
+        /* 21. Tu sì che sei un perdente: Aura Abissale estrema (Niente Emoji) */
         .cosmetic-schiappa {
-            border: 3px solid #0f172a !important;
-            box-shadow: 0 0 35px rgba(0, 0, 0, 1), inset 0 0 25px rgba(88, 28, 135, 0.9) !important;
-            filter: contrast(1.2) brightness(0.8);
-        }
-        .cosmetic-schiappa::before {
-            content: '👁️‍🗨️';
-            position: absolute;
-            top: -24px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 38px;
-            z-index: 20;
-            animation: voidFloat 3s ease-in-out infinite;
-            filter: drop-shadow(0 0 15px rgba(88, 28, 135, 1));
-        }
-        .cosmetic-schiappa::after {
-            content: '🌑';
-            position: absolute;
-            bottom: -12px;
-            right: -12px;
-            font-size: 28px;
-            z-index: 20;
-            animation: pulseVoid 2s infinite alternate;
+            border: 3px solid #000 !important;
+            box-shadow: 0 0 35px rgba(0, 0, 0, 1), inset 0 0 30px #4c1d95 !important;
+            filter: contrast(1.2) brightness(0.7) grayscale(0.5);
+            animation: abyssPulse 2.5s infinite alternate;
         }
 
         /* --- STILI COSMETICI DI LIVELLO --- */
@@ -546,6 +479,15 @@
         @keyframes pulseBorderPurple { 0%, 100% { border-color: #a855f7; } 50% { border-color: #d8b4fe; } }
         @keyframes masterGlow { 0% { filter: hue-rotate(0deg) drop-shadow(0 0 20px #ec4899); } 100% { filter: hue-rotate(90deg) drop-shadow(0 0 40px #8b5cf6); } }
         
+        /* Nuove animazioni per gli effetti senza emoji */
+        @keyframes cyberScan { 0% { top: -20px; } 100% { top: 100%; } }
+        @keyframes radarSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fireFlicker { 0% { box-shadow: 0 0 10px #ef4444, inset 0 0 15px #f97316; border-color: #ef4444; } 100% { box-shadow: 0 0 25px #dc2626, inset 0 0 30px #fb923c; border-color: #fca5a5; } }
+        @keyframes sunFlare { 0% { filter: brightness(1.2); box-shadow: 0 0 20px #fef08a, 0 0 30px #fff, inset 0 0 20px #fff; } 100% { filter: brightness(1.5); box-shadow: 0 0 40px #fef08a, 0 0 60px #fff, inset 0 0 40px #fff; } }
+        @keyframes toxicBubbles { 0% { bottom: -20px; opacity: 0; transform: scale(0.5) translateX(0); } 20% { opacity: 0.8; } 100% { bottom: 100%; opacity: 0; transform: scale(1.5) translateX(-10px); } }
+        @keyframes paparazziFlash { 0%, 90% { opacity: 0; transform: scale(0.5); } 95% { opacity: 1; transform: scale(1.5); } 100% { opacity: 0; transform: scale(0.5); } }
+        @keyframes abyssPulse { 0% { box-shadow: 0 0 20px #000, inset 0 0 20px #4c1d95; filter: contrast(1.1) brightness(0.8) grayscale(0.3); } 100% { box-shadow: 0 0 45px #000, inset 0 0 40px #581c87; filter: contrast(1.3) brightness(0.6) grayscale(0.6); } }
+
         @keyframes crownFloat {
             0%, 100% { transform: translate(-50%, 0) scale(1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7)); }
             50% { transform: translate(-50%, -8px) scale(1.15); filter: drop-shadow(0 10px 15px rgba(251,191,36,1)); }
