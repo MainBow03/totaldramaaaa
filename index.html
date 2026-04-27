@@ -2100,7 +2100,7 @@
                       const sorted = Object.entries(data)
                           .map(([name, count]) => ({ name, count }))
                           .sort((a, b) => b.count - a.count)
-                          .slice(0, 10);
+                          .slice(0, 24); // MODIFICATO DA 10 A 24 PER IL TEMA ALL STARS
                       setTopCharacters(sorted);
                   } else {
                       setTopCharacters([]); // Documento non esiste ancora, mostra lista vuota
@@ -2135,6 +2135,19 @@
             const code = Math.floor(1000 + Math.random() * 9000).toString();
             const newLobbyRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'lobbies'));
             
+            let allStarsRoster = [];
+            if (config.theme === 'All Stars') {
+                let names = (topCharacters || []).map(c => c.name);
+                if (names.length < 24) {
+                     const fallback = [...ROSTER].sort(() => Math.random() - 0.5);
+                     for (let char of fallback) {
+                         if (!names.includes(char.name)) names.push(char.name);
+                         if (names.length >= 24) break;
+                     }
+                }
+                allStarsRoster = names.slice(0, 24);
+            }
+            
             const initialData = {
               hostId: user.uid,
               hostName: nickname,
@@ -2142,6 +2155,7 @@
               status: 'waiting',
               config: {
                 ...config,
+                allStarsRoster: allStarsRoster,
                 redemption: config.redemption || { enabled: false, count: 0, episodes: [] },
                 theme: config.theme || 'Tutti'
               }, 
@@ -2485,8 +2499,8 @@
                           value={config.theme} 
                           onChange={e => {
                               const val = e.target.value;
-                              if (val === 'Brains vs Beauties vs Brawns' || val === 'Eroi vs Villains vs Neutrali') {
-                                  setConfig({...config, theme: val, numTeams: 3});
+                              if (val === 'Brains vs Beauties vs Brawns' || val === 'Eroi vs Villains vs Neutrali' || val === 'All Stars') {
+                                  setConfig({...config, theme: val, numTeams: 3, maxPlayers: val === 'All Stars' ? Math.min(config.maxPlayers, 24) : config.maxPlayers});
                               } else if (val === 'Girly pop') {
                                   setConfig({...config, theme: val, numTeams: 4});
                               } else if (val === 'La Notte del Giudizio' || val === 'Popolarità') {
@@ -2503,6 +2517,7 @@
                           <option value="Girly pop">Girly pop (Girl Edition, 4 Team)</option>
                           <option value="Brains vs Beauties vs Brawns">Brains vs Beauties vs Brawns</option>
                           <option value="Eroi vs Villains vs Neutrali">Eroi vs Villains vs Neutrali</option>
+                          <option value="All Stars">All Stars (Top 24 Hall of Fame, 3 Team)</option>
                           <option value="La Notte del Giudizio">La Notte del Giudizio (Tutti vs Tutti, Voto ai Peggiori 2)</option>
                           <option value="Popolarità">Popolarità (Niente sfide, immunità ai più amati)</option>
                           <option value="Ghost Island">Ghost Island (Gli eliminati lottano per tornare al Merge)</option>
@@ -2523,9 +2538,9 @@
                     </div>
 
                     <div>
-                      <label className="block text-slate-400 font-bold mb-2">Concorrenti (8 - 100)</label>
+                      <label className="block text-slate-400 font-bold mb-2">Concorrenti (8 - {config.theme === 'All Stars' ? 24 : 100})</label>
                       <div className="flex items-center gap-4">
-                        <input type="range" min="8" max="100" value={config.maxPlayers} onChange={e => {
+                        <input type="range" min="8" max={config.theme === 'All Stars' ? "24" : "100"} value={config.maxPlayers} onChange={e => {
                             const newVal = parseInt(e.target.value);
                             setConfig({
                                 ...config, 
@@ -2540,7 +2555,7 @@
                     <div>
                       <label className="block text-slate-400 font-bold mb-2">Squadre (2 - 8)</label>
                       <div className="flex items-center gap-4">
-                        <input type="range" min="2" max="8" value={config.numTeams} disabled={config.theme === 'Brains vs Beauties vs Brawns' || config.theme === 'Eroi vs Villains vs Neutrali' || config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità' || config.theme === 'Girly pop'} onChange={e => setConfig({...config, numTeams: parseInt(e.target.value)})} className="flex-1 accent-blue-500 disabled:opacity-50" />
+                        <input type="range" min="2" max="8" value={config.numTeams} disabled={config.theme === 'Brains vs Beauties vs Brawns' || config.theme === 'Eroi vs Villains vs Neutrali' || config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità' || config.theme === 'Girly pop' || config.theme === 'All Stars'} onChange={e => setConfig({...config, numTeams: parseInt(e.target.value)})} className="flex-1 accent-blue-500 disabled:opacity-50" />
                         <span className="text-2xl font-bold w-12 text-center">{config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità' ? 1 : config.numTeams}</span>
                       </div>
                     </div>
@@ -2739,7 +2754,7 @@
                           ) : topCharacters.length === 0 ? (
                               <div className="text-center text-slate-500 text-sm italic py-8">Nessun dato registrato. Gioca la prima partita!</div>
                           ) : (
-                              topCharacters.map((char, index) => {
+                              topCharacters.slice(0, 10).map((char, index) => {
                                   const rosterData = ROSTER.find(r => r.name === char.name);
                                   const img = rosterData ? rosterData.img : "";
                                   
@@ -3605,6 +3620,7 @@
                 if (lobby.config.theme === 'Girly pop') return FEMALES.includes(r.name);
                 if (lobby.config.theme === 'Brains vs Beauties vs Brawns') return BRAINS.includes(r.name) || BEAUTIES.includes(r.name) || BRAWNS.includes(r.name);
                 if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') return HEROES.includes(r.name) || VILLAINS_LIST.includes(r.name) || NEUTRALS.includes(r.name);
+                if (lobby.config.theme === 'All Stars') return lobby.config.allStarsRoster?.includes(r.name);
                 return true; 
             };
 
@@ -3741,7 +3757,7 @@
             }
 
             const numTeams = lobby.config.numTeams;
-            const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : lobby.config.theme === 'Girly pop' ? ["Girly pop", "Amazzoni", "Yuri", "Dive"] : DEFAULT_TEAM_NAMES;
+            const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : lobby.config.theme === 'Girly pop' ? ["Girly pop", "Amazzoni", "Yuri", "Dive"] : lobby.config.theme === 'All Stars' ? ["Vincenti", "Vinti", "Pelatoni"] : DEFAULT_TEAM_NAMES;
 
             if (lobby.config.theme === 'Brains vs Beauties vs Brawns') {
                 currentPlayers = currentPlayers.map(p => {
@@ -4192,6 +4208,7 @@
                          if (lobby.config.theme === 'Girly pop') return FEMALES.includes(char.name);
                          if (lobby.config.theme === 'Brains vs Beauties vs Brawns') return BRAINS.includes(char.name) || BEAUTIES.includes(char.name) || BRAWNS.includes(char.name);
                          if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') return HEROES.includes(char.name) || VILLAINS_LIST.includes(char.name) || NEUTRALS.includes(char.name);
+                         if (lobby.config.theme === 'All Stars') return lobby.config.allStarsRoster?.includes(char.name);
                          return true;
                      }).map(char => {
                        const takenBy = lobby.players.find(p => p.character?.name === char.name);
@@ -4230,6 +4247,10 @@
                                auraBorder = 'border-gray-500 hover:border-gray-400';
                                badge = <div className="absolute top-1 left-1 bg-gray-600/90 text-gray-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-gray-400/50">Neutrale</div>;
                            }
+                       } else if (lobby.config.theme === 'All Stars') {
+                           auraShadow = 'shadow-[0_0_15px_rgba(250,204,21,0.6)]';
+                           auraBorder = 'border-yellow-500 hover:border-yellow-400';
+                           badge = <div className="absolute top-1 left-1 bg-yellow-600/90 text-yellow-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-yellow-400/50">All Star</div>;
                        }
 
                        return (
@@ -6001,6 +6022,7 @@
             let currentTeamNames = DEFAULT_TEAM_NAMES;
             if (lobby.config.theme === 'Villain Edition') currentTeamNames = VILLAIN_TEAM_NAMES;
             else if (lobby.config.theme === 'Girly pop') currentTeamNames = ["Girly pop", "Amazzoni", "Yuri", "Dive"];
+            else if (lobby.config.theme === 'All Stars') currentTeamNames = ["Vincenti", "Vinti", "Pelatoni"];
             else if (lobby.config.theme === 'Custom') {
                 // Recupera i nomi scelti custom per mantenerli nella Stagione 2
                 currentTeamNames = [...new Set(lobby.players.map(p => p.team).filter(t => t && t !== 'MERGE'))];
@@ -8123,6 +8145,8 @@
                      currentTeamNames = ["Eroi", "Villains", "Neutrali"];
                  } else if (lobby.config.theme === 'Girly pop') {
                      currentTeamNames = ["Girly pop", "Amazzoni", "Yuri", "Dive"];
+                 } else if (lobby.config.theme === 'All Stars') {
+                     currentTeamNames = ["Vincenti", "Vinti", "Pelatoni"];
                  } else if (lobby.config.theme === 'Custom') {
                      // MODIFICA: in Custom ignoriamo i preset e prendiamo i team che l'Host ha effettivamente generato!
                      currentTeamNames = [...new Set(lobby.players.map(p => p.team).filter(t => t && t !== 'MERGE'))];
@@ -8916,6 +8940,10 @@
                                     'Amazzoni': { bg: 'bg-emerald-900/40', border: 'border-emerald-400', text: 'text-emerald-300' },
                                     'Yuri': { bg: 'bg-purple-900/40', border: 'border-purple-400', text: 'text-purple-300' },
                                     'Dive': { bg: 'bg-rose-900/40', border: 'border-rose-400', text: 'text-rose-300' },
+
+                                    'Vincenti': { bg: 'bg-yellow-900/40', border: 'border-yellow-500', text: 'text-yellow-400' },
+                                    'Vinti': { bg: 'bg-slate-900/40', border: 'border-slate-500', text: 'text-slate-400' },
+                                    'Pelatoni': { bg: 'bg-pink-900/40', border: 'border-pink-500', text: 'text-pink-400' },
 
                                     'MERGE': { bg: 'bg-yellow-600/30', border: 'border-yellow-400', text: 'text-yellow-300' }
                                  };
