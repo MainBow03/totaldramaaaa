@@ -4210,7 +4210,12 @@
                          if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') return HEROES.includes(char.name) || VILLAINS_LIST.includes(char.name) || NEUTRALS.includes(char.name);
                          if (lobby.config.theme === 'All Stars') return lobby.config.allStarsRoster?.includes(char.name);
                          return true;
-                     }).map(char => {
+                     }).sort((a, b) => {
+                         if (lobby.config.theme === 'All Stars' && lobby.config.allStarsRoster) {
+                             return lobby.config.allStarsRoster.indexOf(a.name) - lobby.config.allStarsRoster.indexOf(b.name);
+                         }
+                         return 0;
+                     }).map((char, index) => {
                        const takenBy = lobby.players.find(p => p.character?.name === char.name);
                        const isMe = takenBy?.uid === user.uid;
                        
@@ -4250,7 +4255,7 @@
                        } else if (lobby.config.theme === 'All Stars') {
                            auraShadow = 'shadow-[0_0_15px_rgba(250,204,21,0.6)]';
                            auraBorder = 'border-yellow-500 hover:border-yellow-400';
-                           badge = <div className="absolute top-1 left-1 bg-yellow-600/90 text-yellow-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-yellow-400/50">All Star</div>;
+                           badge = <div className="absolute top-1 left-1 bg-yellow-600/90 text-yellow-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-yellow-400/50">All Star #{index + 1}</div>;
                        }
 
                        return (
@@ -4768,6 +4773,7 @@
                      if (possibleTargets.length === 0) return;
                      const target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
                      const actions = ['friend', 'suckup', 'rumor'];
+                     if (lobby.config.theme === 'All Stars') actions.push('campione', 'vip');
                      const action = actions[Math.floor(Math.random() * actions.length)];
 
                      const targetIdx = updatedPlayers.findIndex(p => p.uid === target.uid);
@@ -4800,6 +4806,22 @@
                                   [victim.uid]: Math.max(-5, currentRel - 1)
                               };
                               newLogs.push(`🤖 ${bot.name} ha messo zizzania tra ${target.name} e ${victim.name}.`);
+                          }
+                     } else if (action === 'campione') {
+                          if (Math.random() < 0.6) {
+                              updatedPlayers[botIdx].nextRollBuffCampione = true;
+                              newLogs.push(`🌟 ${bot.name} si è vantato del suo status da All Star con ${target.name} ed è stato applaudito!`);
+                          } else {
+                              updatedPlayers[botIdx].nextRollNerfCampione = true;
+                              newLogs.push(`🤡 ${bot.name} ha fatto il superiore con ${target.name} rimediando una figuraccia!`);
+                          }
+                     } else if (action === 'vip') {
+                          if (Math.random() < 0.35) {
+                              updatedPlayers[targetIdx].relationships[bot.uid] = Math.max(1, (updatedPlayers[targetIdx].relationships[bot.uid] || 0) + 1);
+                              updatedPlayers[botIdx].relationships[target.uid] = Math.max(1, (updatedPlayers[botIdx].relationships[target.uid] || 0) + 1);
+                              updatedPlayers[targetIdx].alliances = [...new Set([...(updatedPlayers[targetIdx].alliances || []), bot.uid])];
+                              updatedPlayers[botIdx].alliances = [...new Set([...(updatedPlayers[botIdx].alliances || []), target.uid])];
+                              newLogs.push(`✨ ${bot.name} ha usato il suo Pass VIP con ${target.name}! Sono diventati Alleati!`);
                           }
                      }
                  });
@@ -5372,12 +5394,16 @@
                     let roll = Math.floor(Math.random() * maxFaces) + 1;
                     if (playerObj.nextRollNerf) {
                         roll = Math.floor(Math.random() * 4) + 1; 
+                    } else if (playerObj.nextRollBuffCampione) {
+                        roll = Math.floor(Math.random() * 4) + 7;
+                    } else if (playerObj.nextRollNerfCampione) {
+                        roll = Math.floor(Math.random() * 6) + 1;
                     }
                     
                     const updatedRolls = { ...rolls, [currentPlayerId]: roll };
                     
                     const updatedPlayers = lobby.players.map(p => 
-                        p.uid === currentPlayerId ? { ...p, diceRoll: roll, nextRollNerf: false } : p
+                        p.uid === currentPlayerId ? { ...p, diceRoll: roll, nextRollNerf: false, nextRollBuffCampione: false, nextRollNerfCampione: false } : p
                     );
                     
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
@@ -5694,6 +5720,10 @@
               
               if (player.nextRollNerf) {
                   roll = Math.floor(Math.random() * 4) + 1; 
+              } else if (player.nextRollBuffCampione) {
+                  roll = Math.floor(Math.random() * 4) + 7; 
+              } else if (player.nextRollNerfCampione) {
+                  roll = Math.floor(Math.random() * 6) + 1; 
               } else {
                   roll = Math.floor(Math.random() * maxFaces) + 1; 
               }
@@ -5711,12 +5741,16 @@
               let updates = {
                   [`challengeData.rolls`]: updatedRolls,
                   [`challengeData.rollingIndex`]: rollingIndex + 1,
-                  [`players`]: lobby.players.map(p => p.uid === user.uid ? { ...p, diceRoll: roll, nextRollNerf: false } : p)
+                  [`players`]: lobby.players.map(p => p.uid === user.uid ? { ...p, diceRoll: roll, nextRollNerf: false, nextRollBuffCampione: false, nextRollNerfCampione: false } : p)
               };
 
               let logsToAdd = [];
               if (player.nextRollNerf) {
                   logsToAdd.push(`😵 ${player.name} ha l'attrezzatura sabotata! Roll massimo: 4. (Ha fatto ${roll})`);
+              } else if (player.nextRollBuffCampione) {
+                  logsToAdd.push(`🌟 L'ego di ${player.name} è alle stelle! Roll garantito alto (7-10). (Ha fatto ${roll})`);
+              } else if (player.nextRollNerfCampione) {
+                  logsToAdd.push(`🤡 ${player.name} è ancora imbarazzato per la figuraccia! Roll max 6. (Ha fatto ${roll})`);
               }
 
               if (usedAdvantage) {
@@ -8036,6 +8070,37 @@
                           transaction.update(lobbyRef, updates);
                           return { type, localImbroglio };
                       }
+                      else if (type === 'campione') {
+                          let updates = { players: updatedPlayers };
+                          if (Math.random() < 0.6) {
+                              updatedPlayers[myIdx].nextRollBuffCampione = true;
+                              localImbroglio = `🌟 EGO BOOST!\nTi sei vantato del tuo status da All Star con ${targetName} e hai fatto colpo!\nNella prossima sfida avrai un lancio garantito tra 7 e 10.`;
+                              updates.logs = arrayUnion(`🌟 L'ego da All Star di ${actorName} è salito alle stelle dopo una conversazione con ${targetName}!`);
+                          } else {
+                              updatedPlayers[myIdx].nextRollNerfCampione = true;
+                              localImbroglio = `🤡 FIGURACCIA!\nHai provato a tirartela con ${targetName} ma hai fatto una scena pietosa.\nL'imbarazzo limiterà il tuo prossimo lancio (Max 6).`;
+                              updates.logs = arrayUnion(`🤡 ${actorName} ha fatto una figuraccia colossale cercando di tirarsela con ${targetName}!`);
+                          }
+                          transaction.update(lobbyRef, updates);
+                          return { type, localImbroglio };
+                      }
+                      else if (type === 'vip') {
+                          let updates = { players: updatedPlayers };
+                          if (Math.random() < 0.35) {
+                              updatedPlayers[targetIdx].relationships[user.uid] = Math.max(1, (updatedPlayers[targetIdx].relationships[user.uid] || 0) + 1);
+                              updatedPlayers[myIdx].relationships[targetId] = Math.max(1, (updatedPlayers[myIdx].relationships[targetId] || 0) + 1);
+                              updatedPlayers[targetIdx].alliances = [...new Set([...(updatedPlayers[targetIdx].alliances || []), user.uid])];
+                              updatedPlayers[myIdx].alliances = [...new Set([...(updatedPlayers[myIdx].alliances || []), targetId])];
+                              
+                              localImbroglio = `✨ PASS VIP ACCETTATO!\nTi sei comportato da vera All Star e ${targetName} ha apprezzato.\nSiete diventati amici (+1) e avete formato un'Alleanza!`;
+                              updates.logs = arrayUnion(`✨ ${actorName} ha fatto entrare ${targetName} nel privè VIP! Hanno formato un'alleanza!`);
+                          } else {
+                              localImbroglio = `🚪 INGRESSO NEGATO.\nHai provato a usare la scusa del "Lei non sa chi sono io!", ma ${targetName} ti ha ignorato.\nNon è successo nulla.`;
+                              updates.logs = arrayUnion(`🚪 ${actorName} ha fatto il VIP con ${targetName}, ma non è servito a niente.`);
+                          }
+                          transaction.update(lobbyRef, updates);
+                          return { type, localImbroglio };
+                      }
 
                       // SE NON È UNA SKILL DI FAZIONE, AGGIORNA NORMALE
                       transaction.update(lobbyRef, {
@@ -8466,6 +8531,22 @@
                                    !showRumorSelector && !showTrioSelector && !specialSkillType ? (
                                    <div className="space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar px-1 pb-1">
                                        
+                                       {/* ALL STARS SKILLS */}
+                                       {lobby.config.theme === 'All Stars' && (
+                                           <div className="mb-4 p-3 bg-yellow-950/80 rounded-xl border-2 border-yellow-900/50 shadow-inner">
+                                               <div className="text-[10px] uppercase font-black text-yellow-400 mb-2 tracking-widest flex items-center justify-center gap-2">
+                                                   <Crown size={12} className="text-yellow-400"/> Azione All Star
+                                               </div>
+                                               
+                                               <button onClick={() => handleInteraction('campione')} className="w-full bg-yellow-700 border border-yellow-400 py-2 rounded-lg font-bold flex justify-center gap-2 hover:bg-yellow-600 text-sm mb-2">
+                                                   <Trophy size={16}/> Vantati (60%)
+                                               </button>
+                                               <button onClick={() => handleInteraction('vip')} className="w-full bg-amber-700 border border-amber-400 py-2 rounded-lg font-bold flex justify-center gap-2 hover:bg-amber-600 text-sm mb-2">
+                                                   <Star size={16}/> Pass VIP (35%)
+                                               </button>
+                                           </div>
+                                       )}
+
                                        {/* GIRLY POP SKILLS */}
                                        {lobby.config.theme === 'Girly pop' && (
                                            <div className="mb-4 p-3 bg-pink-950/80 rounded-xl border-2 border-pink-900/50 shadow-inner">
