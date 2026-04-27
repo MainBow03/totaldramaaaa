@@ -899,6 +899,8 @@
 		  { name: "Shego", img: "https://i.pinimg.com/736x/54/70/77/5470771ee32d3350ffa08f921bb3d1ad.jpg", alignment: 'villain' },
 		  { name: "Ariana Grande", img: "https://media.tenor.com/1u94p6qR01gAAAAM/ariana-grande-eternal-sunshine.gif", skins: [{ name: "Default", img: "https://media.tenor.com/1u94p6qR01gAAAAM/ariana-grande-eternal-sunshine.gif" }, { name: "Ariana 1", img: "https://i.pinimg.com/1200x/2d/85/23/2d8523c2f95a47cdc2f68f428da59e44.jpg" }, { name: "Ariana 2", img: "https://i.pinimg.com/736x/92/45/a3/9245a3787d5a46529f4188d88386cb4d.jpg" }, { name: "Ariana 3", img: "https://i.pinimg.com/originals/b7/de/f4/b7def4c28e8839bfe5d0c29e2450c82f.gif" }], speeches: ["Grazie a tutti i miei fan per avermi supportata fino a qui! Yuh! 🤍 Votatemi e il mio prossimo singolo sarà dedicato a voi!", "Sono passata dal pop al fango di quest'isola, e sono ancora flawless. Datemi la corona, thank you, next!"] },
 		  { name: "Will", img: "https://i.pinimg.com/originals/88/80/73/8880736b5695844044e0e38c8063a1ff.gif", speeches: ["Ho sempre guidato il mio gruppo con il Cuore. Se mi darete il vostro voto, dimostrerete che l'unione fa la forza!", "Abbiamo superato sfide magiche e ostacoli impossibili. Prometto di usare questa vittoria per fare del bene!"] },
+          { name: "Hannibal", img: "https://i.pinimg.com/originals/bf/3a/fb/bf3afbc8242baf434cf064871298b5d3.gif", skins: [{ name: "Default", img: "https://i.pinimg.com/originals/bf/3a/fb/bf3afbc8242baf434cf064871298b5d3.gif" }, { name: "Hannibal 1", img: "https://i.pinimg.com/736x/9c/4e/18/9c4e185a823598e771131f7724392995.jpg" }, { name: "Blood Hannibal", img: "https://i.pinimg.com/1200x/01/ca/db/01cadbc63ec87dcfcb6e8cfe85e37f50.jpg" }], speeches: ["Ho preparato una cena speciale per stasera. Spero non ci siate voi nel menu.", "La scortesia è inaccettabile. Votatemi, o ne pagherete le conseguenze."], alignment: "villain", isNew: true },
+          { name: "Emma Frost", img: "https://i.pinimg.com/736x/39/01/ad/3901ad70e16a220efc02c5c8005ea0f4.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/39/01/ad/3901ad70e16a220efc02c5c8005ea0f4.jpg" }, { name: "Emma Frost 1", img: "https://i.pinimg.com/736x/56/82/5e/56825e171b75f2e0c03b563203962778.jpg" }], speeches: ["I diamanti sono i migliori amici di una ragazza. Ma un milione di dollari non fa male.", "Siete tutti come libri aperti per me. E so già chi perderà."], alignment: "villain", isNew: true },
 		  { name: "Carlos Oliveira", img: "https://i.pinimg.com/originals/32/0d/d1/320dd13031f1aba8a2d3d9b9837174f4.gif", skins: [{ name: "Default", img: "https://i.pinimg.com/originals/32/0d/d1/320dd13031f1aba8a2d3d9b9837174f4.gif" }, { name: "Carlos 1", img: "https://i.pinimg.com/736x/3b/32/29/3b3229d97074aac59eceb564b01601e8.jpg" }, { name: "Carlos 2", img: "https://i.pinimg.com/736x/c3/3e/60/c33e605cb3df44bdb47d56ee48423f18.jpg" }], speeches: ["In un mondo pieno di mostri, voi siete stati la mia squadra. Votate per me, vi ho guardato le spalle fin dall'inizio.", "Non lascio mai un civile indietro, figuriamoci una finale. Sono un sopravvissuto nato, merito il vostro voto."] },
 		  { name: "Leon", img: "https://i.pinimg.com/736x/db/ef/fc/dbeffc6e915a929f7dbe908390f5af42.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/db/ef/fc/dbeffc6e915a929f7dbe908390f5af42.jpg" }, { name: "Leon 1", img: "https://i.pinimg.com/736x/38/a7/51/38a7517e952f29656cc0f6ec62c9723e.jpg" }, { name: "Leon 2", img: "https://i.pinimg.com/736x/cf/c3/eb/cfc3eb57eaabeda3e3636ebaf6d91cc8.jpg" }], speeches: ["Ho affrontato di peggio a Raccoon City. Ho mantenuto il sangue freddo e ho giocato pulito. Votatemi, missione compiuta.", "Scusate il ritardo, ma eccomi in finale. Se cercate un vero sopravvissuto, sapete a chi dare il vostro voto."] },
 		  { name: "Spongebob", img: "https://i.pinimg.com/originals/4c/74/21/4c742132b3f7018e49ae1901a2ab3e68.gif", skins: [{ name: "Default", img: "https://i.pinimg.com/originals/4c/74/21/4c742132b3f7018e49ae1901a2ab3e68.gif" }, { name: "Girly", img: "https://i.pinimg.com/1200x/6c/62/c7/6c62c7b364228712eb9dc440a486db82.jpg" }, { name: "Wrestling Spongebob", img: "https://i.pinimg.com/1200x/f6/c6/28/f6c62879d0f16f54b90537a89048f0a6.jpg" }], speeches: ["Sono pronto! Sono pronto per vincere! Hahahaha!", "Ho sempre creduto nel potere dell'amicizia e del Krabby Patty. Votatemi!"] },
@@ -986,15 +988,15 @@
           "Sfigati", "Dimenticati", "Invisibili"
         ];
 
-        const BRAINS = ["Marinette", "Kowalski", "Conan", "Shinichi", "Anais", "Peridot", "Dr Doofenshmirtz", "Corvina GO", "Corvina TT", "Velma", "Stewie", "Perla", "Wanda", "Shinobu", "Tails", "Gwen Tennyson", "Gommarosa", "Doraemon", "Azula", "Hiro", "Hiccup", "Sypha", "Banana Barbara", "Kiyo"];
-        const BEAUTIES = ["Heartfixer", "Gwen", "Heather", "Rias", "Penny", "Stellarubia GO", "Fred", "Anastasia", "Ellis", "Tengen", "Zuko", "Ariana Grande", "Poison Ivy", "Simba", "Leon", "Alya", "Shizuka", "Sdentato", "Helga", "Megara", "Aiden", "Bloom", "Perla Gialla", "Perla Rosa", "Folgore"];
+        const BRAINS = ["Marinette", "Kowalski", "Conan", "Shinichi", "Anais", "Peridot", "Dr Doofenshmirtz", "Corvina GO", "Corvina TT", "Velma", "Stewie", "Perla", "Wanda", "Shinobu", "Tails", "Gwen Tennyson", "Gommarosa", "Doraemon", "Azula", "Hiro", "Hiccup", "Sypha", "Banana Barbara", "Kiyo", "Hannibal", "Emma Frost"];
+        const BEAUTIES = ["Heartfixer", "Gwen", "Heather", "Rias", "Penny", "Stellarubia GO", "Fred", "Anastasia", "Ellis", "Tengen", "Zuko", "Ariana Grande", "Poison Ivy", "Simba", "Leon", "Alya", "Shizuka", "Sdentato", "Helga", "Megara", "Aiden", "Bloom", "Perla Gialla", "Perla Rosa", "Folgore", "Emma Frost"];
         const BRAWNS = ["Kagami", "Alejandro", "Lightning", "Bowser", "Brago", "Garnet", "Rubino", "Zaffiro", "Nicole", "Johnny Bravo", "Robin TT", "Hunter", "Tom", "Tanjiro", "Superboy", "Kratos", "Po", "Argos", "Baki", "Sephiroth", "Clark", "Legoshi", "Morte", "Gatto con gli stivali", "Robert", "Livewire", "Tefè"];
 
         const HEROES = ["Marinette", "Adrien", "Owen", "Lindsay", "Yoshi", "Luigi", "Zatch Bell", "Steven", "Ponygon", "Jake DC", "Finn", "Mortino", "Spongebob", "Sonic", "Robin TT", "Aang", "Alya", "Gommarosa", "Doraemon", "Shizuka", "Clark", "Hiro", "Hiccup", "Sdentato", "Gatto con gli stivali", "Megara", "Sypha", "Bloom", "Hunter", "Ashley", "Will", "Leon", "Ben 10", "Gwen Tennyson", "Timmy", "Wanda", "Robot Boy", "Fiona", "Jake", "Cake", "Zoey", "Rochelle", "Ellis", "Tanjiro", "Hinosuke", "Zenitsu", "Nezuko", "Shinobu", "Tengen", "Katara", "Toph", "Sokka", "Superboy", "Miss Martian", "Zatanna", "Carlos Oliveira", "Clover", "Sam", "Pery", "Hazel", "Kiyo", "Folgore"];
-        const VILLAINS_LIST = ["Dr Eggman", "Chrysalis", "Heather", "Alejandro", "Bowser", "Vicky", "Stewie", "Fiore", "Shego", "Scar", "Yzma", "Malefica", "Ghostface", "Plankton", "Poison Ivy", "Argos", "Azula", "Sephiroth", "Helga", "Morte", "Grett", "Isabelle", "Anastasia", "Courtney", "Duncan", "Bowie", "Lord Farquaad", "Heartfixer", "Lightning", "Wario", "Waluigi", "Bowser Jr", "Brago", "Candace", "Dr Doofenshmirtz", "Re Ghiaccio", "Rico", "Livewire"];
+        const VILLAINS_LIST = ["Dr Eggman", "Chrysalis", "Heather", "Alejandro", "Bowser", "Vicky", "Stewie", "Fiore", "Shego", "Scar", "Yzma", "Malefica", "Ghostface", "Plankton", "Poison Ivy", "Argos", "Azula", "Sephiroth", "Helga", "Morte", "Grett", "Isabelle", "Anastasia", "Courtney", "Duncan", "Bowie", "Lord Farquaad", "Heartfixer", "Lightning", "Wario", "Waluigi", "Bowser Jr", "Brago", "Candace", "Dr Doofenshmirtz", "Re Ghiaccio", "Rico", "Livewire", "Hannibal", "Emma Frost"];
         const NEUTRALS = ["Kratos", "Squiddi", "Mr Krab", "Zuko", "Trixie", "Francine", "Vanessa", "Bart", "Baki", "Legoshi", "Aiden", "Banana Barbara", "Tom", "Ally", "Ariana Grande", "Cosmo", "Luka", "Kagami", "Re Julien", "Skipper", "Kowalski", "Soldato", "Gwen", "Julia", "Raj", "Conan", "Ran", "Rias", "Bayonetta", "Rosalinda", "Peach", "Daisy", "Pauline", "Tio", "Penny", "Perla", "Perla Gialla", "Perla Rosa", "Garnet", "Rubino", "Zaffiro", "Peridot", "Lapis", "Ametista", "Nicole", "Richard", "Gumball", "Anais", "Lisa", "Marge", "Ned", "Neera", "Perry", "Isabella", "Nonnina", "Sid", "Diego", "Alex", "Corvina GO", "Corvina TT", "Stellarubia GO", "Cyborg TT", "BeastBoy TT", "Nightwing", "Robin GO", "Johnny Bravo", "Daphne", "Shaggy", "Fred", "Velma", "Hayley", "Stan", "Lois", "Peter", "Fry", "Leela", "Kim", "Tess", "Marceline", "Mordecai", "Rigby", "Draculaura", "Clawdeen", "Frankie", "Mimikyu", "Pikachu", "Gallade", "Gardevoir", "Roserade", "Robert", "Tefè"];
 
-        const FEMALES = ["Marinette", "Alya", "Heartfixer", "Chrysalis", "Nathalie", "Kagami", "Gwen", "Julia", "Heather", "Courtney", "Lindsay", "Ran", "Rias", "Bayonetta", "Rosalinda", "Peach", "Daisy", "Pauline", "Tio", "Penny", "Perla", "Perla Gialla", "Perla Rosa", "Garnet", "Rubino", "Zaffiro", "Peridot", "Lapis", "Ametista", "Nicole", "Anais", "Lisa", "Marge", "Neera", "Candace", "Vanessa", "Isabella", "Nonnina", "Corvina GO", "Corvina TT", "Stellarubia GO", "Daphne", "Velma", "Francine", "Hayley", "Lois", "Leela", "Kim", "Tess", "Ashley", "Grett", "Fiore", "Ally", "Isabelle", "Anastasia", "Trixie", "Vicky", "Fiona", "Cake", "Gommarosa", "Marceline", "Zoey", "Rochelle", "Nezuko", "Shinobu", "Katara", "Toph", "Miss Martian", "Zatanna", "Draculaura", "Clawdeen", "Frankie", "Shego", "Ariana Grande", "Will", "Poison Ivy", "Malefica", "Yzma", "Aurora", "Gardevoir", "Roserade", "Clover", "Sam", "Gwen Tennyson", "Shizuka", "Helga", "Megara", "Sypha", "Bloom", "Banana Barbara", "Livewire", "Tefè"];
+        const FEMALES = ["Marinette", "Alya", "Heartfixer", "Chrysalis", "Nathalie", "Kagami", "Gwen", "Julia", "Heather", "Courtney", "Lindsay", "Ran", "Rias", "Bayonetta", "Rosalinda", "Peach", "Daisy", "Pauline", "Tio", "Penny", "Perla", "Perla Gialla", "Perla Rosa", "Garnet", "Rubino", "Zaffiro", "Peridot", "Lapis", "Ametista", "Nicole", "Anais", "Lisa", "Marge", "Neera", "Candace", "Vanessa", "Isabella", "Nonnina", "Corvina GO", "Corvina TT", "Stellarubia GO", "Daphne", "Velma", "Francine", "Hayley", "Lois", "Leela", "Kim", "Tess", "Ashley", "Grett", "Fiore", "Ally", "Isabelle", "Anastasia", "Trixie", "Vicky", "Fiona", "Cake", "Gommarosa", "Marceline", "Zoey", "Rochelle", "Nezuko", "Shinobu", "Katara", "Toph", "Miss Martian", "Zatanna", "Draculaura", "Clawdeen", "Frankie", "Shego", "Ariana Grande", "Will", "Poison Ivy", "Malefica", "Yzma", "Aurora", "Gardevoir", "Roserade", "Clover", "Sam", "Gwen Tennyson", "Shizuka", "Helga", "Megara", "Sypha", "Bloom", "Banana Barbara", "Livewire", "Tefè", "Emma Frost"];
 
         // --- TITOLI PERSONAGGI ---
         const CHARACTER_TITLES = {
@@ -1614,6 +1616,14 @@
                 name: "Sguardo Ferito",
                 style: "bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(99,102,241,0.4)] tracking-widest font-black text-[11px]"
             },
+            "Hannibal": {
+                name: "Cannibale",
+                style: "bg-gradient-to-r from-red-800 via-rose-900 to-black bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(153,27,27,0.4)] tracking-widest font-black text-[11px]"
+            },
+            "Emma Frost": {
+                name: "Regina Bianca",
+                style: "bg-gradient-to-r from-slate-100 via-white to-cyan-100 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(255,255,255,0.4)] tracking-widest font-black text-[11px]"
+            },
             "Carlos Oliveira": {
                 name: "Peloso",
                 style: "bg-gradient-to-r from-pink-300 via-fuchsia-500 to-rose-300 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(244,114,182,0.8)] tracking-widest font-black text-[11px]"
@@ -2150,7 +2160,7 @@
             if (config.theme === 'All Stars') {
                 let names = (topCharacters || []).map(c => c.name);
                 if (names.length < 24) {
-                     const fallback = [...ROSTER].sort(() => Math.random() - 0.5);
+                     const fallback = [...ROSTER];
                      for (let char of fallback) {
                          if (!names.includes(char.name)) names.push(char.name);
                          if (names.length >= 24) break;
@@ -2158,15 +2168,20 @@
                 }
                 allStarsRoster = names.slice(0, 24);
             } else if (config.theme === 'Loser Island') {
-                // Prendi quelli con meno partecipazioni
-                let namesFromStats = [...allGlobalStats].sort((a, b) => a.count - b.count).map(c => c.name);
-                // Prendi anche quelli che non sono proprio in classifica (0 presenze)
-                const allRosterNames = ROSTER.map(r => r.name);
-                const unplayedNames = allRosterNames.filter(n => !namesFromStats.includes(n));
+                // Calcola le statistiche per l'intero roster (assegnando 0 a chi non ha giocato)
+                const statsMap = {};
+                allGlobalStats.forEach(s => statsMap[s.name] = s.count);
                 
-                // Unisci: prima quelli a 0 (randomizzati), poi quelli con 1, 2, ecc.
-                let combined = [...unplayedNames.sort(() => Math.random() - 0.5), ...namesFromStats];
-                loserIslandRoster = combined.slice(0, 24);
+                const allWithStats = ROSTER.map(r => ({
+                    name: r.name,
+                    count: statsMap[r.name] || 0
+                }));
+                
+                // Ordina per numero di partite crescenti (i meno giocati in assoluto vanno per primi)
+                // A parità di partite (es. tutti a 0), manterrà la lista stabile anziché randomizzarla
+                allWithStats.sort((a, b) => a.count - b.count);
+                
+                loserIslandRoster = allWithStats.slice(0, 24).map(c => c.name);
             }
             
             const initialData = {
@@ -2475,7 +2490,19 @@
                            <Megaphone size={24} /> PATCH NOTES
                        </h3>
                        <div className="space-y-4 text-sm text-slate-300">
-                           <div className="border-l-2 border-fuchsia-500 pl-4 py-1">
+                           {/* AGGIORNAMENTO RECENTE IN CIMA */}
+                           <div className="border-l-2 border-yellow-400 pl-4 py-1">
+                               <div className="font-bold text-white text-base">All Stars, Loser Island & Nuovi Personaggi! ⭐</div>
+                               <ul className="list-disc pl-4 mt-2 space-y-2">
+                                   <li><strong className="text-yellow-400">All Stars & Loser Island:</strong> Aggiunti ufficialmente i due nuovi temi speciali! Gareggia in epiche sfide a 24 giocatori con il meglio del meglio, o dai una seconda chance a chi non ha mai brillato! (Il limite giocatori scatterà automaticamente a 24).</li>
+                                   <li><strong className="text-red-500">Nuovi Personaggi:</strong> Hannibal (con skin alternativa e titolo Cannibale) ed Emma Frost (con skin e titolo Regina Bianca) si uniscono ufficialmente al roster!</li>
+                                   <li><strong className="text-red-400">Anti-AFK Giuria:</strong> Aggiunto un pulsante per l'Host durante la finale per <strong className="text-white">forzare lo spoglio dei voti</strong> e calcolare il vincitore nel caso qualche giurato vada AFK!</li>
+                                   <li><strong className="text-pink-400">Aggiornamento Amicizie:</strong> Ora le interazioni sociali positive ("Amicizia" e "Leccapiedi") sono <strong className="text-white">reciproche al 100%</strong>. Se un bot fa il primo passo, i punti affetto saliranno per entrambi!</li>
+                                   <li>Aggiunto un nuovo achievement segreto: <strong className="text-purple-400">"Tu sì che sei un perdente"</strong>. Sbloccalo per ottenere l'esclusiva e rarissima <strong className="text-purple-400">Aura Abissale</strong>!</li>
+                               </ul>
+                           </div>
+
+                           <div className="border-l-2 border-fuchsia-500 pl-4 py-1 opacity-60 hover:opacity-100 transition-opacity">
                                <div className="font-bold text-white text-base">Livelli EXP & Statistiche Giocatore! 🚀</div>
                                <ul className="list-disc pl-4 mt-2 space-y-2">
                                    <li><strong className="text-purple-400">Profilo Personale:</strong> Aggiunto il pulsante "LE TUE STATISTICHE" nella lobby! Il gioco ora salva i tuoi record in modo permanente: vittorie, round sopravvissuti, immunità, idoli trovati e calcola persino il tuo <em className="text-white">Personaggio Main</em>!</li>
@@ -2500,15 +2527,6 @@
                                    <li><strong className="text-red-400">Sicurezza (Guardrails):</strong> Prevenuti potenziali bug di softlock a fine gioco! I twist "Sfida a Coppie" e "Doppia Eliminazione" verranno saltati se si raggiungono rispettivamente la Top 4 o la Top 3.</li>
                                </ul>
                            </div>
-                           <div className="border-l-2 border-slate-600 pl-4 py-1 opacity-60 hover:opacity-100 transition-opacity">
-                               <div className="font-bold text-white text-base">Amicizie Reciproche, Anti-AFK Giuria e Nuove Skin!</div>
-                               <ul className="list-disc pl-4 mt-2 space-y-2">
-                                   <li><strong className="text-red-400">Anti-AFK Giuria:</strong> Aggiunto un pulsante per l'Host durante la finale per <strong className="text-white">forzare lo spoglio dei voti</strong> e calcolare il vincitore nel caso qualche giurato vada AFK!</li>
-                                   <li><strong className="text-pink-400">Aggiornamento Amicizie:</strong> Ora le interazioni sociali positive ("Amicizia" e "Leccapiedi") sono <strong className="text-white">reciproche al 100%</strong>. Se un bot fa il primo passo, i punti affetto saliranno per entrambi!</li>
-                                   <li>Aggiunto un nuovo achievement segreto: <strong className="text-purple-400">"Tu sì che sei un perdente"</strong>. Sbloccalo per ottenere l'esclusiva e rarissima <strong className="text-purple-400">Aura Abissale</strong>!</li>
-                                   <li>Aggiunte tantissime <strong className="text-yellow-400">nuove skin</strong> nel roster per svariati personaggi e nuove icone default per Julia.</li>
-                               </ul>
-                           </div>
                        </div>
                    </div>
 
@@ -2525,7 +2543,7 @@
                           onChange={e => {
                               const val = e.target.value;
                               if (val === 'Brains vs Beauties vs Brawns' || val === 'Eroi vs Villains vs Neutrali' || val === 'All Stars' || val === 'Loser Island') {
-                                  setConfig({...config, theme: val, numTeams: 3, maxPlayers: (val === 'All Stars' || val === 'Loser Island') ? Math.min(config.maxPlayers, 24) : config.maxPlayers});
+                                  setConfig({...config, theme: val, numTeams: 3, maxPlayers: (val === 'All Stars' || val === 'Loser Island') ? 24 : config.maxPlayers});
                               } else if (val === 'Girly pop') {
                                   setConfig({...config, theme: val, numTeams: 4});
                               } else if (val === 'La Notte del Giudizio' || val === 'Popolarità') {
@@ -2554,14 +2572,14 @@
                     <div>
                       <label className="block text-slate-400 font-bold mb-2">Concorrenti (8 - {(config.theme === 'All Stars' || config.theme === 'Loser Island') ? 24 : 100})</label>
                       <div className="flex items-center gap-4">
-                        <input type="range" min="8" max={(config.theme === 'All Stars' || config.theme === 'Loser Island') ? "24" : "100"} value={config.maxPlayers} onChange={e => {
+                        <input type="range" min="8" max={(config.theme === 'All Stars' || config.theme === 'Loser Island') ? "24" : "100"} value={config.maxPlayers} disabled={config.theme === 'All Stars' || config.theme === 'Loser Island'} onChange={e => {
                             const newVal = parseInt(e.target.value);
                             setConfig({
                                 ...config, 
                                 maxPlayers: newVal,
                                 mergeSize: (config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità') ? newVal : Math.min(config.mergeSize, newVal - 1)
                             });
-                        }} className="flex-1 accent-yellow-500" />
+                        }} className="flex-1 accent-yellow-500 disabled:opacity-50" />
                         <span className="text-2xl font-bold w-12 text-center">{config.maxPlayers}</span>
                       </div>
                     </div>
