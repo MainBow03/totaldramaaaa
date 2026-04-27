@@ -972,13 +972,18 @@
           "Vipere Velenose", "Iene Spietate", "Tarantole Tossiche", "Pipistrelli Predatori"
         ];
 
+        const LOSER_TEAM_NAMES = [
+          "Sfigati", "Dimenticati", "Invisibili"
+        ];
+
         // NUOVA LISTA COMPLETA PER LA MODALITÀ CUSTOM
         const ALL_AVAILABLE_TEAMS = [
           "Marmotte Urlanti", "Carpe Assassine", "Criceti Radioattivi", "Avvoltoi Volanti",
           "Tigri Selvaggi", "Orsi Polari", "Lupi Mannari", "Serpenti A Sonagli",
           "Avvoltoi Malvagi", "Corvi Cruenti", "Draghi Diabolici", "Piedini Rosa",
           "Vipere Velenose", "Iene Spietate", "Tarantole Tossiche", "Pipistrelli Predatori",
-          "Brains", "Beauties", "Brawns", "Eroi", "Villains", "Neutrali"
+          "Brains", "Beauties", "Brawns", "Eroi", "Villains", "Neutrali",
+          "Sfigati", "Dimenticati", "Invisibili"
         ];
 
         const BRAINS = ["Marinette", "Kowalski", "Conan", "Shinichi", "Anais", "Peridot", "Dr Doofenshmirtz", "Corvina GO", "Corvina TT", "Velma", "Stewie", "Perla", "Wanda", "Shinobu", "Tails", "Gwen Tennyson", "Gommarosa", "Doraemon", "Azula", "Hiro", "Hiccup", "Sypha", "Banana Barbara", "Kiyo"];
@@ -1832,6 +1837,7 @@
           const [lobbyData, setLobbyData] = useState(null);
           const [errorMsg, setErrorMsg] = useState('');
           const [muted, setMuted] = useState(false);
+          const [allGlobalStats, setAllGlobalStats] = useState([]); // NUOVO STATO
           const [topCharacters, setTopCharacters] = useState(null);
           const [isReconnecting, setIsReconnecting] = useState(true); // NUOVO STATO
           
@@ -2099,14 +2105,17 @@
                       const data = docSnap.data();
                       const sorted = Object.entries(data)
                           .map(([name, count]) => ({ name, count }))
-                          .sort((a, b) => b.count - a.count)
-                          .slice(0, 24); // MODIFICATO DA 10 A 24 PER IL TEMA ALL STARS
-                      setTopCharacters(sorted);
+                          .sort((a, b) => b.count - a.count);
+                      
+                      setAllGlobalStats(sorted); // Salviamo TUTTA la classifica per il tema Loser Island
+                      setTopCharacters(sorted.slice(0, 24)); // MODIFICATO DA 10 A 24 PER IL TEMA ALL STARS
                   } else {
+                      setAllGlobalStats([]);
                       setTopCharacters([]); // Documento non esiste ancora, mostra lista vuota
                   }
               }, (error) => {
                   console.error("Errore fetch global stats:", error);
+                  setAllGlobalStats([]);
                   setTopCharacters([]); // In caso di errore smetti di caricare
               });
               return () => unsub();
@@ -2136,6 +2145,8 @@
             const newLobbyRef = doc(collection(db, 'artifacts', appId, 'public', 'data', 'lobbies'));
             
             let allStarsRoster = [];
+            let loserIslandRoster = [];
+
             if (config.theme === 'All Stars') {
                 let names = (topCharacters || []).map(c => c.name);
                 if (names.length < 24) {
@@ -2146,6 +2157,16 @@
                      }
                 }
                 allStarsRoster = names.slice(0, 24);
+            } else if (config.theme === 'Loser Island') {
+                // Prendi quelli con meno partecipazioni
+                let namesFromStats = [...allGlobalStats].sort((a, b) => a.count - b.count).map(c => c.name);
+                // Prendi anche quelli che non sono proprio in classifica (0 presenze)
+                const allRosterNames = ROSTER.map(r => r.name);
+                const unplayedNames = allRosterNames.filter(n => !namesFromStats.includes(n));
+                
+                // Unisci: prima quelli a 0 (randomizzati), poi quelli con 1, 2, ecc.
+                let combined = [...unplayedNames.sort(() => Math.random() - 0.5), ...namesFromStats];
+                loserIslandRoster = combined.slice(0, 24);
             }
             
             const initialData = {
@@ -2156,7 +2177,8 @@
               config: {
                 ...config,
                 allStarsRoster: allStarsRoster,
-                redemption: config.redemption || { enabled: false, count: 0, episodes: [] },
+                loserIslandRoster: loserIslandRoster,
+                redemption: config.redemption || { enabled: false, count: 1, episodes: "" },
                 theme: config.theme || 'Tutti'
               }, 
               currentSeasonIndex: 0,
@@ -2363,7 +2385,10 @@
           // Calcolo del personaggio preferito
           const favChar = useMemo(() => {
               if (!personalStats.personaggiGiocati) return { name: "Nessuno", count: 0 };
-              const entries = Object.entries(personalStats.personaggiGiocati);
+              // FIX: Filtriamo i nomi validi dal ROSTER per ignorare vecchi salvataggi corrotti col nickname del giocatore
+              const validNames = ROSTER.map(r => r.name);
+              const entries = Object.entries(personalStats.personaggiGiocati).filter(([name]) => validNames.includes(name));
+              
               if (entries.length === 0) return { name: "Nessuno", count: 0 };
               entries.sort((a, b) => b[1] - a[1]); // Ordina in modo decrescente
               return { name: entries[0][0], count: entries[0][1] };
@@ -2499,8 +2524,8 @@
                           value={config.theme} 
                           onChange={e => {
                               const val = e.target.value;
-                              if (val === 'Brains vs Beauties vs Brawns' || val === 'Eroi vs Villains vs Neutrali' || val === 'All Stars') {
-                                  setConfig({...config, theme: val, numTeams: 3, maxPlayers: val === 'All Stars' ? Math.min(config.maxPlayers, 24) : config.maxPlayers});
+                              if (val === 'Brains vs Beauties vs Brawns' || val === 'Eroi vs Villains vs Neutrali' || val === 'All Stars' || val === 'Loser Island') {
+                                  setConfig({...config, theme: val, numTeams: 3, maxPlayers: (val === 'All Stars' || val === 'Loser Island') ? Math.min(config.maxPlayers, 24) : config.maxPlayers});
                               } else if (val === 'Girly pop') {
                                   setConfig({...config, theme: val, numTeams: 4});
                               } else if (val === 'La Notte del Giudizio' || val === 'Popolarità') {
@@ -2518,6 +2543,7 @@
                           <option value="Brains vs Beauties vs Brawns">Brains vs Beauties vs Brawns</option>
                           <option value="Eroi vs Villains vs Neutrali">Eroi vs Villains vs Neutrali</option>
                           <option value="All Stars">All Stars (Top 24 Hall of Fame, 3 Team)</option>
+                          <option value="Loser Island">Loser Island (Bottom 24 Dimenticati, 3 Team)</option>
                           <option value="La Notte del Giudizio">La Notte del Giudizio (Tutti vs Tutti, Voto ai Peggiori 2)</option>
                           <option value="Popolarità">Popolarità (Niente sfide, immunità ai più amati)</option>
                           <option value="Ghost Island">Ghost Island (Gli eliminati lottano per tornare al Merge)</option>
@@ -2526,21 +2552,9 @@
                     </div>
 
                     <div>
-                      <label className="block text-slate-400 font-bold mb-2">Livello di Difficoltà</label>
-                      <select 
-                          value={config.difficulty} 
-                          onChange={e => setConfig({...config, difficulty: e.target.value})}
-                          className="w-full bg-slate-900 border border-slate-600 text-white rounded-xl p-3 focus:border-red-500 outline-none font-bold"
-                      >
-                          <option value="Normale">Normale (I bot giocano in modo bilanciato)</option>
-                          <option value="Hardcore">Hardcore (I bot sparlano degli umani ad ogni turno)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-slate-400 font-bold mb-2">Concorrenti (8 - {config.theme === 'All Stars' ? 24 : 100})</label>
+                      <label className="block text-slate-400 font-bold mb-2">Concorrenti (8 - {(config.theme === 'All Stars' || config.theme === 'Loser Island') ? 24 : 100})</label>
                       <div className="flex items-center gap-4">
-                        <input type="range" min="8" max={config.theme === 'All Stars' ? "24" : "100"} value={config.maxPlayers} onChange={e => {
+                        <input type="range" min="8" max={(config.theme === 'All Stars' || config.theme === 'Loser Island') ? "24" : "100"} value={config.maxPlayers} onChange={e => {
                             const newVal = parseInt(e.target.value);
                             setConfig({
                                 ...config, 
@@ -2555,7 +2569,7 @@
                     <div>
                       <label className="block text-slate-400 font-bold mb-2">Squadre (2 - 8)</label>
                       <div className="flex items-center gap-4">
-                        <input type="range" min="2" max="8" value={config.numTeams} disabled={config.theme === 'Brains vs Beauties vs Brawns' || config.theme === 'Eroi vs Villains vs Neutrali' || config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità' || config.theme === 'Girly pop' || config.theme === 'All Stars'} onChange={e => setConfig({...config, numTeams: parseInt(e.target.value)})} className="flex-1 accent-blue-500 disabled:opacity-50" />
+                        <input type="range" min="2" max="8" value={config.numTeams} disabled={config.theme === 'Brains vs Beauties vs Brawns' || config.theme === 'Eroi vs Villains vs Neutrali' || config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità' || config.theme === 'Girly pop' || config.theme === 'All Stars' || config.theme === 'Loser Island'} onChange={e => setConfig({...config, numTeams: parseInt(e.target.value)})} className="flex-1 accent-blue-500 disabled:opacity-50" />
                         <span className="text-2xl font-bold w-12 text-center">{config.theme === 'La Notte del Giudizio' || config.theme === 'Popolarità' ? 1 : config.numTeams}</span>
                       </div>
                     </div>
@@ -3621,6 +3635,7 @@
                 if (lobby.config.theme === 'Brains vs Beauties vs Brawns') return BRAINS.includes(r.name) || BEAUTIES.includes(r.name) || BRAWNS.includes(r.name);
                 if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') return HEROES.includes(r.name) || VILLAINS_LIST.includes(r.name) || NEUTRALS.includes(r.name);
                 if (lobby.config.theme === 'All Stars') return lobby.config.allStarsRoster?.includes(r.name);
+                if (lobby.config.theme === 'Loser Island') return lobby.config.loserIslandRoster?.includes(r.name);
                 return true; 
             };
 
@@ -3757,7 +3772,7 @@
             }
 
             const numTeams = lobby.config.numTeams;
-            const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : lobby.config.theme === 'Girly pop' ? ["Girly pop", "Amazzoni", "Yuri", "Dive"] : lobby.config.theme === 'All Stars' ? ["Vincenti", "Vinti", "Pelatoni"] : DEFAULT_TEAM_NAMES;
+            const currentTeamNames = lobby.config.theme === 'Villain Edition' ? VILLAIN_TEAM_NAMES : lobby.config.theme === 'Girly pop' ? ["Girly pop", "Amazzoni", "Yuri", "Dive"] : lobby.config.theme === 'All Stars' ? ["Vincenti", "Vinti", "Pelatoni"] : lobby.config.theme === 'Loser Island' ? LOSER_TEAM_NAMES : DEFAULT_TEAM_NAMES;
 
             if (lobby.config.theme === 'Brains vs Beauties vs Brawns') {
                 currentPlayers = currentPlayers.map(p => {
@@ -4383,7 +4398,7 @@
                               votiRicevuti: r.votes || 0,
                               amicizie: r.friendships || 0,
                               exp: gainedExp
-                          }, r.name);
+                          }, myPlayer.character?.name); // FIX: Usa il nome del personaggio, non il nickname del giocatore!
                       }
                       localStorage.setItem(syncedCountKey, myRankings.length.toString());
                   }
@@ -4774,6 +4789,7 @@
                      const target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)];
                      const actions = ['friend', 'suckup', 'rumor'];
                      if (lobby.config.theme === 'All Stars') actions.push('campione', 'vip');
+                     if (lobby.config.theme === 'Loser Island') actions.push('piagnisteo', 'riscatto');
                      const action = actions[Math.floor(Math.random() * actions.length)];
 
                      const targetIdx = updatedPlayers.findIndex(p => p.uid === target.uid);
@@ -4822,6 +4838,20 @@
                               updatedPlayers[targetIdx].alliances = [...new Set([...(updatedPlayers[targetIdx].alliances || []), bot.uid])];
                               updatedPlayers[botIdx].alliances = [...new Set([...(updatedPlayers[botIdx].alliances || []), target.uid])];
                               newLogs.push(`✨ ${bot.name} ha usato il suo Pass VIP con ${target.name}! Sono diventati Alleati!`);
+                          }
+                     } else if (action === 'piagnisteo') {
+                          if (Math.random() < 0.6) {
+                              updatedPlayers[botIdx].nextRollNerf = true;
+                              newLogs.push(`😭 ${bot.name} si è lamentato del suo destino amaro con ${target.name} deprimendosi. (-lancio)`);
+                          } else {
+                              updatedPlayers[targetIdx].relationships[bot.uid] = Math.max(-10, (updatedPlayers[targetIdx].relationships[bot.uid] || 0) - 1);
+                              newLogs.push(`🙄 ${bot.name} ha pianto miseria con ${target.name}, che si è infastidito! (-1 relaz)`);
+                          }
+                     } else if (action === 'riscatto') {
+                          if (Math.random() < 0.4) {
+                              updatedPlayers[targetIdx].relationships[bot.uid] = Math.max(1, (updatedPlayers[targetIdx].relationships[bot.uid] || 0) + 2);
+                              updatedPlayers[botIdx].relationships[target.uid] = Math.max(1, (updatedPlayers[botIdx].relationships[target.uid] || 0) + 2);
+                              newLogs.push(`🤝 ${bot.name} e ${target.name} hanno stretto un patto di riscatto per dimostrare quanto valgono! (+2 relaz)`);
                           }
                      }
                  });
@@ -6057,6 +6087,7 @@
             if (lobby.config.theme === 'Villain Edition') currentTeamNames = VILLAIN_TEAM_NAMES;
             else if (lobby.config.theme === 'Girly pop') currentTeamNames = ["Girly pop", "Amazzoni", "Yuri", "Dive"];
             else if (lobby.config.theme === 'All Stars') currentTeamNames = ["Vincenti", "Vinti", "Pelatoni"];
+            else if (lobby.config.theme === 'Loser Island') currentTeamNames = LOSER_TEAM_NAMES;
             else if (lobby.config.theme === 'Custom') {
                 // Recupera i nomi scelti custom per mantenerli nella Stagione 2
                 currentTeamNames = [...new Set(lobby.players.map(p => p.team).filter(t => t && t !== 'MERGE'))];
@@ -8027,7 +8058,7 @@
                       }
                       else if (type === 'spy') {
                           let updates = { players: updatedPlayers };
-                          if (Math.random() < 0.5) {
+                          if (Math.random() < 0.75) {
                               const activeOthers = lobby.players.filter(p => p.status === 'active' && p.uid !== targetId);
                               const targetRels = updatedPlayers[targetIdx].relationships || {};
                               activeOthers.sort((a, b) => (targetRels[b.uid] || 0) - (targetRels[a.uid] || 0));
@@ -8097,6 +8128,33 @@
                           } else {
                               localImbroglio = `🚪 INGRESSO NEGATO.\nHai provato a usare la scusa del "Lei non sa chi sono io!", ma ${targetName} ti ha ignorato.\nNon è successo nulla.`;
                               updates.logs = arrayUnion(`🚪 ${actorName} ha fatto il VIP con ${targetName}, ma non è servito a niente.`);
+                          }
+                          transaction.update(lobbyRef, updates);
+                          return { type, localImbroglio };
+                      }
+                      else if (type === 'piagnisteo') {
+                          let updates = { players: updatedPlayers };
+                          if (Math.random() < 0.6) {
+                              updatedPlayers[myIdx].nextRollNerf = true;
+                              localImbroglio = `😭 PIAGNISTEO...\nTi sei lamentato del tuo destino crudele con ${targetName}.\nTi sei depresso pesantemente e il tuo prossimo lancio sarà scarso (Max 4).`;
+                              updates.logs = arrayUnion(`😭 ${actorName} ha pianto miseria tutto il giorno deprimendosi!`);
+                          } else {
+                              updatedPlayers[targetIdx].relationships[user.uid] = Math.max(-10, (updatedPlayers[targetIdx].relationships[user.uid] || 0) - 1);
+                              localImbroglio = `🙄 CHE NOIA!\nHai pianto ininterrottamente. ${targetName} si è infastidito e si è allontanato (-1 relaz).`;
+                              updates.logs = arrayUnion(`🙄 ${targetName} non ne può più delle lamentele vittimistiche di ${actorName}!`);
+                          }
+                          transaction.update(lobbyRef, updates);
+                          return { type, localImbroglio };
+                      }
+                      else if (type === 'riscatto') {
+                          let updates = { players: updatedPlayers };
+                          if (Math.random() < 0.4) {
+                              updatedPlayers[targetIdx].relationships[user.uid] = Math.min(10, (updatedPlayers[targetIdx].relationships[user.uid] || 0) + 2);
+                              updatedPlayers[myIdx].relationships[targetId] = Math.min(10, (updatedPlayers[myIdx].relationships[targetId] || 0) + 2);
+                              localImbroglio = `🤝 PATTO DI RISCATTO!\nSiete gli esclusi, i dimenticati... e ora siete uniti!\nHai legato profondamente con ${targetName} (+2 Relazione).`;
+                              updates.logs = arrayUnion(`🤝 ${actorName} e ${targetName} hanno promesso di riscattarsi insieme ad ogni costo!`);
+                          } else {
+                              localImbroglio = `❌ FALLIMENTO.\nHai provato a motivare ${targetName} al riscatto, ma non ci crede abbastanza in se stesso.\nNessun effetto.`;
                           }
                           transaction.update(lobbyRef, updates);
                           return { type, localImbroglio };
@@ -8547,6 +8605,22 @@
                                            </div>
                                        )}
 
+                                       {/* LOSER ISLAND SKILLS */}
+                                       {lobby.config.theme === 'Loser Island' && (
+                                           <div className="mb-4 p-3 bg-slate-950/80 rounded-xl border-2 border-slate-700/50 shadow-inner">
+                                               <div className="text-[10px] uppercase font-black text-slate-400 mb-2 tracking-widest flex items-center justify-center gap-2">
+                                                   <Ghost size={12} className="text-slate-400"/> Azioni Loser
+                                               </div>
+                                               
+                                               <button onClick={() => handleInteraction('piagnisteo')} className="w-full bg-slate-700 border border-slate-500 py-2 rounded-lg font-bold flex justify-center gap-2 hover:bg-slate-600 text-sm mb-2">
+                                                   <MessageSquare size={16}/> Piagnisteo (60%)
+                                               </button>
+                                               <button onClick={() => handleInteraction('riscatto')} className="w-full bg-indigo-700 border border-indigo-400 py-2 rounded-lg font-bold flex justify-center gap-2 hover:bg-indigo-600 text-sm mb-2">
+                                                   <Shield size={16}/> Patto di Riscatto (40%)
+                                               </button>
+                                           </div>
+                                       )}
+
                                        {/* GIRLY POP SKILLS */}
                                        {lobby.config.theme === 'Girly pop' && (
                                            <div className="mb-4 p-3 bg-pink-950/80 rounded-xl border-2 border-pink-900/50 shadow-inner">
@@ -8633,7 +8707,7 @@
 
                                        {lobby.config.theme === 'Popolarità' && (
                                             <>
-                                                <button onClick={() => handleInteraction('spy')} className="w-full bg-fuchsia-900 hover:bg-fuchsia-800 border border-fuchsia-500 py-3 rounded font-bold flex justify-center gap-2"><Eye className="text-fuchsia-400"/> Spia Telefono (50%)</button>
+                                                <button onClick={() => handleInteraction('spy')} className="w-full bg-fuchsia-900 hover:bg-fuchsia-800 border border-fuchsia-500 py-3 rounded font-bold flex justify-center gap-2"><Eye className="text-fuchsia-400"/> Spia Telefono (75%)</button>
                                                 <button onClick={() => handleInteraction('scuse_pubbliche')} className="w-full bg-sky-900 hover:bg-sky-800 border border-sky-500 py-3 rounded font-bold flex justify-center gap-2"><Mic className="text-sky-400"/> Scuse Pubbliche (35%)</button>
                                             </>
                                        )}
@@ -9025,6 +9099,10 @@
                                     'Vincenti': { bg: 'bg-yellow-900/40', border: 'border-yellow-500', text: 'text-yellow-400' },
                                     'Vinti': { bg: 'bg-slate-900/40', border: 'border-slate-500', text: 'text-slate-400' },
                                     'Pelatoni': { bg: 'bg-pink-900/40', border: 'border-pink-500', text: 'text-pink-400' },
+
+                                    'Sfigati': { bg: 'bg-slate-900/40', border: 'border-slate-500', text: 'text-slate-400' },
+                                    'Dimenticati': { bg: 'bg-zinc-900/40', border: 'border-zinc-500', text: 'text-zinc-400' },
+                                    'Invisibili': { bg: 'bg-gray-900/40', border: 'border-gray-500', text: 'text-gray-400' },
 
                                     'MERGE': { bg: 'bg-yellow-600/30', border: 'border-yellow-400', text: 'text-yellow-300' }
                                  };
