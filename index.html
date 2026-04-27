@@ -4224,10 +4224,14 @@
                          if (lobby.config.theme === 'Brains vs Beauties vs Brawns') return BRAINS.includes(char.name) || BEAUTIES.includes(char.name) || BRAWNS.includes(char.name);
                          if (lobby.config.theme === 'Eroi vs Villains vs Neutrali') return HEROES.includes(char.name) || VILLAINS_LIST.includes(char.name) || NEUTRALS.includes(char.name);
                          if (lobby.config.theme === 'All Stars') return lobby.config.allStarsRoster?.includes(char.name);
+                         if (lobby.config.theme === 'Loser Island') return lobby.config.loserIslandRoster?.includes(char.name);
                          return true;
                      }).sort((a, b) => {
                          if (lobby.config.theme === 'All Stars' && lobby.config.allStarsRoster) {
                              return lobby.config.allStarsRoster.indexOf(a.name) - lobby.config.allStarsRoster.indexOf(b.name);
+                         }
+                         if (lobby.config.theme === 'Loser Island' && lobby.config.loserIslandRoster) {
+                             return lobby.config.loserIslandRoster.indexOf(a.name) - lobby.config.loserIslandRoster.indexOf(b.name);
                          }
                          return 0;
                      }).map((char, index) => {
@@ -4271,6 +4275,10 @@
                            auraShadow = 'shadow-[0_0_15px_rgba(250,204,21,0.6)]';
                            auraBorder = 'border-yellow-500 hover:border-yellow-400';
                            badge = <div className="absolute top-1 left-1 bg-yellow-600/90 text-yellow-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-yellow-400/50">All Star #{index + 1}</div>;
+                       } else if (lobby.config.theme === 'Loser Island') {
+                           auraShadow = 'shadow-[0_0_15px_rgba(71,85,105,0.6)]';
+                           auraBorder = 'border-slate-500 hover:border-slate-400';
+                           badge = <div className="absolute top-1 left-1 bg-slate-700/90 text-slate-100 text-[8px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase backdrop-blur-sm z-10 border border-slate-500/50">Loser #{ROSTER.length - index}</div>;
                        }
 
                        return (
