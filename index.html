@@ -433,6 +433,103 @@
             animation: abyssPulse 2.5s infinite alternate;
         }
 
+        /* 22. Il Preferito di Chris: Riflettore dorato TV (Niente Emoji) */
+        .cosmetic-preferito {
+            border: 3px solid #fbbf24 !important;
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.9), inset 0 0 15px rgba(251, 191, 36, 0.6) !important;
+            position: relative;
+            overflow: hidden !important;
+        }
+        .cosmetic-preferito::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.9), transparent);
+            animation: sweepGold 3s infinite linear;
+            z-index: 20; pointer-events: none; mix-blend-mode: overlay;
+        }
+
+        /* 23. Vittoria Schiacciante: Aura Imperatore (Senza Emoji) */
+        .cosmetic-imperatore {
+            border: 3px solid #fbbf24 !important;
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.8), 0 0 15px rgba(220, 38, 38, 0.8), inset 0 0 20px rgba(251, 191, 36, 0.6) !important;
+            position: relative;
+        }
+        .cosmetic-imperatore::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border: 4px double #f59e0b;
+            border-radius: inherit;
+            animation: pulseEmperor 2s infinite alternate;
+            z-index: 20; pointer-events: none;
+        }
+        .cosmetic-imperatore::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent 0%, rgba(251, 191, 36, 0.3) 10%, transparent 20%, transparent 40%, rgba(251, 191, 36, 0.3) 50%, transparent 60%);
+            animation: rotateRing 8s linear infinite;
+            z-index: 20; pointer-events: none; mix-blend-mode: color-dodge;
+        }
+
+        /* 24. Il Veggente: Occhio Oscuro che sbatte (Niente Emoji) */
+        .cosmetic-veggente {
+            border: 3px solid #4c1d95 !important;
+            box-shadow: 0 0 25px rgba(88, 28, 135, 0.9), inset 0 0 20px rgba(107, 33, 168, 0.6) !important;
+            position: relative;
+        }
+        .cosmetic-veggente::before {
+            content: '';
+            position: absolute;
+            top: -16px; left: 50%;
+            margin-left: -14px;
+            width: 28px; height: 14px;
+            background: radial-gradient(circle at center, #e879f9 10%, #7e22ce 50%, #000 90%);
+            border: 2px solid #d8b4fe;
+            border-radius: 80% 0 80% 0; /* Crea la forma a mandorla dell'occhio */
+            transform: rotate(45deg);
+            box-shadow: 0 0 15px #9333ea;
+            animation: blinkEvilEye 5s infinite;
+            z-index: 20;
+        }
+
+        /* 25. Re dei Dadi: Dadi rotanti (Niente Emoji) */
+        .cosmetic-rededadi {
+            border: 3px solid #dc2626 !important;
+            box-shadow: 0 0 25px rgba(220, 38, 38, 0.9), inset 0 0 15px rgba(255, 255, 255, 0.4) !important;
+            position: relative;
+        }
+        .cosmetic-rededadi::before,
+        .cosmetic-rededadi::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            margin-top: -10px; margin-left: -10px;
+            width: 20px; height: 20px;
+            background-color: white;
+            border: 2px solid black;
+            border-radius: 4px;
+            z-index: 20;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+        }
+        .cosmetic-rededadi::before {
+            /* Dado faccia 1 (1 punto centrale) */
+            background-image: radial-gradient(circle at center, black 15%, transparent 15%);
+            background-size: 16px 16px;
+            background-position: center;
+            background-repeat: no-repeat;
+            animation: orbitDice1 3s linear infinite;
+        }
+        .cosmetic-rededadi::after {
+            /* Dado faccia 3 (3 punti diagonali) */
+            background-image: 
+                radial-gradient(circle at 25% 25%, black 15%, transparent 15%),
+                radial-gradient(circle at 50% 50%, black 15%, transparent 15%),
+                radial-gradient(circle at 75% 75%, black 15%, transparent 15%);
+            animation: orbitDice2 3s linear infinite;
+        }
+
         /* --- STILI COSMETICI DI LIVELLO --- */
         .cosmetic-level-rame { border: 3px solid #b87333 !important; box-shadow: 0 0 10px rgba(184, 115, 51, 0.5) !important; }
         .cosmetic-level-ferro { border: 3px solid #94a3b8 !important; box-shadow: 0 0 10px rgba(148, 163, 184, 0.5) !important; }
@@ -487,6 +584,11 @@
         @keyframes toxicBubbles { 0% { bottom: -20px; opacity: 0; transform: scale(0.5) translateX(0); } 20% { opacity: 0.8; } 100% { bottom: 100%; opacity: 0; transform: scale(1.5) translateX(-10px); } }
         @keyframes paparazziFlash { 0%, 90% { opacity: 0; transform: scale(0.5); } 95% { opacity: 1; transform: scale(1.5); } 100% { opacity: 0; transform: scale(0.5); } }
         @keyframes abyssPulse { 0% { box-shadow: 0 0 20px #000, inset 0 0 20px #4c1d95; filter: contrast(1.1) brightness(0.8) grayscale(0.3); } 100% { box-shadow: 0 0 45px #000, inset 0 0 40px #581c87; filter: contrast(1.3) brightness(0.6) grayscale(0.6); } }
+        @keyframes sweepGold { 0% { transform: translate(-100%, -100%) rotate(45deg); } 50%, 100% { transform: translate(100%, 100%) rotate(45deg); } }
+        @keyframes pulseEmperor { 0% { filter: drop-shadow(0 0 5px #ef4444); border-color: #f59e0b; transform: scale(1); } 100% { filter: drop-shadow(0 0 20px #dc2626); border-color: #fcd34d; transform: scale(1.05); } }
+        @keyframes blinkEvilEye { 0%, 90%, 100% { transform: rotate(45deg) scale3d(1, 1, 1); border-width: 2px; } 95% { transform: rotate(45deg) scale3d(0, 0, 1); border-width: 0px; } }
+        @keyframes orbitDice1 { 0% { transform: rotate(0deg) translateY(-40px) rotate(0deg); } 100% { transform: rotate(360deg) translateY(-40px) rotate(-360deg); } }
+        @keyframes orbitDice2 { 0% { transform: rotate(180deg) translateY(-40px) rotate(-180deg); } 100% { transform: rotate(540deg) translateY(-40px) rotate(-540deg); } }
 
         @keyframes crownFloat {
             0%, 100% { transform: translate(-50%, 0) scale(1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7)); }
@@ -710,6 +812,10 @@
                 'donnealpotere': 'cosmetic-donnealpotere', // Coroncina dorata e aura rosa
                 'spotlight': 'cosmetic-spotlight', // Effetto VIP con fotocamera
                 'schiappa': 'cosmetic-schiappa', // Aura triste con nuvola e naso da clown
+                'preferitodichris': 'cosmetic-preferito', // Riflettore TV sweep
+                'vittoriaschiacciante': 'cosmetic-imperatore', // Aura imperatore sfarzosa
+                'ilveggente': 'cosmetic-veggente', // Occhio oscuro in cima che blinka
+                'redeidadi': 'cosmetic-rededadi', // Dadi orbitanti
                 // COSMETICI DI LIVELLO
                 'level_rame': 'cosmetic-level-rame',
                 'level_ferro': 'cosmetic-level-ferro',
@@ -1923,6 +2029,10 @@
                   donnealpotere: { progress: 0, unlocked: false },
                   spotlight: { progress: 0, unlocked: false },
                   schiappa: { progress: 0, unlocked: false },
+                  preferitodichris: { progress: 0, unlocked: false },
+                  vittoriaschiacciante: { progress: 0, unlocked: false },
+                  ilveggente: { progress: 0, unlocked: false },
+                  redeidadi: { progress: 0, unlocked: false },
                   title_Marinette: { progress: 0, unlocked: false }
               };
               
@@ -2498,7 +2608,7 @@
                                    <li><strong className="text-red-500">Nuovi Personaggi:</strong> Hannibal (con skin alternativa e titolo Cannibale) ed Emma Frost (con skin e titolo Regina Bianca) si uniscono ufficialmente al roster!</li>
                                    <li><strong className="text-red-400">Anti-AFK Giuria:</strong> Aggiunto un pulsante per l'Host durante la finale per <strong className="text-white">forzare lo spoglio dei voti</strong> e calcolare il vincitore nel caso qualche giurato vada AFK!</li>
                                    <li><strong className="text-pink-400">Aggiornamento Amicizie:</strong> Ora le interazioni sociali positive ("Amicizia" e "Leccapiedi") sono <strong className="text-white">reciproche al 100%</strong>. Se un bot fa il primo passo, i punti affetto saliranno per entrambi!</li>
-                                   <li>Aggiunto un nuovo achievement segreto: <strong className="text-purple-400">"Tu sì che sei un perdente"</strong>. Sbloccalo per ottenere l'esclusiva e rarissima <strong className="text-purple-400">Aura Abissale</strong>!</li>
+                                   <li><strong className="text-amber-400">Nuovi Achievements & Aure:</strong> Aggiunti 5 nuovi fantastici Trofei! Sblocca <strong className="text-amber-400">"Vittoria Schiacciante"</strong>, <strong className="text-purple-400">"Il Veggente"</strong>, <strong className="text-red-400">"Re dei Dadi"</strong>, <strong className="text-yellow-300">"Il Preferito di Chris"</strong> e il segreto <strong className="text-slate-400">"Tu sì che sei un perdente"</strong> per ottenere nuove esclusive Aure CSS animate!</li>
                                </ul>
                            </div>
 
@@ -3351,6 +3461,32 @@
                                  </div>
                               </div>
 
+                              {/* ACHIEVEMENT: IL PREFERITO DI CHRIS */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.preferitodichris?.unlocked ? 'border-yellow-400 bg-yellow-900/20 shadow-[0_0_20px_rgba(251,191,36,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.preferitodichris?.unlocked ? 'text-yellow-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]' : 'text-slate-300'}`}>
+                                         <Camera size={20} className={achievements.preferitodichris?.unlocked ? 'text-yellow-400' : 'text-slate-500'}/> Il Preferito di Chris
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-yellow-400 font-bold">
+                                         {achievements.preferitodichris?.progress || 0} / 50
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Fai il leccapiedi con successo per 50 volte. Sei la star dello show!</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.preferitodichris?.unlocked ? 'bg-yellow-400 shadow-[0_0_10px_#facc15]' : 'bg-slate-500'}`} style={{ width: `${((achievements.preferitodichris?.progress || 0) / 50) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.preferitodichris?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('preferitodichris')}
+                                             className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'preferitodichris' ? 'bg-yellow-400 text-black border-white shadow-[0_0_15px_rgba(250,204,21,1)]' : 'bg-slate-800 text-yellow-400 border-yellow-500 hover:bg-yellow-900/50'}`}
+                                         >
+                                             {equippedCosmetic === 'preferitodichris' ? 'EQUIPAGGIATO' : 'AURA TV STAR'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+
                               {/* ACHIEVEMENT: SCHIAPPA (ORA AURA ABISSALE) */}
                               <div className={`p-4 rounded-xl border-2 transition-all ${achievements.schiappa?.unlocked ? 'border-purple-900 bg-slate-950/90 shadow-[0_0_25px_rgba(88,28,135,0.6)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
                                  <div className="flex justify-between items-center mb-2">
@@ -3375,6 +3511,84 @@
                                          </button>
                                      )}
                                  </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: VITTORIA SCHIACCIANTE */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.vittoriaschiacciante?.unlocked ? 'border-amber-400 bg-amber-900/20 shadow-[0_0_20px_rgba(251,191,36,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.vittoriaschiacciante?.unlocked ? 'text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]' : 'text-slate-300'}`}>
+                                         <Award size={20} className={achievements.vittoriaschiacciante?.unlocked ? 'text-amber-400' : 'text-slate-500'}/> Vittoria Schiacciante
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-amber-400 font-bold">
+                                         {achievements.vittoriaschiacciante?.progress || 0} / 1
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Vinci la finale ottenendo il 100% dei voti della giuria. (Voto unanime)</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.vittoriaschiacciante?.unlocked ? 'bg-amber-400 shadow-[0_0_10px_#facc15]' : 'bg-slate-500'}`} style={{ width: `${((achievements.vittoriaschiacciante?.progress || 0) / 1) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.vittoriaschiacciante?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('vittoriaschiacciante')}
+                                             className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'vittoriaschiacciante' ? 'bg-amber-400 text-black border-white shadow-[0_0_15px_rgba(251,191,36,1)]' : 'bg-slate-800 text-amber-400 border-amber-500 hover:bg-amber-900/50'}`}
+                                         >
+                                             {equippedCosmetic === 'vittoriaschiacciante' ? 'EQUIPAGGIATO' : 'AURA IMPERATORE'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: IL VEGGENTE */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.ilveggente?.unlocked ? 'border-purple-600 bg-purple-950/80 shadow-[0_0_20px_rgba(147,51,234,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                  <div className="flex justify-between items-center mb-2">
+                                      <span className={`font-black text-lg flex items-center gap-2 ${achievements.ilveggente?.unlocked ? 'text-purple-400 drop-shadow-[0_0_5px_rgba(192,132,252,0.8)]' : 'text-slate-300'}`}>
+                                          <Eye size={20} className={achievements.ilveggente?.unlocked ? 'text-purple-400' : 'text-slate-500'}/> Il Veggente
+                                      </span>
+                                      <span className="text-xs font-mono bg-black/80 px-2 py-1 rounded text-purple-400 font-bold border border-purple-900">
+                                          {achievements.ilveggente?.progress || 0} / 15
+                                      </span>
+                                  </div>
+                                  <p className="text-sm text-slate-400 mb-3">Usa la <strong className="text-fuchsia-400">Sfera di Cristallo</strong> e vota esattamente la persona che viene eliminata in quel falò, per 15 volte.</p>
+                                  <div className="flex items-center justify-between mt-2">
+                                      <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                          <div className={`h-full rounded-full transition-all duration-1000 ${achievements.ilveggente?.unlocked ? 'bg-gradient-to-r from-purple-700 to-purple-400 shadow-[0_0_10px_#a855f7]' : 'bg-slate-500'}`} style={{ width: `${((achievements.ilveggente?.progress || 0) / 15) * 100}%` }}></div>
+                                      </div>
+                                      {achievements.ilveggente?.unlocked && (
+                                          <button 
+                                              onClick={() => toggleEquipCosmetic('ilveggente')}
+                                              className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'ilveggente' ? 'bg-purple-950 text-purple-300 border-purple-400 shadow-[0_0_15px_rgba(168,85,247,1)]' : 'bg-slate-900 text-purple-500 border-purple-800 hover:bg-black hover:text-purple-400'}`}
+                                          >
+                                              {equippedCosmetic === 'ilveggente' ? 'EQUIPAGGIATO' : 'OCCHIO OSCURO'}
+                                          </button>
+                                      )}
+                                  </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: RE DEI DADI */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.redeidadi?.unlocked ? 'border-red-500 bg-red-950/80 shadow-[0_0_20px_rgba(239,68,68,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                  <div className="flex justify-between items-center mb-2">
+                                      <span className={`font-black text-lg flex items-center gap-2 ${achievements.redeidadi?.unlocked ? 'text-red-400 drop-shadow-[0_0_5px_rgba(248,113,113,0.8)]' : 'text-slate-300'}`}>
+                                          <Dices size={20} className={achievements.redeidadi?.unlocked ? 'text-red-400' : 'text-slate-500'}/> Re dei Dadi
+                                      </span>
+                                      <span className="text-xs font-mono bg-black/80 px-2 py-1 rounded text-red-400 font-bold border border-red-900">
+                                          {achievements.redeidadi?.progress || 0} / 10
+                                      </span>
+                                  </div>
+                                  <p className="text-sm text-slate-400 mb-3">Partecipa a 10 spareggi per l'immunità (pareggio nei dadi e conseguente rilancio).</p>
+                                  <div className="flex items-center justify-between mt-2">
+                                      <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                          <div className={`h-full rounded-full transition-all duration-1000 ${achievements.redeidadi?.unlocked ? 'bg-gradient-to-r from-red-700 to-red-400 shadow-[0_0_10px_#ef4444]' : 'bg-slate-500'}`} style={{ width: `${((achievements.redeidadi?.progress || 0) / 10) * 100}%` }}></div>
+                                      </div>
+                                      {achievements.redeidadi?.unlocked && (
+                                          <button 
+                                              onClick={() => toggleEquipCosmetic('redeidadi')}
+                                              className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'redeidadi' ? 'bg-red-950 text-red-300 border-red-400 shadow-[0_0_15px_rgba(239,68,68,1)]' : 'bg-slate-900 text-red-500 border-red-800 hover:bg-black hover:text-red-400'}`}
+                                          >
+                                              {equippedCosmetic === 'redeidadi' ? 'EQUIPAGGIATO' : 'AURA DADI'}
+                                          </button>
+                                      )}
+                                  </div>
                               </div>
 
                               <div className="p-4 border-2 border-dashed border-slate-700 bg-slate-800/50 rounded-xl text-center">
@@ -4596,6 +4810,23 @@
               }
           }, [lobby.phase, lobby.ceremonyData, user.uid, lobbyId, updateAchievement]);
 
+          // --- TRACKING ACHIEVEMENT: RE DEI DADI ---
+          useEffect(() => {
+              if (lobby.phase === 'challenge' && lobby.challengeData?.isTieBreak) {
+                  // Se sono tra i vincitori al pareggio
+                  if (lobby.challengeData.players.includes(user.uid)) {
+                      // Chiave univoca usando i giocatori coinvolti, per non contarlo più volte nello stesso giro
+                      const playersKey = lobby.challengeData.players.join('_');
+                      const eventKey = `redeidadi_${lobbyId}_${lobby.round}_${playersKey}`;
+                      
+                      if (!processedAchievements.current.has(eventKey)) {
+                          updateAchievement('redeidadi', 1, 10);
+                          processedAchievements.current.add(eventKey);
+                      }
+                  }
+              }
+          }, [lobby.phase, lobby.challengeData?.isTieBreak, lobby.challengeData?.players, user.uid, lobbyId, lobby.round, updateAchievement]);
+
           // --- TRACKING ACHIEVEMENTS: CAMPIONE, VETERANO & MVP ---
           useEffect(() => {
               // Controlla se la stagione è finita (o il gioco intero) e se ci sono vincitori
@@ -4612,6 +4843,16 @@
                           updateAchievement('veterano', 1, 5);
                           if (myPlayer?.character?.name) {
                               updateAchievement(`title_${myPlayer.character.name}`, 1, 3);
+                          }
+                          
+                          // VITTORIA SCHIACCIANTE
+                          if (lobby.juryData && lobby.juryData.winnerId === myPlayer.uid) {
+                              const jd = lobby.juryData;
+                              const totalVotes = (jd.p1Votes || 0) + (jd.p2Votes || 0);
+                              const winnerVotes = jd.winnerId === jd.finalist1 ? jd.p1Votes : jd.p2Votes;
+                              if (winnerVotes === totalVotes && totalVotes > 0) {
+                                  updateAchievement('vittoriaschiacciante', 1, 1);
+                              }
                           }
                       }
 
@@ -4714,9 +4955,18 @@
                       updateAchievement('idolo', 1, 1);
                   }
                   
+                  // 3. Il Veggente
+                  const crystalBallRound = lobby.idolData?.activeEffects?.[`crystalBallActive_${user.uid}`];
+                  if (crystalBallRound === lobby.round) {
+                      const myTarget = lobby.votes?.[user.uid];
+                      if (myTarget && victims.includes(myTarget)) {
+                          updateAchievement('ilveggente', 1, 15);
+                      }
+                  }
+
                   processedAchievements.current.add(eventKey);
               }
-          }, [lobby.phase, lobby.ceremonyData?.finalReveal, lobby.round, lobbyId, lobby.votes, myPlayer, user.uid, updateAchievement]);
+          }, [lobby.phase, lobby.ceremonyData?.finalReveal, lobby.round, lobbyId, lobby.votes, lobby.idolData, myPlayer, user.uid, updateAchievement]);
 
 
           // Fix: Reset delle azioni al nuovo round sociale
@@ -5380,6 +5630,7 @@
                              [`challengeData.rollingIndex`]: 0,
                              [`challengeData.originalRolls`]: lobby.challengeData.originalRolls || rolls, // FIX: Salviamo i tiri originali prima di azzerarli per lo spareggio!
                              [`challengeData.rolls`]: {},
+                             [`challengeData.isTieBreak`]: true,
                              logs: arrayUnion(`PAREGGIO (${maxRoll})! Spareggio per l'immunità tra: ${winnerNames}`)
                          });
                          return;
@@ -5435,6 +5686,7 @@
                          [`challengeData.players`]: winners,
                          [`challengeData.rollingIndex`]: 0,
                          [`challengeData.rolls`]: {},
+                         [`challengeData.isTieBreak`]: true,
                          logs: arrayUnion(`PAREGGIO (${maxRoll})! Spareggio per l'immunità tra: ${winnerNames}`)
                      });
                      return;
@@ -7858,6 +8110,7 @@
                               };
                               
                               msg = `👅 Hai fatto il leccapiedi con ${targetName}. I tuoi complimenti esagerati hanno funzionato! (+2 Relazione)`;
+                              achieved = 'preferitodichris';
                           } else {
                               const tRel = updatedPlayers[targetIdx].relationships[user.uid] || 0;
                               updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [user.uid]: tRel - 1 };
@@ -8233,6 +8486,7 @@
                       if (result.achieved === 'dramaqueen') updateAchievement('dramaqueen', 1, 20);
                       if (result.achieved === 'itremoschettieri') updateAchievement('itremoschettieri', 1, 10);
                       if (result.achieved === 'dolcezza') updateAchievement('dolcezza', 1, 30);
+                      if (result.achieved === 'preferitodichris') updateAchievement('preferitodichris', 1, 50);
 
                       setHasActed(true);
                       setSelectedPlayer(null);
