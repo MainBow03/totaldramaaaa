@@ -2502,6 +2502,8 @@
               theme: 'Tutti',
               difficulty: 'Normale',
               finaleType: 'Casuale',
+              redemptionThemeInterval: 4,
+              redemptionElimCount: 2,
               redemption: { enabled: false, count: 1, episodes: "" },
               advantages: { idol: 1, extraVote: 1, advantage: 1, voteSteal: 1, spyDrone: 1, mutiny: 1, safety: 1, immunitySteal: 1, legacy: 1, crystalBall: 1 }
           });
@@ -2675,10 +2677,70 @@
                           <option value="La Notte del Giudizio">La Notte del Giudizio (Tutti vs Tutti, Voto ai Peggiori 2)</option>
                           <option value="Popolarità">Popolarità (Niente sfide, immunità ai più amati)</option>
                           <option value="Ghost Island">Ghost Island (Gli eliminati lottano per tornare al Merge)</option>
-                          <option value="Redemption Island">Redemption Island (Ritorno automatico ogni 4 eliminati fino in Top 6)</option>
+                          <option value="Redemption Island">Redemption Island (Sfida di Ritorno per gli eliminati fino in Top 6)</option>
                           <option value="Custom">Custom (Crea Team e scegli Bot manualmente)</option>
                       </select>
                     </div>
+
+                    {config.theme === 'Redemption Island' && (() => {
+                        const interval = config.redemptionThemeInterval;
+                        const elimCount = Math.min(config.redemptionElimCount || 2, Math.max(1, interval - 1));
+                        const stayingCount = interval - 1 - elimCount;
+
+                        return (
+                        <div className="bg-orange-900/30 p-4 rounded-xl border border-orange-500 animate-in fade-in space-y-4">
+                            <div>
+                                <label className="block text-orange-400 font-bold mb-2">
+                                    Sfida di Ritorno ogni quanti eliminati? (2 - 8)
+                                </label>
+                                <div className="flex items-center gap-4">
+                                    <input
+                                        type="range"
+                                        min="2"
+                                        max="8"
+                                        value={interval}
+                                        onChange={e => setConfig({...config, redemptionThemeInterval: parseInt(e.target.value)})}
+                                        className="flex-1 accent-orange-500"
+                                    />
+                                    <span className="text-2xl font-bold w-12 text-center text-orange-400">
+                                        {interval}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-orange-400 font-bold mb-2">
+                                    Quanti eliminati definitivi per sfida? (1 - {Math.max(1, interval - 1)})
+                                </label>
+                                <div className="flex items-center gap-4">
+                                    <input
+                                        type="range"
+                                        min="1"
+                                        max={Math.max(1, interval - 1)}
+                                        value={elimCount}
+                                        onChange={e => setConfig({...config, redemptionElimCount: parseInt(e.target.value)})}
+                                        className="flex-1 accent-red-500"
+                                    />
+                                    <span className="text-2xl font-bold w-12 text-center text-red-500">
+                                        {elimCount}
+                                    </span>
+                                </div>
+                                <div className="mt-4 bg-black/40 p-3 rounded-lg border border-orange-500/30 text-xs text-slate-300">
+                                    <strong className="text-orange-400 block mb-1">💡 Come funzionerà con questi numeri?</strong>
+                                    <ul className="list-disc pl-4 mt-1 space-y-1">
+                                        <li>Appena <strong>{interval} concorrenti</strong> si accumulano sull'Isola, parte la sfida.</li>
+                                        <li>Il <strong className="text-green-400">1° classificato</strong> vince e torna in gioco!</li>
+                                        <li>I <strong>peggiori {elimCount}</strong> vengono eliminati <em className="text-red-400">definitivamente</em> dallo show.</li>
+                                        {stayingCount > 0 ? (
+                                            <li>I restanti <strong>{stayingCount}</strong> giocatori "nel mezzo" <strong>rimangono bloccati sull'Isola</strong> ad aspettare i prossimi eliminati per fare una nuova sfida a {interval}!</li>
+                                        ) : (
+                                            <li>Nessuno rimane in attesa: chi non arriva primo, viene eliminato per sempre!</li>
+                                        )}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        );
+                    })()}
 
                     <div>
                       <label className="block text-slate-400 font-bold mb-2">Concorrenti (8 - {(config.theme === 'All Stars' || config.theme === 'Loser Island') ? 24 : 100})</label>
@@ -3689,10 +3751,18 @@
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2 pb-4">
                               {ROSTER.filter(char => CHARACTER_TITLES[char.name] && char.name.toLowerCase().includes(titlesSearchQuery.toLowerCase()))
                                      .sort((a, b) => {
-                                         // Mostra prima quelli sbloccati
-                                         const aUnlocked = achievements[`title_${a.name}`]?.unlocked ? 1 : 0;
-                                         const bUnlocked = achievements[`title_${b.name}`]?.unlocked ? 1 : 0;
-                                         return bUnlocked - aUnlocked;
+                                         const titleIdA = `title_${a.name}`;
+                                         const titleIdB = `title_${b.name}`;
+                                         const aUnlocked = achievements[titleIdA]?.unlocked ? 1 : 0;
+                                         const bUnlocked = achievements[titleIdB]?.unlocked ? 1 : 0;
+                                         
+                                         if (aUnlocked !== bUnlocked) {
+                                             return bUnlocked - aUnlocked;
+                                         }
+                                         
+                                         const progressA = achievements[titleIdA]?.progress || 0;
+                                         const progressB = achievements[titleIdB]?.progress || 0;
+                                         return progressB - progressA;
                                      })
                                      .map(char => {
                                   const titleId = `title_${char.name}`;
@@ -4555,10 +4625,13 @@
               ? true 
               : (activePlayers.length <= (lobby.config.mergeSize || (lobby.config.maxPlayers / 2)) || uniqueActiveTeams.length < 2); 
 
-          // --- SFONDO VILLAIN EDITION ---
-          // Immagine cupa e nebbiosa perfetta per il tema villain, presa dal web per funzionare in multiplayer!
+          // --- GESTIONE SFONDI SPECIALI ---
           const villainBgUrl = "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=2094&auto=format&fit=crop"; 
-          const currentBg = lobby.config.theme === 'Villain Edition' ? villainBgUrl : currentSeason.bg;
+          const redemptionBgUrl = "https://i.natgeofe.com/n/0ac3f386-a198-4296-b1ac-b1fd6a37ddad/BN39WG.jpg";
+          
+          const currentBg = lobby.phase === 'redemption' 
+              ? redemptionBgUrl 
+              : (lobby.config.theme === 'Villain Edition' ? villainBgUrl : currentSeason.bg);
 
           const [hasActed, setHasActed] = useState(false);
           const [chatInput, setChatInput] = useState("");
@@ -6523,97 +6596,80 @@
              const allRolled = candidates.every(c => rolls[c]);
              if (!allRolled) return;
 
-             if (candidates.length > 2) {
-                 // Fase a eliminazione: il peggiore svanisce
-                 let minRoll = 999;
-                 let potentialLosers = [];
-                 candidates.forEach(c => {
-                     if(rolls[c] < minRoll) { minRoll = rolls[c]; potentialLosers = [c]; }
-                     else if(rolls[c] === minRoll) { potentialLosers.push(c); }
+             let maxRoll = -1;
+             let winners = [];
+             candidates.forEach(c => {
+                 if (rolls[c] > maxRoll) { maxRoll = rolls[c]; winners = [c]; }
+                 else if (rolls[c] === maxRoll) { winners.push(c); }
+             });
+
+             if (winners.length > 1) {
+                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                    [`redemptionData.rolls`]: {},
+                    logs: arrayUnion(`Pareggio per il primo posto (${maxRoll})! I candidati rilanciano i dadi!`)
                  });
-
-                 if (potentialLosers.length === 1) {
-                     const loserId = potentialLosers[0];
-                     const loser = lobby.players.find(p => p.uid === loserId);
-                     
-                     const newCandidates = candidates.filter(c => c !== loserId);
-                     const updatedPlayers = lobby.players.map(p => 
-                         p.uid === loserId ? { ...p, status: 'perm_eliminated' } : p
-                     );
-
-                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                        players: updatedPlayers,
-                        [`redemptionData.candidates`]: newCandidates,
-                        [`redemptionData.rolls`]: {},
-                        logs: arrayUnion(`💥 REDEMPTION: ${loser.name} ha fatto il punteggio più basso (${minRoll}) ed è SVANITO DEFINITIVAMENTE! Rimangono in ${newCandidates.length}...`)
-                     });
-                 } else {
-                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                        [`redemptionData.rolls`]: {},
-                        logs: arrayUnion(`Pareggio al ribasso (${minRoll})! Si rilanciano i dadi per non essere eliminati.`)
-                     });
-                 }
-             } else {
-                 // Scontro finale a 2: vince chi fa di più e torna in gioco
-                 let maxRoll = -1;
-                 let potentialWinners = [];
-                 candidates.forEach(c => {
-                     if(rolls[c] > maxRoll) { maxRoll = rolls[c]; potentialWinners = [c]; }
-                     else if(rolls[c] === maxRoll) { potentialWinners.push(c); }
-                 });
-
-                 if (potentialWinners.length === 1) {
-                     const winnerId = potentialWinners[0];
-                     const loserIds = candidates.filter(c => c !== winnerId);
-                     const winner = lobby.players.find(p => p.uid === winnerId);
-                     const loserNames = loserIds.map(id => lobby.players.find(p => p.uid === id)?.name).join(' e ');
-                     
-                     const activePlayers = lobby.players.filter(p => p.status === 'active');
-                     let targetTeam = "Merge";
-                     
-                     const activeTeamsList = [...new Set(activePlayers.map(p => p.team).filter(t => t && t !== "Merge"))];
-                     
-                     if (activeTeamsList.length > 0) {
-                         const teamCounts = {};
-                         activeTeamsList.forEach(t => teamCounts[t] = 0);
-                         
-                         activePlayers.forEach(p => { 
-                             if(p.team && activeTeamsList.includes(p.team)) {
-                                 teamCounts[p.team] = (teamCounts[p.team] || 0) + 1;
-                             }
-                         });
-                         
-                         let minCount = 999;
-                         Object.entries(teamCounts).forEach(([t, count]) => {
-                             if (count < minCount) { minCount = count; targetTeam = t; }
-                             else if (count === minCount && Math.random() > 0.5) { targetTeam = t; } 
-                         });
-                     }
-
-                     const updatedPlayers = lobby.players.map(p => {
-                         if (p.uid === winnerId) return { ...p, status: 'active', team: targetTeam, immunityWins: 0 };
-                         if (loserIds.includes(p.uid)) return { ...p, status: 'perm_eliminated' };
-                         return p;
-                     });
-
-                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                        players: updatedPlayers,
-                        phase: 'episode_start',
-                        round: lobby.round, 
-                        redemptionData: null,
-                        logs: arrayUnion(`🏆 DUELLO FINALE: ${winner.name} trionfa (${maxRoll}) e TORNA IN GARA nel team ${targetTeam}! ${loserNames} svanisce definitivamente.`)
-                     });
-                     
-                     incrementActivePlayersStats(updatedPlayers.filter(p => p.status === 'active'));
-                     setSelectedRedemptionCandidates([]);
-
-                 } else {
-                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                        [`redemptionData.rolls`]: {},
-                        logs: arrayUnion(`Pareggio al vertice (${maxRoll})! Ultimo scontro decisivo, rilanciate i dadi!`)
-                     });
-                 }
+                 return;
              }
+
+             const winnerId = winners[0];
+             const winner = lobby.players.find(p => p.uid === winnerId);
+
+             const losers = candidates.filter(c => c !== winnerId).map(uid => ({ uid, roll: rolls[uid] }));
+             losers.sort((a, b) => b.roll - a.roll);
+
+             const elimCount = Math.min(lobby.config.redemptionElimCount || 2, losers.length);
+             const permEliminated = losers.slice(-elimCount).map(l => l.uid);
+             const permElimNames = permEliminated.map(id => lobby.players.find(p=>p.uid===id)?.name).join(', ');
+
+             const staying = losers.slice(0, -elimCount).map(l => l.uid);
+             const stayingNames = staying.map(id => lobby.players.find(p=>p.uid===id)?.name).join(', ');
+
+             const activePlayers = lobby.players.filter(p => p.status === 'active');
+             let targetTeam = "MERGE";
+             
+             const activeTeamsList = [...new Set(activePlayers.map(p => p.team).filter(t => t && t !== "MERGE"))];
+             
+             if (activeTeamsList.length > 0) {
+                 const teamCounts = {};
+                 activeTeamsList.forEach(t => teamCounts[t] = 0);
+                 
+                 activePlayers.forEach(p => { 
+                     if(p.team && activeTeamsList.includes(p.team)) {
+                         teamCounts[p.team] = (teamCounts[p.team] || 0) + 1;
+                     }
+                 });
+                 
+                 let minCount = 999;
+                 Object.entries(teamCounts).forEach(([t, count]) => {
+                     if (count < minCount) { minCount = count; targetTeam = t; }
+                     else if (count === minCount && Math.random() > 0.5) { targetTeam = t; } 
+                 });
+             }
+
+             const updatedPlayers = lobby.players.map(p => {
+                 if (p.uid === winnerId) return { ...p, status: 'active', team: targetTeam, immunityWins: 0 };
+                 if (permEliminated.includes(p.uid)) return { ...p, status: 'perm_eliminated' };
+                 return p;
+             });
+
+             let logMsgs = [
+                 `🏆 BATTAGLIA FINITA! ${winner.name} trionfa (${maxRoll}) e TORNA IN GARA nel team ${targetTeam}!`,
+                 `💥 ${permElimNames} hanno ottenuto i punteggi più bassi e SVANISCONO PER SEMPRE!`
+             ];
+             if (staying.length > 0) {
+                 logMsgs.push(`👻 ${stayingNames} rimangono sulla Redemption Island in attesa della prossima ondata!`);
+             }
+
+             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                players: updatedPlayers,
+                phase: 'episode_start',
+                round: lobby.round, 
+                redemptionData: null,
+                logs: arrayUnion(...logMsgs)
+             });
+             
+             incrementActivePlayersStats(updatedPlayers.filter(p => p.uid === winnerId));
+             setSelectedRedemptionCandidates([]);
           };
 
           const advanceGame = async () => {
@@ -7022,7 +7078,9 @@
                       logs: arrayUnion(`${victim.name} è ELIMINATO DIRETTAMENTE dallo show!`, ...newLogs)
                   };
 
-                  if (lobby.config.theme === 'Redemption Island' && nextActiveCount > 6 && currentGhosts.length >= 4) {
+                  const redemptionInterval = lobby.config.redemptionThemeInterval || 4;
+
+                  if (lobby.config.theme === 'Redemption Island' && nextActiveCount > 6 && currentGhosts.length >= redemptionInterval) {
                       updates = {
                           ...updates,
                           phase: 'redemption',
@@ -7454,7 +7512,9 @@
                       updatedPlayers = updatedPlayers.map(p => p.status === 'active' ? { ...p, team: 'MERGE' } : p);
                   }
 
-                  if (lobby.config.theme === 'Redemption Island' && nextActiveCount > 6 && currentGhosts.length >= 4) {
+                  const redemptionInterval = lobby.config.redemptionThemeInterval || 4;
+
+                  if (lobby.config.theme === 'Redemption Island' && nextActiveCount > 6 && currentGhosts.length >= redemptionInterval) {
                       updates = {
                         ...updates,
                         phase: 'redemption',
@@ -9715,9 +9775,7 @@
                              <div className="text-center mb-8">
                                  <h1 className="text-5xl font-black text-orange-500 mb-2 uppercase tracking-widest drop-shadow-md">Redemption Island</h1>
                                  <p className="text-slate-300 text-lg font-bold bg-black/40 px-6 py-2 rounded-full border border-orange-500/30 inline-block mt-2">
-                                     {lobby.redemptionData.candidates?.length > 2 
-                                        ? "Sopravvivenza: Chi fa il punteggio più basso SVANISCE per sempre!" 
-                                        : "Duello Finale: Chi fa il punteggio più alto TORNA IN GIOCO!"}
+                                     BATTAGLIA: 1 Ritorna in gioco, i peggiori {lobby.config.redemptionElimCount || 2} svaniscono, gli altri restano!
                                  </p>
                              </div>
 
