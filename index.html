@@ -6207,6 +6207,28 @@
               }
           }, [lobby.ghostIslandData, isHost, lobby.phase]);
 
+          // --- BOT CEREMONY TIE-BREAK LOGIC ---
+          useEffect(() => {
+              if (!isHost || lobby.phase !== 'ceremony' || !lobby.ceremonyData?.tieMatch) return;
+              
+              const { candidates, rolls } = lobby.ceremonyData.tieMatch;
+              const botsToRoll = candidates.filter(uid => {
+                  const p = lobby.players.find(x => x.uid === uid);
+                  return p && p.isBot && !rolls[uid];
+              });
+
+              if (botsToRoll.length > 0) {
+                  const timer = setTimeout(async () => {
+                      const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
+                      let updates = {};
+                      botsToRoll.forEach(uid => {
+                          updates[`ceremonyData.tieMatch.rolls.${uid}`] = Math.floor(Math.random() * maxFaces) + 1;
+                      });
+                      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
+                  }, 2000);
+                  return () => clearTimeout(timer);
+              }
+          }, [lobby.ceremonyData?.tieMatch, isHost, lobby.phase]);
 
           const sendChat = async (e) => {
             e.preventDefault();
@@ -7143,7 +7165,7 @@
                       }
                   }
               }
-              else if (lobby.challengeData?.type === 'sudden_death') {
+              else if ((lobby.challengeData?.type === 'sudden_death' || lobby.challengeData?.type === 'chain_of_safety') && lobby.challengeData?.stage === 'finished') {
                   const victimId = lobby.challengeData.loser;
                   const victim = lobby.players.find(p => p.uid === victimId);
                   
@@ -7455,95 +7477,71 @@
             else if (lobby.phase === 'ceremony') {
               const data = lobby.ceremonyData;
               
-              if (data.tieMatch) {
-                  const { candidates, rolls } = data.tieMatch;
-                  const allRolled = (candidates || []).every(uid => rolls[uid]);
-                 // --- LOGICA SUDDEN DEATH (ELIMINAZIONE DIRETTA) ---
-                 if (lobby.challengeData.type === 'sudden_death') {
-                    let minRoll = 999;
-                     let losers = [];
-                     (candidates || []).forEach(uid => {
-                         if (rolls[uid] < minRoll) { minRoll = rolls[uid]; losers = [uid]; }
-                         else if (rolls[uid] === minRoll) { losers.push(uid); }
-                     });
-
-                     if (losers.length === 1) {
-                         const elimId = losers[0];
-                         const safe = data.safe.concat((candidates || []).filter(c => c !== elimId));
-                         
-                         updates = {
-                             [`ceremonyData.eliminated`]: elimId,
-                             [`ceremonyData.tieMatch`]: null,
-                             [`ceremonyData.safe`]: safe,
-                             [`ceremonyData.revealedCount`]: data.revealedCount 
-                         };
-                     } else {
-                         newLogs.push("ANCORA PAREGGIO! Si rilancia.");
-                         updates = {
-                             [`ceremonyData.tieMatch.rolls`]: {},
-                             logs: arrayUnion(...newLogs)
-                         };
-                     }
-                    return;
-                 }
-
-                 // --- LOGICA CATENA DI SALVATAGGIO ---
-                 if (lobby.challengeData.type === 'chain_of_safety') {
-                     let maxRoll = -1;
-                     let winners = [];
-                     Object.entries(rolls).forEach(([uid, r]) => {
-                         if (r > maxRoll) { maxRoll = r; winners = [uid]; }
-                         else if (r === maxRoll) { winners.push(uid); }
-                     });
-
-                     if (winners.length > 1) {
-                         const winnerNames = winners.map(w => lobby.players.find(p => p.uid === w)?.name).join(", ");
-                         updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                             [`challengeData.players`]: winners,
-                             [`challengeData.rollingIndex`]: 0,
-                             [`challengeData.rolls`]: {},
-                             [`challengeData.isTieBreak`]: true,
-                             logs: arrayUnion(`PAREGGIO (${maxRoll})! Spareggio per l'immunità tra: ${winnerNames}`)
-                         });
-                         return;
-                     }
-
-                     const winnerId = winners[0];
-                     const winnerName = lobby.players.find(p => p.uid === winnerId)?.name;
-
-                     const updatedPlayersTemp = lobby.players.map(p => {
-                         if (p.uid === winnerId) return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
-                         return p;
-                     });
-
-                     const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [`${winnerName} VINCE L'IMMUNITÀ con ${maxRoll} e dà il via alla Catena di Salvataggio!`]);
-
-                     updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                         players: updatedPlayers,
-                         [`challengeData.stage`]: 'chain_selection',
-                         [`challengeData.winner`]: winners,
-                         [`challengeData.savedPlayers`]: [winnerId],
-                         [`challengeData.currentSelector`]: winnerId,
-                         immunity: winners,
-                         losingTeam: "MERGE",
-                         logs: arrayUnion(...newLogs)
-                     });
-                     return;
-                 }
-
-                 // --- LOGICA SFIDA A SQUADRE ---
-                      }
-              else if (lobby.challengeData?.type === 'sudden_death' || (lobby.challengeData?.type === 'chain_of_safety' && lobby.challengeData?.stage === 'finished')) {
-                  const victimId = lobby.challengeData.loser;
-                  const victim = lobby.players.find(p => p.uid === victimId);
+              if (data.revealedCount < data.safe.length) {
+                  updates = { [`ceremonyData.revealedCount`]: increment(1) };
+              } 
+              else if (!data.finalReveal) {
+                  let finalVictims = Array.isArray(data.eliminated) ? [...data.eliminated] : [data.eliminated].filter(Boolean);
+                  let savedBy = [];
                   
-                  let updatedPlayers = lobby.players.map(p => p.uid === victimId ? { ...p, status: 'eliminated' } : p);
+                  // LOGICA IDOLO DELL'IMMUNITÀ
+                  activePlayers.forEach(p => {
+                      if (finalVictims.includes(p.uid) && lobby.idolData?.inventory?.idols?.[p.uid] > 0) {
+                          updates[`idolData.inventory.idols.${p.uid}`] = lobby.idolData.inventory.idols[p.uid] - 1;
+                          updates[`idolData.activeEffects.idolPlayedThisRound`] = arrayUnion(p.uid);
+                          
+                          newLogs.push(`💎 INCREDIBILE! ${p.name} ha giocato l'Idolo dell'Immunità! I voti contro di lui/lei NON CONTANO!`);
+                          savedBy.push(p.uid);
+                      }
+                  });
 
+                  finalVictims = finalVictims.filter(uid => !savedBy.includes(uid));
+
+                  if (savedBy.length > 0 && finalVictims.length === 0 && !data.isDoubleElimination) {
+                       newLogs.push(`Tutti i voti sono stati annullati dall'Idolo! Nessuno viene eliminato stasera!`);
+                  }
+                  
+                  updates[`ceremonyData.idolPlayedBy`] = savedBy.length > 0 ? savedBy[0] : null;
                   updates[`ceremonyData.eliminated`] = finalVictims;
                   updates[`ceremonyData.finalReveal`] = true;
-                  if(newLogs.length > 0) updates.logs = arrayUnion(...newLogs);
-                  if(finalVictims.length > 0) setTimeout(() => playSound('elimination'), savedBy.length > 0 ? 1500 : 0);
-              } 
+                  if (newLogs.length > 0) updates.logs = arrayUnion(...newLogs);
+                  
+                  if (finalVictims.length > 0) {
+                      setTimeout(() => playSound('elimination'), savedBy.length > 0 ? 1500 : 0);
+                  } else if (savedBy.length > 0) {
+                      setTimeout(() => playSound('idol'), 500);
+                  }
+              }
+              else if (data.tieMatch) {
+                  const { candidates, rolls } = data.tieMatch;
+                  const allRolled = (candidates || []).every(uid => rolls[uid]);
+                  if (!allRolled) return;
+
+                  let minRoll = 999;
+                  let losers = [];
+                  (candidates || []).forEach(uid => {
+                      if (rolls[uid] < minRoll) { minRoll = rolls[uid]; losers = [uid]; }
+                      else if (rolls[uid] === minRoll) { losers.push(uid); }
+                  });
+
+                  if (losers.length === 1) {
+                      const elimId = losers[0];
+                      const safe = data.safe.concat((candidates || []).filter(c => c !== elimId));
+                      
+                      updates = {
+                          [`ceremonyData.eliminated`]: elimId,
+                          [`ceremonyData.tieMatch`]: null,
+                          [`ceremonyData.safe`]: safe
+                      };
+                      newLogs.push(`${lobby.players.find(p => p.uid === elimId)?.name} perde lo spareggio ed è eliminato!`);
+                  } else {
+                      newLogs.push("ANCORA PAREGGIO! Si rilancia.");
+                      updates = {
+                          [`ceremonyData.tieMatch.rolls`]: {},
+                          logs: arrayUnion(...newLogs)
+                      };
+                  }
+              }
               else {
                   let finalVictims = Array.isArray(data.eliminated) ? [...data.eliminated] : [data.eliminated].filter(Boolean);
                   const isDouble = data.isDoubleElimination;
@@ -9511,10 +9509,10 @@
                                                 ? `PROCEDI AL VOTO`
                                                 : lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0
                                                     ? `ATTESA GIURATI (${pendingJuryVotesCount})`
-                                                    : lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting'
+                                                        : lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting'
                                                         ? 'INIZIA SPOGLIO'
                                                         : lobby.phase === 'ceremony' || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'revealing')
-                                                            ? (lobby.ceremonyData?.finalReveal && !lobby.ceremonyData?.tieMatch ? 'FINISCI' : lobby.ceremonyData?.tieMatch ? 'SPAREGGIO' : 'RIVELA') 
+                                                            ? (lobby.ceremonyData?.finalReveal ? (lobby.ceremonyData?.tieMatch ? 'SPAREGGIO' : 'FINISCI') : 'RIVELA') 
                                                             : lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'revealing'
                                                                 ? (lobby.challengeData.revealIndex < lobby.challengeData.popularityResults.length - 1 ? 'SVELA POSIZIONE' : 'PROCLAMA VINCITORI')
                                                                 : lobby.phase === 'ghost_island' ? 'RISOLVI GHOST ISLAND' 
@@ -11043,7 +11041,7 @@
 
                      {lobby.phase === 'ceremony' && lobby.ceremonyData && (
                          <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                             {lobby.ceremonyData.tieMatch ? (
+                             {lobby.ceremonyData.tieMatch && lobby.ceremonyData.finalReveal ? (
                                  <div className="text-center">
                                      <h2 className="text-3xl font-black text-red-500 mb-4 animate-bounce">PAREGGIO!</h2>
                                      <p className="mb-6">Spareggio dadi: Chi fa il numero più basso ESCE.</p>
