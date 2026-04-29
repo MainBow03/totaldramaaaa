@@ -2603,7 +2603,15 @@
                        </h3>
                        <div className="space-y-4 text-sm text-slate-300">
                            {/* AGGIORNAMENTO RECENTE IN CIMA */}
-                           <div className="border-l-2 border-yellow-400 pl-4 py-1">
+                           <div className="border-l-2 border-indigo-500 pl-4 py-1">
+                               <div className="font-bold text-white text-base">Catena di Salvataggio & Redemption Island! 🔗🏝️</div>
+                               <ul className="list-disc pl-4 mt-2 space-y-2">
+                                   <li><strong className="text-indigo-400">Catena di Salvataggio:</strong> Aggiunto un nuovo letale colpo di scena durante la fase Fusione. Il migliore ai dadi ottiene l'immunità e sceglie chi salvare. Il salvato salverà un altro, creando una catena. <strong className="text-red-500">L'ultimo che rimane fuori dalla catena verrà eliminato all'istante!</strong> (Probabilità: 4% in Normale, 10% in Chaos).</li>
+                                   <li><strong className="text-orange-400">Nuovo Tema - Redemption Island:</strong> Gli eliminati non svaniscono subito, ma finiscono in esilio sulla Redemption Island! Quando si accumulano abbastanza giocatori, si sfideranno in una spietata Purga. Solo l'ultimo sopravvissuto tornerà in gioco!</li>
+                               </ul>
+                           </div>
+
+                           <div className="border-l-2 border-yellow-400 pl-4 py-1 opacity-60 hover:opacity-100 transition-opacity">
                                <div className="font-bold text-white text-base">All Stars, Loser Island & Nuovi Personaggi! ⭐</div>
                                <ul className="list-disc pl-4 mt-2 space-y-2">
                                    <li><strong className="text-yellow-400">All Stars & Loser Island:</strong> Aggiunti ufficialmente i due nuovi temi speciali! Gareggia in epiche sfide a 24 giocatori con il meglio del meglio, o dai una seconda chance a chi non ha mai brillato! (Il limite giocatori scatterà automaticamente a 24).</li>
@@ -4754,7 +4762,7 @@
                   const elims = lobby.ceremonyData.eliminated;
                   if (Array.isArray(elims)) uidsInLimbo = elims;
                   else if (elims) uidsInLimbo = [elims];
-              } else if (lobby.phase === 'challenge' && lobby.challengeData?.type === 'sudden_death' && lobby.challengeData?.stage === 'finished') {
+              } else if (lobby.phase === 'challenge' && (lobby.challengeData?.type === 'sudden_death' || lobby.challengeData?.type === 'chain_of_safety') && lobby.challengeData?.stage === 'finished') {
                   if (lobby.challengeData.loser) uidsInLimbo = [lobby.challengeData.loser];
               }
 
@@ -4991,8 +4999,8 @@
                   }
               }
               
-              // Caso 2: Eliminato per Sudden Death al Round 1
-              if (lobby.phase === 'challenge' && lobby.challengeData?.type === 'sudden_death' && lobby.challengeData?.stage === 'finished' && lobby.round === 1) {
+              // Caso 2: Eliminato per Sudden Death o Catena al Round 1
+              if (lobby.phase === 'challenge' && (lobby.challengeData?.type === 'sudden_death' || lobby.challengeData?.type === 'chain_of_safety') && lobby.challengeData?.stage === 'finished' && lobby.round === 1) {
                   if (lobby.challengeData.loser === user.uid) {
                       const eventKey = `schiappa_${lobbyId}_${lobby.currentSeasonIndex}`;
                       if (!processedAchievements.current.has(eventKey)) {
@@ -5384,6 +5392,71 @@
                    twistData: { type: 'purge', targets: finalTargets },
                    logs: arrayUnion(...newLogs)
               });
+          };
+
+          const submitChainChoice = async (targetId, isBotCall = false) => {
+              if (lobby.phase !== 'challenge' || lobby.challengeData?.stage !== 'chain_selection') return;
+              if (!isBotCall && lobby.challengeData.currentSelector !== user.uid) return;
+
+              if (lobby.challengeData.pendingChainResolved) return;
+              
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`challengeData.pendingChainResolved`]: true
+              });
+
+              const deciderId = lobby.challengeData.currentSelector;
+              const savedPlayers = lobby.challengeData.savedPlayers || [];
+              const newSaved = [...savedPlayers, targetId];
+              
+              const deciderPlayer = lobby.players.find(p => p.uid === deciderId);
+              const targetPlayer = lobby.players.find(p => p.uid === targetId);
+
+              let updatedPlayersTemp = [...lobby.players];
+              let logsToAdd = [`🔗 ${deciderPlayer.name.toUpperCase()} HA SCELTO DI SALVARE ${targetPlayer.name.toUpperCase()}!`];
+
+              if (targetPlayer && targetPlayer.isBot && Math.random() < 0.60) {
+                  const targetIdx = updatedPlayersTemp.findIndex(p => p.uid === targetId);
+                  const currentRel = updatedPlayersTemp[targetIdx].relationships[deciderId] || 0;
+                  updatedPlayersTemp[targetIdx].relationships = {
+                      ...updatedPlayersTemp[targetIdx].relationships,
+                      [deciderId]: Math.min(10, currentRel + 2)
+                  };
+                  logsToAdd.push(`💖 ${targetPlayer.name} è molto grato a ${deciderPlayer.name} per averlo salvato! (+2 Relaz)`);
+              }
+
+              const activeCount = lobby.players.filter(p => p.status === 'active').length;
+              let updates = {};
+
+              if (newSaved.length >= activeCount - 1) {
+                  const allActiveUids = lobby.players.filter(p => p.status === 'active').map(p => p.uid);
+                  const loserId = allActiveUids.find(uid => !newSaved.includes(uid));
+                  const loserName = lobby.players.find(p => p.uid === loserId)?.name;
+
+                  logsToAdd.push(`💥 LA CATENA È CONCLUSA! Nessuno ha salvato ${loserName}, che viene ELIMINATO DIRETTAMENTE!`);
+                  const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, logsToAdd);
+
+                  updates = {
+                      players: updatedPlayers,
+                      [`challengeData.savedPlayers`]: newSaved,
+                      [`challengeData.stage`]: 'finished',
+                      [`challengeData.loser`]: loserId,
+                      [`challengeData.pendingChainResolved`]: false,
+                      logs: arrayUnion(...newLogs)
+                  };
+              } else {
+                  logsToAdd.push(`Ora il potere passa a ${targetPlayer.name}! Chi salverà?`);
+                  const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, logsToAdd);
+
+                  updates = {
+                      players: updatedPlayers,
+                      [`challengeData.savedPlayers`]: newSaved,
+                      [`challengeData.currentSelector`]: targetId,
+                      [`challengeData.pendingChainResolved`]: false,
+                      logs: arrayUnion(...newLogs)
+                  };
+              }
+
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), updates);
           };
 
           // Funzione per proporre l'annullamento
@@ -5983,6 +6056,31 @@
                           twistData: { type: 'purge', targets: chosenTargets }, // Riutilizza la logica della Purga per limitare i voti!
                           logs: arrayUnion(...logsToAdd)
                       });
+                  }, 3000 + Math.random() * 2000);
+                  return () => clearTimeout(timer);
+              }
+          }, [lobby.challengeData, isHost, lobby.phase]);
+
+          // --- BOT CHAIN OF SAFETY LOGIC ---
+          useEffect(() => {
+              if (!isHost || lobby.phase !== 'challenge' || lobby.challengeData?.stage !== 'chain_selection' || lobby.challengeData?.type !== 'chain_of_safety') return;
+
+              const deciderId = lobby.challengeData.currentSelector;
+              const deciderPlayer = lobby.players.find(p => p.uid === deciderId);
+
+              if (deciderPlayer?.isBot && !lobby.challengeData.pendingChainResolved) {
+                  const timer = setTimeout(async () => {
+                      const savedPlayers = lobby.challengeData.savedPlayers || [];
+                      let validTargets = lobby.players.filter(p => p.status === 'active' && !savedPlayers.includes(p.uid));
+
+                      // Mescola e ordina per relazione (il bot salva l'amico)
+                      validTargets.sort(() => Math.random() - 0.5);
+                      validTargets.sort((a, b) => (deciderPlayer.relationships[b.uid] || 0) - (deciderPlayer.relationships[a.uid] || 0));
+
+                      const chosenTarget = validTargets[0];
+                      if (chosenTarget) {
+                          await submitChainChoice(chosenTarget.uid, true);
+                      }
                   }, 3000 + Math.random() * 2000);
                   return () => clearTimeout(timer);
               }
@@ -6820,7 +6918,7 @@
                           };
                           newLogs.push("Chris: È il momento del Test di Popolarità! Assegnate la vostra preferenza a 2 persone. Chi ottiene più cuori sarà immune stasera!");
                       }
-                      else if (rand < (isChaos ? 0.15 : 0.06)) {
+                      else if (rand < (isChaos ? 0.10 : 0.04)) {
                            const rollers = activePlayers.map(p => p.uid);
                            updates.challengeData = {
                                type: 'sudden_death',
@@ -6833,7 +6931,20 @@
                            newLogs.push("Chris: COLPO DI SCENA! Sfida ad Eliminazione Diretta!");
                            newLogs.push("Chi fa il numero più basso TORNA A CASA. Niente votazioni.");
                       
-                      } else if (rand < (isChaos ? 0.30 : 0.14)) { 
+                      } else if (rand < (isChaos ? 0.20 : 0.08)) {
+                           const rollers = activePlayers.map(p => p.uid);
+                           updates.challengeData = {
+                               type: 'chain_of_safety',
+                               players: rollers,
+                               rollingIndex: 0,
+                               rolls: {},
+                               stage: 'rolling',
+                               winner: null 
+                           };
+                           newLogs.push("Chris: COLPO DI SCENA! Oggi giochiamo alla CATENA DI SALVATAGGIO!");
+                           newLogs.push("Chi fa il punteggio più alto ottiene l'immunità e salverà una persona, che ne salverà un'altra... L'ultimo che rimane è FUORI.");
+                      
+                      } else if (rand < (isChaos ? 0.35 : 0.14)) { 
                           const shuffled = [...activePlayers].sort(() => Math.random() - 0.5);
                           const mid = Math.ceil(shuffled.length / 2);
                           const teamA = shuffled.slice(0, mid).map(p => p.uid);
@@ -6855,7 +6966,7 @@
                           newLogs.push("Chris: Oggi sfida speciale! Vi dividerò in due squadre casuali.");
                           newLogs.push("La squadra che totalizza il punteggio più alto vince l'immunità!");
 
-                      } else if (rand < (isChaos ? 0.44 : 0.20) && activePlayers.length > 4) { 
+                      } else if (rand < (isChaos ? 0.48 : 0.20) && activePlayers.length > 4) { 
                           const shuffled = [...activePlayers].sort(() => Math.random() - 0.5);
                           const tempTeams = {};
                           const playersArr = [];
@@ -6893,7 +7004,7 @@
                           newLogs.push("Chris: Oggi sfida a coppie! Vi dividerò in minigruppi casuali.");
                           newLogs.push("Tutti saranno salvi TRANNE la coppia che farà il punteggio più basso! Loro due andranno al ballottaggio!");
 
-                      } else if (isChaos && rand < 0.58) {
+                      } else if (isChaos && rand < 0.62) {
                            const rollers = activePlayers.map(p => p.uid);
                            let riskCount = 2;
                            if (activePlayers.length > 30) riskCount = 5;
@@ -6910,7 +7021,7 @@
                                targetRiskCount: riskCount
                            };
                            newLogs.push(`Chris: CHAOS! La Notte del Giudizio! I ${riskCount} peggiori di questa sfida andranno al televoto!`);
-                      } else if (isChaos && rand < 0.73) {
+                      } else if (isChaos && rand < 0.76) {
                            updates.challengeData = {
                                type: 'popularity_vote',
                                stage: 'voting',
@@ -7347,8 +7458,9 @@
               if (data.tieMatch) {
                   const { candidates, rolls } = data.tieMatch;
                   const allRolled = (candidates || []).every(uid => rolls[uid]);
-                  if (allRolled) {
-                     let minRoll = 999;
+                 // --- LOGICA SUDDEN DEATH (ELIMINAZIONE DIRETTA) ---
+                 if (lobby.challengeData.type === 'sudden_death') {
+                    let minRoll = 999;
                      let losers = [];
                      (candidates || []).forEach(uid => {
                          if (rolls[uid] < minRoll) { minRoll = rolls[uid]; losers = [uid]; }
@@ -7372,60 +7484,60 @@
                              logs: arrayUnion(...newLogs)
                          };
                      }
-                  } else {
-                      (candidates || []).forEach(uid => {
-                          if (!rolls[uid]) {
-                              const p = lobby.players.find(x => x.uid === uid);
-                              if (p && p.isBot) {
-                                  const maxFaces = lobby.config.theme === 'La Notte del Giudizio' ? 13 : 10;
-                                  const r = Math.floor(Math.random() * maxFaces) + 1;
-                                  updates[`ceremonyData.tieMatch.rolls.${uid}`] = r;
-                              }
-                          }
-                      });
-                  }
-              } 
-              else if (data.revealedCount < data.safe.length) {
-                 updates = { [`ceremonyData.revealedCount`]: increment(1) };
-              } 
-              else if (!data.finalReveal) {
-                  let victimsIds = Array.isArray(data.eliminated) ? [...data.eliminated] : [data.eliminated].filter(Boolean);
-                  let finalVictims = [];
-                  let savedBy = [];
-                  
-                  const activePlayersList = lobby.players.filter(p => p.status === 'active');
-                  const sortedByVotes = activePlayersList.sort((a, b) => (data.voteCounts[b.uid] || 0) - (data.voteCounts[a.uid] || 0)).map(p => p.uid);
+                    return;
+                 }
 
-                  for (let i = 0; i < victimsIds.length; i++) {
-                      let currentVictim = victimsIds[i];
-                      
-                      if (currentVictim && lobby.idolData?.inventory?.idols?.[currentVictim] > 0) {
-                          updates[`idolData.inventory.idols.${currentVictim}`] = lobby.idolData.inventory.idols[currentVictim] - 1; 
-                          savedBy.push(currentVictim);
-                          newLogs.push(`COLPO DI SCENA! ${lobby.players.find(p => p.uid === currentVictim).name} usa un Idolo dell'Immunità!`);
-                          playSound('idol');
+                 // --- LOGICA CATENA DI SALVATAGGIO ---
+                 if (lobby.challengeData.type === 'chain_of_safety') {
+                     let maxRoll = -1;
+                     let winners = [];
+                     Object.entries(rolls).forEach(([uid, r]) => {
+                         if (r > maxRoll) { maxRoll = r; winners = [uid]; }
+                         else if (r === maxRoll) { winners.push(uid); }
+                     });
 
-                          let runnerUpId = sortedByVotes.find(id => 
-                              id !== currentVictim && 
-                              !finalVictims.includes(id) && 
-                              !savedBy.includes(id) &&
-                              (data.voteCounts[id] || 0) > 0
-                          );
-                          
-                          if (runnerUpId) {
-                             finalVictims.push(runnerUpId);
-                             newLogs.push(`I voti sono annullati! Il prossimo più votato, ${lobby.players.find(p => p.uid === runnerUpId).name}, prende il suo posto!`);
-                          } else {
-                              newLogs.push("Nessun altro concorrente ha ricevuto voti! Eliminazione annullata.");
-                          }
-                      } else {
-                          finalVictims.push(currentVictim);
+                     if (winners.length > 1) {
+                         const winnerNames = winners.map(w => lobby.players.find(p => p.uid === w)?.name).join(", ");
+                         updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                             [`challengeData.players`]: winners,
+                             [`challengeData.rollingIndex`]: 0,
+                             [`challengeData.rolls`]: {},
+                             [`challengeData.isTieBreak`]: true,
+                             logs: arrayUnion(`PAREGGIO (${maxRoll})! Spareggio per l'immunità tra: ${winnerNames}`)
+                         });
+                         return;
+                     }
+
+                     const winnerId = winners[0];
+                     const winnerName = lobby.players.find(p => p.uid === winnerId)?.name;
+
+                     const updatedPlayersTemp = lobby.players.map(p => {
+                         if (p.uid === winnerId) return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
+                         return p;
+                     });
+
+                     const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [`${winnerName} VINCE L'IMMUNITÀ con ${maxRoll} e dà il via alla Catena di Salvataggio!`]);
+
+                     updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                         players: updatedPlayers,
+                         [`challengeData.stage`]: 'chain_selection',
+                         [`challengeData.winner`]: winners,
+                         [`challengeData.savedPlayers`]: [winnerId],
+                         [`challengeData.currentSelector`]: winnerId,
+                         immunity: winners,
+                         losingTeam: "MERGE",
+                         logs: arrayUnion(...newLogs)
+                     });
+                     return;
+                 }
+
+                 // --- LOGICA SFIDA A SQUADRE ---
                       }
-                  }
-
-                  if (savedBy.length > 0) {
-                      updates[`ceremonyData.idolPlayedBy`] = savedBy[0]; 
-                  }
+              else if (lobby.challengeData?.type === 'sudden_death' || (lobby.challengeData?.type === 'chain_of_safety' && lobby.challengeData?.stage === 'finished')) {
+                  const victimId = lobby.challengeData.loser;
+                  const victim = lobby.players.find(p => p.uid === victimId);
+                  
+                  let updatedPlayers = lobby.players.map(p => p.uid === victimId ? { ...p, status: 'eliminated' } : p);
 
                   updates[`ceremonyData.eliminated`] = finalVictims;
                   updates[`ceremonyData.finalReveal`] = true;
@@ -7534,8 +7646,8 @@
 
                   if (lobby.config.theme === 'Redemption Island' && nextActiveCount > 6 && currentGhosts.length >= redemptionInterval) {
                       updates = {
-                        ...updates,
-                        phase: 'redemption',
+                          ...updates,
+                          phase: 'redemption',
                         redemptionData: { active: true, stage: 'rolling', candidates: currentGhosts.map(g => g.uid), rolls: {}, purged: [] },
                         round: nextRound,
                         players: updatedPlayers,
@@ -10207,6 +10319,7 @@
                                     <h2 className="text-3xl font-bold mb-4 uppercase flex items-center justify-center gap-3">
                                         {lobby.challengeData.type === 'sudden_death' && <AlertOctagon size={40} className="text-red-600"/>}
                                         {lobby.challengeData.type === 'sudden_death' && <span className="text-red-500 font-black">ELIMINAZIONE DIRETTA (LOWEST ROLL)</span>}
+                                        {lobby.challengeData.type === 'chain_of_safety' && <span className="text-indigo-400 font-black">CATENA DI SALVATAGGIO (IMMUNITÀ AL MIGLIORE)</span>}
                                         {lobby.challengeData.type === 'purge' && <span className="text-red-500 font-black">SFIDA PURGA (I {lobby.challengeData.targetRiskCount || 2} PEGGIORI A RISCHIO)</span>}
                                         {lobby.challengeData.type === 'team' && "SFIDA A SQUADRE (50% IMMUNITÀ)"}
                                         {lobby.challengeData.type === 'pairs' && "SFIDA A COPPIE (SOLO LA PEGGIORE VA AL FALÒ)"}
@@ -10226,8 +10339,8 @@
                                         </button>
                                     )}
 
-                                    {/* MODIFICA: Schermata Eliminazione Diretta (Sudden Death) */}
-                                    {lobby.challengeData.type === 'sudden_death' && lobby.challengeData.stage === 'finished' && (
+                                    {/* MODIFICA: Schermata Eliminazione Diretta o Catena */}
+                                    {(lobby.challengeData.type === 'sudden_death' || lobby.challengeData.type === 'chain_of_safety') && lobby.challengeData.stage === 'finished' && (
                                         <div className="absolute inset-0 bg-red-950/95 z-50 flex flex-col items-center justify-center animate-in zoom-in duration-500 backdrop-blur-sm">
                                             <Skull size={120} className="text-black mb-4 animate-pulse drop-shadow-[0_0_20px_rgba(255,0,0,0.8)]"/>
                                             <h2 className="text-5xl md:text-7xl font-black text-black uppercase tracking-widest drop-shadow-[0_0_15px_rgba(255,0,0,0.8)] mb-6 text-center">ELIMINAZIONE<br/>DIRETTA</h2>
@@ -10397,6 +10510,60 @@
                                      ) : (
                                          <div className="text-2xl font-black text-indigo-300 animate-pulse bg-indigo-900/40 p-8 rounded-2xl border-2 border-indigo-500 inline-block shadow-lg">
                                              <span className="opacity-80">In attesa che</span> {lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.name} <span className="opacity-80">faccia la sua scelta...</span>
+                                         </div>
+                                     )}
+                                </div>
+                            ) : lobby.challengeData.stage === 'chain_selection' ? (
+                                <div className="text-center animate-in zoom-in w-full max-w-5xl">
+                                     <h2 className="text-4xl md:text-5xl font-black text-indigo-500 mb-4 uppercase flex items-center justify-center gap-3 drop-shadow-lg">
+                                         <Link size={40}/> CATENA DI SALVATAGGIO <Link size={40}/>
+                                     </h2>
+                                     <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+                                         Chi è stato salvato deve ora scegliere chi salvare a sua volta. L'ultimo che rimane senza catena verrà eliminato istantaneamente!
+                                     </p>
+
+                                     <div className="bg-indigo-950/40 p-4 rounded-2xl border-2 border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.3)] mb-8 flex flex-wrap gap-2 justify-center items-center">
+                                         <div className="text-indigo-400 font-bold uppercase tracking-widest text-sm w-full mb-2">Catena Attuale:</div>
+                                         {lobby.challengeData.savedPlayers.map((uid, idx) => {
+                                             const p = lobby.players.find(pl => pl.uid === uid);
+                                             return (
+                                                 <div key={uid} className="flex items-center gap-2">
+                                                     {idx > 0 && <ArrowRight className="text-indigo-500"/>}
+                                                     <div className="flex flex-col items-center">
+                                                         <img src={p?.character.img} className="w-12 h-12 rounded-full border-2 border-indigo-500 object-cover shadow-lg" />
+                                                         {idx === 0 && <Crown size={12} className="text-yellow-400 mt-1 absolute -top-3"/>}
+                                                     </div>
+                                                 </div>
+                                             )
+                                         })}
+                                     </div>
+
+                                     {lobby.challengeData.currentSelector === user.uid ? (
+                                         <div className="bg-slate-800 p-8 rounded-3xl border-4 border-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.4)] relative">
+                                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Tocca a te!</div>
+                                             <h3 className="text-2xl font-bold text-indigo-300 mb-6">Scegli chi salvare:</h3>
+                                             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                                                 {activePlayers
+                                                     .filter(p => !lobby.challengeData.savedPlayers.includes(p.uid))
+                                                     .map(p => (
+                                                         <button
+                                                             key={p.uid}
+                                                             onClick={() => submitChainChoice(p.uid)}
+                                                             className="bg-slate-900 hover:bg-indigo-600 p-3 rounded-2xl flex flex-col items-center border-2 border-slate-700 hover:border-indigo-400 hover:scale-110 transition-all shadow-lg"
+                                                         >
+                                                             <img src={p.character.img} className="w-16 h-16 rounded-full mb-2 object-cover border-2 border-transparent"/>
+                                                             <span className="text-xs font-bold text-center leading-tight w-full">{p.name}</span>
+                                                         </button>
+                                                     ))
+                                                 }
+                                             </div>
+                                         </div>
+                                     ) : (
+                                         <div className="flex flex-col items-center">
+                                             <img src={lobby.players.find(p=>p.uid===lobby.challengeData.currentSelector)?.character.img} className="w-32 h-32 rounded-full border-4 border-indigo-500 object-cover mb-4 animate-pulse"/>
+                                             <div className="text-2xl font-black text-indigo-300 bg-indigo-900/40 p-6 rounded-2xl border-2 border-indigo-500 inline-block shadow-lg">
+                                                 <span className="opacity-80">In attesa che</span> {lobby.players.find(p=>p.uid===lobby.challengeData.currentSelector)?.name} <span className="opacity-80">salvi qualcuno...</span>
+                                             </div>
                                          </div>
                                      )}
                                 </div>
