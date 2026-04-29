@@ -981,10 +981,10 @@
 		  { name: "Zoey", img: "https://i.pinimg.com/736x/48/53/3e/48533edc4b5054ec0a7bca17130f22af.jpg" },
 		  { name: "Rochelle", img: "https://i.pinimg.com/736x/bb/56/ed/bb56ed9fa63be897ba67032706d75cc7.jpg" },
 		  { name: "Ellis", img: "https://i.pinimg.com/736x/be/58/d5/be58d584da6dfa953ec9be2bd0ac94ac.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/be/58/d5/be58d584da6dfa953ec9be2bd0ac94ac.jpg" }, { name: "Shirtless Ellis", img: "https://i.pinimg.com/1200x/d1/14/f5/d114f52e271fa02f5e1c40739a146a47.jpg" }] },
-		  { name: "Tanjiro", img: "https://i.pinimg.com/736x/e9/6d/20/e96d20e7c159897a05c6baa57fac7f35.jpg" },
-		  { name: "Hinosuke", img: "https://i.pinimg.com/1200x/cf/d8/27/cfd82718c3f40c906665a0d680196439.jpg" },
-		  { name: "Zenitsu", img: "https://i.pinimg.com/1200x/91/12/9d/91129dee62e996da6313160605cb514d.jpg" },
-		  { name: "Nezuko", img: "https://i.pinimg.com/1200x/72/b7/56/72b756ee900c26b3e616ba439e1f05c2.jpg" },
+		  { name: "Tanjiro", img: "https://i.pinimg.com/736x/e9/6d/20/e96d20e7c159897a05c6baa57fac7f35.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/e9/6d/20/e96d20e7c159897a05c6baa57fac7f35.jpg" }, { name: "Long Hair Tanjiro", img: "https://i.pinimg.com/736x/14/30/04/14300440491fa82c24702b769242a1e1.jpg" }, { name: "Training Tanjiro", img: "https://i.pinimg.com/736x/0e/ce/d5/0eced5defeb02c9b10ed99d9c41a69a3.jpg" }, { name: "Demon King Tanjiro", img: "https://i.pinimg.com/736x/a2/46/94/a246944fbd9cfb70f74cc0103895f77b.jpg" }] },
+		  { name: "Hinosuke", img: "https://i.pinimg.com/1200x/cf/d8/27/cfd82718c3f40c906665a0d680196439.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/cf/d8/27/cfd82718c3f40c906665a0d680196439.jpg" }, { name: "Maschera Hinosuke", img: "https://i.pinimg.com/736x/ef/62/b3/ef62b3ef7426d5ded4c2c8a7b4dfe743.jpg" }] },
+		  { name: "Zenitsu", img: "https://i.pinimg.com/1200x/91/12/9d/91129dee62e996da6313160605cb514d.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/91/12/9d/91129dee62e996da6313160605cb514d.jpg" }, { name: "Serious Zenitsu", img: "https://i.pinimg.com/1200x/9d/4c/2e/9d4c2e8502fd37beeb7a8850ab8f5b87.jpg" }, { name: "Cute Zenitsu", img: "https://i.pinimg.com/736x/5c/1f/bc/5c1fbc0f7c798e162e535ce7dbabe4ad.jpg" }] },
+		  { name: "Nezuko", img: "https://i.pinimg.com/1200x/72/b7/56/72b756ee900c26b3e616ba439e1f05c2.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/72/b7/56/72b756ee900c26b3e616ba439e1f05c2.jpg" }, { name: "Nezuko 1", img: "https://i.pinimg.com/736x/af/90/bc/af90bccde8f476d33a524c536780543e.jpg" }, { name: "Nezuko Umana", img: "https://i.pinimg.com/1200x/79/ed/03/79ed0383bba29dceb972b05fef8804d2.jpg" }] },
 		  { name: "Shinobu", img: "https://i.pinimg.com/736x/8b/71/a5/8b71a53282f08aea93f83852a01e4e44.jpg" },
 		  { name: "Tengen", img: "https://i.pinimg.com/736x/33/ef/07/33ef07083eb82a6e314b32b2d6e72295.jpg" },
 		  { name: "Aang", img: "https://i.pinimg.com/736x/21/c6/02/21c60273e7409b871140d5cee2cace5b.jpg" },
@@ -2675,6 +2675,7 @@
                           <option value="La Notte del Giudizio">La Notte del Giudizio (Tutti vs Tutti, Voto ai Peggiori 2)</option>
                           <option value="Popolarità">Popolarità (Niente sfide, immunità ai più amati)</option>
                           <option value="Ghost Island">Ghost Island (Gli eliminati lottano per tornare al Merge)</option>
+                          <option value="Redemption Island">Redemption Island (Ritorno automatico ogni 4 eliminati fino in Top 6)</option>
                           <option value="Custom">Custom (Crea Team e scegli Bot manualmente)</option>
                       </select>
                     </div>
@@ -6396,6 +6397,7 @@
             else if (lobby.config.theme === 'Girly pop') currentTeamNames = ["Girly pop", "Amazzoni", "Yuri", "Dive"];
             else if (lobby.config.theme === 'All Stars') currentTeamNames = ["Vincenti", "Vinti", "Pelatoni"];
             else if (lobby.config.theme === 'Loser Island') currentTeamNames = LOSER_TEAM_NAMES;
+            else if (lobby.config.theme === 'Redemption Island') currentTeamNames = DEFAULT_TEAM_NAMES;
             else if (lobby.config.theme === 'Custom') {
                 // Recupera i nomi scelti custom per mantenerli nella Stagione 2
                 currentTeamNames = [...new Set(lobby.players.map(p => p.team).filter(t => t && t !== 'MERGE'))];
@@ -6521,60 +6523,96 @@
              const allRolled = candidates.every(c => rolls[c]);
              if (!allRolled) return;
 
-             let maxRoll = -1;
-             let potentialWinners = [];
-             candidates.forEach(c => {
-                 if(rolls[c] > maxRoll) { maxRoll = rolls[c]; potentialWinners = [c]; }
-                 else if(rolls[c] === maxRoll) { potentialWinners.push(c); }
-             });
+             if (candidates.length > 2) {
+                 // Fase a eliminazione: il peggiore svanisce
+                 let minRoll = 999;
+                 let potentialLosers = [];
+                 candidates.forEach(c => {
+                     if(rolls[c] < minRoll) { minRoll = rolls[c]; potentialLosers = [c]; }
+                     else if(rolls[c] === minRoll) { potentialLosers.push(c); }
+                 });
 
-             if (potentialWinners.length === 1) {
-                 const winnerId = potentialWinners[0];
-                 const winner = lobby.players.find(p => p.uid === winnerId);
-                 
-                 const activePlayers = lobby.players.filter(p => p.status === 'active');
-                 let targetTeam = "Merge";
-                 
-                 const activeTeamsList = [...new Set(activePlayers.map(p => p.team).filter(t => t && t !== "Merge"))];
-                 
-                 if (activeTeamsList.length > 0) {
-                     const teamCounts = {};
-                     activeTeamsList.forEach(t => teamCounts[t] = 0);
+                 if (potentialLosers.length === 1) {
+                     const loserId = potentialLosers[0];
+                     const loser = lobby.players.find(p => p.uid === loserId);
                      
-                     activePlayers.forEach(p => { 
-                         if(p.team && activeTeamsList.includes(p.team)) {
-                             teamCounts[p.team] = (teamCounts[p.team] || 0) + 1;
-                         }
+                     const newCandidates = candidates.filter(c => c !== loserId);
+                     const updatedPlayers = lobby.players.map(p => 
+                         p.uid === loserId ? { ...p, status: 'perm_eliminated' } : p
+                     );
+
+                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                        players: updatedPlayers,
+                        [`redemptionData.candidates`]: newCandidates,
+                        [`redemptionData.rolls`]: {},
+                        logs: arrayUnion(`💥 REDEMPTION: ${loser.name} ha fatto il punteggio più basso (${minRoll}) ed è SVANITO DEFINITIVAMENTE! Rimangono in ${newCandidates.length}...`)
                      });
-                     
-                     let minCount = 999;
-                     Object.entries(teamCounts).forEach(([t, count]) => {
-                         if (count < minCount) { minCount = count; targetTeam = t; }
-                         else if (count === minCount && Math.random() > 0.5) { targetTeam = t; } 
+                 } else {
+                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                        [`redemptionData.rolls`]: {},
+                        logs: arrayUnion(`Pareggio al ribasso (${minRoll})! Si rilanciano i dadi per non essere eliminati.`)
                      });
                  }
-
-                 const updatedPlayers = lobby.players.map(p => 
-                     p.uid === winnerId ? { ...p, status: 'active', team: targetTeam, immunityWins: 0 } : p
-                 );
-
-                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                    players: updatedPlayers,
-                    phase: 'episode_start',
-                    round: lobby.round, 
-                    redemptionData: null,
-                    logs: arrayUnion(`${winner.name} VINCE IL RIENTRO e torna nel team ${targetTeam}!`)
-                 });
-                 
-                 // Aggiunge la presenza al round a cui sta tornando
-                 incrementActivePlayersStats(updatedPlayers.filter(p => p.status === 'active'));
-                 setSelectedRedemptionCandidates([]);
-
              } else {
-                 await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                    [`redemptionData.rolls`]: {},
-                    logs: arrayUnion("Pareggio nel rientro! Si rilanciano i dadi.")
+                 // Scontro finale a 2: vince chi fa di più e torna in gioco
+                 let maxRoll = -1;
+                 let potentialWinners = [];
+                 candidates.forEach(c => {
+                     if(rolls[c] > maxRoll) { maxRoll = rolls[c]; potentialWinners = [c]; }
+                     else if(rolls[c] === maxRoll) { potentialWinners.push(c); }
                  });
+
+                 if (potentialWinners.length === 1) {
+                     const winnerId = potentialWinners[0];
+                     const loserIds = candidates.filter(c => c !== winnerId);
+                     const winner = lobby.players.find(p => p.uid === winnerId);
+                     const loserNames = loserIds.map(id => lobby.players.find(p => p.uid === id)?.name).join(' e ');
+                     
+                     const activePlayers = lobby.players.filter(p => p.status === 'active');
+                     let targetTeam = "Merge";
+                     
+                     const activeTeamsList = [...new Set(activePlayers.map(p => p.team).filter(t => t && t !== "Merge"))];
+                     
+                     if (activeTeamsList.length > 0) {
+                         const teamCounts = {};
+                         activeTeamsList.forEach(t => teamCounts[t] = 0);
+                         
+                         activePlayers.forEach(p => { 
+                             if(p.team && activeTeamsList.includes(p.team)) {
+                                 teamCounts[p.team] = (teamCounts[p.team] || 0) + 1;
+                             }
+                         });
+                         
+                         let minCount = 999;
+                         Object.entries(teamCounts).forEach(([t, count]) => {
+                             if (count < minCount) { minCount = count; targetTeam = t; }
+                             else if (count === minCount && Math.random() > 0.5) { targetTeam = t; } 
+                         });
+                     }
+
+                     const updatedPlayers = lobby.players.map(p => {
+                         if (p.uid === winnerId) return { ...p, status: 'active', team: targetTeam, immunityWins: 0 };
+                         if (loserIds.includes(p.uid)) return { ...p, status: 'perm_eliminated' };
+                         return p;
+                     });
+
+                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                        players: updatedPlayers,
+                        phase: 'episode_start',
+                        round: lobby.round, 
+                        redemptionData: null,
+                        logs: arrayUnion(`🏆 DUELLO FINALE: ${winner.name} trionfa (${maxRoll}) e TORNA IN GARA nel team ${targetTeam}! ${loserNames} svanisce definitivamente.`)
+                     });
+                     
+                     incrementActivePlayersStats(updatedPlayers.filter(p => p.status === 'active'));
+                     setSelectedRedemptionCandidates([]);
+
+                 } else {
+                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                        [`redemptionData.rolls`]: {},
+                        logs: arrayUnion(`Pareggio al vertice (${maxRoll})! Ultimo scontro decisivo, rilanciate i dadi!`)
+                     });
+                 }
              }
           };
 
@@ -6984,7 +7022,25 @@
                       logs: arrayUnion(`${victim.name} è ELIMINATO DIRETTAMENTE dallo show!`, ...newLogs)
                   };
 
-                  if (lobby.config.theme === 'Ghost Island' && !alreadyMerged && willBeMerge && currentGhosts.length > 0) {
+                  if (lobby.config.theme === 'Redemption Island' && nextActiveCount > 6 && currentGhosts.length >= 4) {
+                      updates = {
+                          ...updates,
+                          phase: 'redemption',
+                          redemptionData: { active: true, stage: 'rolling', candidates: currentGhosts.map(g => g.uid), rolls: {} },
+                          round: nextRound,
+                          players: updatedPlayers,
+                          votes: {},
+                          extraVotes: {},
+                          immunity: [],
+                          diceRoll: null,
+                          losingTeam: null,
+                          ceremonyData: null,
+                          challengeData: null,
+                          twistData: null,
+                          logs: arrayUnion(...newLogs, `--- BATTAGLIA DELLA REDEMPTION ISLAND ---`, `I ${currentGhosts.length} eliminati si sfidano! Solo chi fa il punteggio più alto torna in gioco, gli altri svaniscono per sempre!`)
+                      };
+                  }
+                  else if (lobby.config.theme === 'Ghost Island' && !alreadyMerged && willBeMerge && currentGhosts.length > 0) {
                       if (currentGhosts.length > 2) {
                           updates = { ...updates, phase: 'ghost_island', ghostIslandData: { stage: 'rolling', candidates: currentGhosts.map(g => g.uid), rolls: {}, isMergeReturn: true }, round: nextRound, players: updatedPlayers, votes: {}, extraVotes: {}, immunity: [], diceRoll: null, losingTeam: null, ceremonyData: null, challengeData: null, twistData: null, logs: arrayUnion(...newLogs, `--- SFIDA FINALE GHOST ISLAND ---`, `I ${currentGhosts.length} fantasmi si sfidano per gli ultimi 2 posti nella Fusione!`) };
                       } else {
@@ -7398,7 +7454,25 @@
                       updatedPlayers = updatedPlayers.map(p => p.status === 'active' ? { ...p, team: 'MERGE' } : p);
                   }
 
-                  if (lobby.config.theme === 'Ghost Island' && !alreadyMerged && willBeMerge && currentGhosts.length > 0) {
+                  if (lobby.config.theme === 'Redemption Island' && nextActiveCount > 6 && currentGhosts.length >= 4) {
+                      updates = {
+                        ...updates,
+                        phase: 'redemption',
+                        redemptionData: { active: true, stage: 'rolling', candidates: currentGhosts.map(g => g.uid), rolls: {} },
+                        round: nextRound,
+                        players: updatedPlayers,
+                        votes: {},
+                        extraVotes: {}, 
+                        immunity: nextImmunities,
+                        diceRoll: null,
+                        losingTeam: null,
+                        ceremonyData: null,
+                        challengeData: null,
+                        twistData: null, 
+                        logs: arrayUnion(...newLogs, `--- BATTAGLIA DELLA REDEMPTION ISLAND ---`, `I ${currentGhosts.length} eliminati si sfidano! Solo chi fa il punteggio più alto torna in gioco, gli altri svaniscono per sempre!`)
+                      };
+                  }
+                  else if (lobby.config.theme === 'Ghost Island' && !alreadyMerged && willBeMerge && currentGhosts.length > 0) {
                       if (currentGhosts.length > 2) {
                           updates = {
                             ...updates,
@@ -9640,7 +9714,11 @@
                          <div className="flex flex-col items-center justify-center min-h-full">
                              <div className="text-center mb-8">
                                  <h1 className="text-5xl font-black text-orange-500 mb-2 uppercase tracking-widest drop-shadow-md">Redemption Island</h1>
-                                 <p className="text-slate-300 text-xl">Chi merita una seconda chance?</p>
+                                 <p className="text-slate-300 text-lg font-bold bg-black/40 px-6 py-2 rounded-full border border-orange-500/30 inline-block mt-2">
+                                     {lobby.redemptionData.candidates?.length > 2 
+                                        ? "Sopravvivenza: Chi fa il punteggio più basso SVANISCE per sempre!" 
+                                        : "Duello Finale: Chi fa il punteggio più alto TORNA IN GIOCO!"}
+                                 </p>
                              </div>
 
                              {lobby.redemptionData.stage === 'selection' ? (
