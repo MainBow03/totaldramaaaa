@@ -6559,6 +6559,7 @@
              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                  [`redemptionData.candidates`]: selectedRedemptionCandidates,
                  [`redemptionData.stage`]: 'rolling',
+                 [`redemptionData.purged`]: [],
                  logs: arrayUnion(`Inizia la sfida per il Rientro! ${selectedRedemptionCandidates.length} concorrenti si sfidano in una Purga Battle Royale.`)
              });
           };
@@ -6588,9 +6589,22 @@
              const loser = lobby.players.find(p => p.uid === loserId);
              const remainingCandidates = candidates.filter(c => c !== loserId);
 
+             const purged = lobby.redemptionData.purged || [];
+             const elimCount = lobby.config.redemptionElimCount || 2;
+             const isPermEliminated = purged.length < elimCount;
+
              let updatedPlayers = [...lobby.players];
-             const loserIdx = updatedPlayers.findIndex(p => p.uid === loserId);
-             updatedPlayers[loserIdx] = { ...updatedPlayers[loserIdx], status: 'perm_eliminated' };
+             let logMsg = "";
+             
+             if (isPermEliminated) {
+                 const loserIdx = updatedPlayers.findIndex(p => p.uid === loserId);
+                 updatedPlayers[loserIdx] = { ...updatedPlayers[loserIdx], status: 'perm_eliminated' };
+                 logMsg = `💥 ${loser.name} ha fatto il punteggio più basso (${minRoll}) e SVANISCE PER SEMPRE!`;
+             } else {
+                 logMsg = `👻 ${loser.name} ha fatto il punteggio più basso (${minRoll})! È fuori dalla sfida ma RIMANE SULL'ISOLA per il prossimo rientro!`;
+             }
+
+             const newPurged = [...purged, loserId];
 
              if (remainingCandidates.length === 1) {
                  const winnerId = remainingCandidates[0];
@@ -6622,7 +6636,7 @@
                     phase: 'episode_start',
                     round: lobby.round, 
                     redemptionData: null,
-                    logs: arrayUnion(`💥 ${loser.name} ha fatto il punteggio più basso (${minRoll}) e SVANISCE PER SEMPRE!`, `🏆 PURGA FINITA! ${winner.name} è l'ultimo sopravvissuto e TORNA IN GARA nel team ${targetTeam}!`)
+                    logs: arrayUnion(logMsg, `🏆 PURGA FINITA! ${winner.name} è l'ultimo sopravvissuto e TORNA IN GARA nel team ${targetTeam}!`)
                  });
                  
                  incrementActivePlayersStats([updatedPlayers[winnerIdx]]);
@@ -6631,8 +6645,9 @@
                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                     players: updatedPlayers,
                     [`redemptionData.candidates`]: remainingCandidates,
+                    [`redemptionData.purged`]: newPurged,
                     [`redemptionData.rolls`]: {},
-                    logs: arrayUnion(`💥 ${loser.name} ha fatto il punteggio più basso (${minRoll}) e SVANISCE PER SEMPRE! I restanti ${remainingCandidates.length} continuano la battaglia!`)
+                    logs: arrayUnion(logMsg, `I restanti ${remainingCandidates.length} continuano la battaglia!`)
                  });
              }
           };
@@ -7058,7 +7073,7 @@
                       updates = {
                           ...updates,
                           phase: 'redemption',
-                          redemptionData: { active: true, stage: 'rolling', candidates: currentGhosts.map(g => g.uid), rolls: {} },
+                          redemptionData: { active: true, stage: 'rolling', candidates: currentGhosts.map(g => g.uid), rolls: {}, purged: [] },
                           round: nextRound,
                           players: updatedPlayers,
                           votes: {},
@@ -7095,7 +7110,7 @@
                        updates = {
                            ...updates,
                            phase: 'redemption',
-                           redemptionData: { active: true, stage: 'selection', candidates: [], rolls: {} },
+                           redemptionData: { active: true, stage: 'selection', candidates: [], rolls: {}, purged: [] },
                            round: nextRound,
                            votes: {},
                            immunity: [],
@@ -7492,7 +7507,7 @@
                       updates = {
                         ...updates,
                         phase: 'redemption',
-                        redemptionData: { active: true, stage: 'rolling', candidates: currentGhosts.map(g => g.uid), rolls: {} },
+                        redemptionData: { active: true, stage: 'rolling', candidates: currentGhosts.map(g => g.uid), rolls: {}, purged: [] },
                         round: nextRound,
                         players: updatedPlayers,
                         votes: {},
@@ -7573,7 +7588,7 @@
                       updates = {
                         ...updates,
                         phase: 'redemption',
-                        redemptionData: { active: true, stage: 'selection', candidates: [], rolls: {} },
+                        redemptionData: { active: true, stage: 'selection', candidates: [], rolls: {}, purged: [] },
                         round: nextRound,
                         votes: {},
                         immunity: nextImmunities, // Mantiene l'immunità del testamento
@@ -9749,7 +9764,7 @@
                              <div className="text-center mb-8">
                                  <h1 className="text-5xl font-black text-orange-500 mb-2 uppercase tracking-widest drop-shadow-md">Redemption Island</h1>
                                  <p className="text-slate-300 text-lg font-bold bg-black/40 px-6 py-2 rounded-full border border-orange-500/30 inline-block mt-2">
-                                     BATTAGLIA: L'ultimo classificato svanisce a ogni round, finché non ne resta solo 1!
+                                     BATTAGLIA PURGA: I peggiori {lobby.config.redemptionElimCount || 2} svaniscono, i migliori restano, l'ultimo sopravvissuto torna in gara!
                                  </p>
                              </div>
 
