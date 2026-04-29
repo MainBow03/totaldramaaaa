@@ -2682,7 +2682,12 @@
                       </select>
                     </div>
 
-                    {config.theme === 'Redemption Island' && (
+                    {config.theme === 'Redemption Island' && (() => {
+                        const interval = config.redemptionThemeInterval;
+                        const elimCount = Math.min(config.redemptionElimCount || 2, Math.max(1, interval - 1));
+                        const stayingCount = interval - 1 - elimCount;
+
+                        return (
                         <div className="bg-orange-900/30 p-4 rounded-xl border border-orange-500 animate-in fade-in space-y-4">
                             <div>
                                 <label className="block text-orange-400 font-bold mb-2">
@@ -2693,26 +2698,50 @@
                                         type="range"
                                         min="2"
                                         max="8"
-                                        value={config.redemptionThemeInterval}
+                                        value={interval}
                                         onChange={e => setConfig({...config, redemptionThemeInterval: parseInt(e.target.value)})}
                                         className="flex-1 accent-orange-500"
                                     />
                                     <span className="text-2xl font-bold w-12 text-center text-orange-400">
-                                        {config.redemptionThemeInterval}
+                                        {interval}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-orange-400 font-bold mb-2">
+                                    Quanti eliminati definitivi per sfida? (1 - {Math.max(1, interval - 1)})
+                                </label>
+                                <div className="flex items-center gap-4">
+                                    <input
+                                        type="range"
+                                        min="1"
+                                        max={Math.max(1, interval - 1)}
+                                        value={elimCount}
+                                        onChange={e => setConfig({...config, redemptionElimCount: parseInt(e.target.value)})}
+                                        className="flex-1 accent-red-500"
+                                    />
+                                    <span className="text-2xl font-bold w-12 text-center text-red-500">
+                                        {elimCount}
                                     </span>
                                 </div>
                                 <div className="mt-4 bg-black/40 p-3 rounded-lg border border-orange-500/30 text-xs text-slate-300">
-                                    <strong className="text-orange-400 block mb-1">💡 Come funziona la Purga Battle Royale?</strong>
+                                    <strong className="text-orange-400 block mb-1">💡 Come funzionerà la Purga?</strong>
                                     <ul className="list-disc pl-4 mt-1 space-y-1">
-                                        <li>Appena <strong>{config.redemptionThemeInterval} concorrenti</strong> si accumulano sull'Isola, parte la battaglia.</li>
-                                        <li>Tutti lanciano i dadi: chi fa il punteggio <strong>più basso</strong> viene eliminato <em className="text-red-400">definitivamente</em>.</li>
-                                        <li>I sopravvissuti lanciano di nuovo i dadi, eliminando un'altra persona.</li>
-                                        <li>Il ciclo continua in un "tutti contro tutti" finché non rimane <strong>un solo giocatore</strong>, che vincerà il diritto di tornare in gara!</li>
+                                        <li>Appena <strong>{interval} concorrenti</strong> si accumulano sull'Isola, parte la battaglia.</li>
+                                        <li>Tutti lanciano i dadi: chi fa il punteggio <strong>più basso</strong> viene eliminato!</li>
+                                        <li>La purga continua eliminando uno ad uno i <strong>peggiori {elimCount}</strong> <em className="text-red-400">definitivamente</em> dallo show.</li>
+                                        <li>Il <strong className="text-green-400">1° classificato</strong> (l'ultimo sopravvissuto) torna in gioco!</li>
+                                        {stayingCount > 0 ? (
+                                            <li>Gli altri <strong>{stayingCount}</strong> "nel mezzo" <strong>rimangono bloccati sull'Isola</strong> in attesa dei prossimi eliminati per fare una nuova Purga a {interval}!</li>
+                                        ) : (
+                                            <li>Nessuno rimane in attesa: o torni, o svanisci per sempre!</li>
+                                        )}
                                     </ul>
                                 </div>
                             </div>
                         </div>
-                    )}
+                        );
+                    })()}
 
                     <div>
                       <label className="block text-slate-400 font-bold mb-2">Concorrenti (8 - {(config.theme === 'All Stars' || config.theme === 'Loser Island') ? 24 : 100})</label>
