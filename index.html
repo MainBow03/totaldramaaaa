@@ -6714,7 +6714,7 @@
           };
 
           const resolveRedemption = async () => {
-             const { candidates, rolls } = lobby.redemptionData;
+             const { candidates, rolls, safePlayers = [] } = lobby.redemptionData;
              const allRolled = candidates.every(c => rolls[c]);
              if (!allRolled) return;
 
@@ -6727,16 +6727,21 @@
 
              if (losers.length > 1) {
                  const loserNames = losers.map(id => lobby.players.find(p=>p.uid===id)?.name).join(', ');
+                 const newSafe = candidates.filter(c => !losers.includes(c));
                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                     [`redemptionData.rolls`]: {},
-                    logs: arrayUnion(`Pareggio all'ultimo posto (${minRoll}) tra ${loserNames}! Tutti i candidati rilanciano i dadi per salvarsi!`)
+                    [`redemptionData.candidates`]: losers,
+                    [`redemptionData.safePlayers`]: [...safePlayers, ...newSafe],
+                    logs: arrayUnion(`Pareggio all'ultimo posto (${minRoll}) tra ${loserNames}! Solo loro rilanciano i dadi per lo spareggio!`)
                  });
                  return;
              }
 
              const loserId = losers[0];
              const loser = lobby.players.find(p => p.uid === loserId);
-             const remainingCandidates = candidates.filter(c => c !== loserId);
+             
+             const tieRemaining = candidates.filter(c => c !== loserId);
+             const remainingCandidates = [...safePlayers, ...tieRemaining];
 
              const purged = lobby.redemptionData.purged || [];
              const elimCount = lobby.config.redemptionElimCount || 2;
@@ -6794,6 +6799,7 @@
                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                     players: updatedPlayers,
                     [`redemptionData.candidates`]: remainingCandidates,
+                    [`redemptionData.safePlayers`]: [],
                     [`redemptionData.purged`]: newPurged,
                     [`redemptionData.rolls`]: {},
                     logs: arrayUnion(logMsg, `I restanti ${remainingCandidates.length} continuano la battaglia!`)
@@ -7872,7 +7878,7 @@
             }
 
             else if (lobby.phase === 'ghost_island') {
-                const { candidates, rolls, isMergeReturn } = lobby.ghostIslandData;
+                const { candidates, rolls, isMergeReturn, safePlayers = [] } = lobby.ghostIslandData;
                 const allRolled = candidates.every(c => rolls[c]);
                 if (!allRolled) return;
 
@@ -7892,7 +7898,9 @@
                     );
 
                     if (isMergeReturn) {
-                        const returnees = candidates.filter(uid => uid !== loserId);
+                        const tieRemaining = candidates.filter(uid => uid !== loserId);
+                        const returnees = [...safePlayers, ...tieRemaining];
+                        
                         returnees.forEach(uid => {
                             const idx = updatedPlayers.findIndex(p => p.uid === uid);
                             updatedPlayers[idx].status = 'active';
@@ -7918,10 +7926,14 @@
                         };
                     }
                 } else {
+                    const loserNames = losers.map(id => lobby.players.find(p=>p.uid===id)?.name).join(', ');
+                    const newSafe = candidates.filter(c => !losers.includes(c));
+                    
                     updates = {
                         [`ghostIslandData.rolls`]: {},
                         [`ghostIslandData.candidates`]: losers,
-                        logs: arrayUnion(`Pareggio a ${minRoll} su Ghost Island! Spareggio tra i peggiori.`)
+                        [`ghostIslandData.safePlayers`]: [...safePlayers, ...newSafe],
+                        logs: arrayUnion(`Pareggio a ${minRoll} su Ghost Island tra ${loserNames}! Solo loro rilanciano i dadi.`)
                     };
                 }
             }
