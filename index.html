@@ -454,12 +454,13 @@
             border: 3px solid #fbbf24 !important;
             box-shadow: 0 0 30px rgba(251, 191, 36, 0.8), 0 0 15px rgba(220, 38, 38, 0.8), inset 0 0 20px rgba(251, 191, 36, 0.6) !important;
             position: relative;
+            overflow: hidden !important; /* FIX: Evita che la luce copra gli altri personaggi */
         }
         .cosmetic-imperatore::before {
             content: '';
             position: absolute;
-            inset: -8px;
-            border: 4px double #f59e0b;
+            inset: 2px; /* Portato all'interno per non essere tagliato dall'overflow */
+            border: 3px double #f59e0b;
             border-radius: inherit;
             animation: pulseEmperor 2s infinite alternate;
             z-index: 20; pointer-events: none;
@@ -468,9 +469,9 @@
             content: '';
             position: absolute;
             top: -50%; left: -50%; width: 200%; height: 200%;
-            background: conic-gradient(from 0deg, transparent 0%, rgba(251, 191, 36, 0.3) 10%, transparent 20%, transparent 40%, rgba(251, 191, 36, 0.3) 50%, transparent 60%);
+            background: conic-gradient(from 0deg, transparent 0%, rgba(251, 191, 36, 0.4) 10%, transparent 20%, transparent 40%, rgba(251, 191, 36, 0.4) 50%, transparent 60%);
             animation: rotateRing 8s linear infinite;
-            z-index: 20; pointer-events: none; mix-blend-mode: color-dodge;
+            z-index: 20; pointer-events: none; mix-blend-mode: overlay;
         }
 
         /* 24. Il Veggente: Occhio Oscuro che sbatte (Niente Emoji) */
@@ -585,7 +586,7 @@
         @keyframes paparazziFlash { 0%, 90% { opacity: 0; transform: scale(0.5); } 95% { opacity: 1; transform: scale(1.5); } 100% { opacity: 0; transform: scale(0.5); } }
         @keyframes abyssPulse { 0% { box-shadow: 0 0 20px #000, inset 0 0 20px #4c1d95; filter: contrast(1.1) brightness(0.8) grayscale(0.3); } 100% { box-shadow: 0 0 45px #000, inset 0 0 40px #581c87; filter: contrast(1.3) brightness(0.6) grayscale(0.6); } }
         @keyframes sweepGold { 0% { transform: translate(-100%, -100%) rotate(45deg); } 50%, 100% { transform: translate(100%, 100%) rotate(45deg); } }
-        @keyframes pulseEmperor { 0% { filter: drop-shadow(0 0 5px #ef4444); border-color: #f59e0b; transform: scale(1); } 100% { filter: drop-shadow(0 0 20px #dc2626); border-color: #fcd34d; transform: scale(1.05); } }
+        @keyframes pulseEmperor { 0% { box-shadow: inset 0 0 5px #ef4444; border-color: #f59e0b; opacity: 0.6; transform: scale(0.95); } 100% { box-shadow: inset 0 0 15px #dc2626; border-color: #fcd34d; opacity: 1; transform: scale(1); } }
         @keyframes blinkEvilEye { 0%, 90%, 100% { transform: rotate(45deg) scale3d(1, 1, 1); border-width: 2px; } 95% { transform: rotate(45deg) scale3d(0, 0, 1); border-width: 0px; } }
         @keyframes orbitDice1 { 0% { transform: rotate(0deg) translateY(-40px) rotate(0deg); } 100% { transform: rotate(360deg) translateY(-40px) rotate(-360deg); } }
         @keyframes orbitDice2 { 0% { transform: rotate(180deg) translateY(-40px) rotate(-180deg); } 100% { transform: rotate(540deg) translateY(-40px) rotate(-540deg); } }
