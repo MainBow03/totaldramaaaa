@@ -9459,8 +9459,8 @@
                </div>
 
                <div className="flex-1 flex flex-col relative z-0 overflow-hidden">
-                  <div className="h-14 bg-slate-800/90 flex items-center justify-between px-4 z-20 border-b border-white/10 flex-shrink-0">
-                     <div className="font-bold italic text-white flex items-center gap-2">
+                  <div className="min-h-[3.5rem] py-2 bg-slate-800/90 flex flex-wrap items-center justify-between gap-y-2 px-2 sm:px-4 z-20 border-b border-white/10 flex-shrink-0">
+                     <div className="font-bold italic text-white text-xs sm:text-base flex items-center justify-center w-full lg:w-auto gap-2">
                         {lobby.phase === 'idol_hunt' && "CACCIA AL TESORO"}
                         {lobby.phase === 'challenge' && "SFIDA IN CORSO"}
                         {lobby.phase === 'social' && "SOCIALIZZAZIONE"}
@@ -9475,29 +9475,29 @@
                         {lobby.phase === 'grand_finale_top6' && "TOP 6 ASSOLUTA"}
                      </div>
                      
-                     <div className="flex items-center gap-4">
+                     <div className="flex flex-wrap items-center justify-center w-full lg:w-auto gap-2 sm:gap-4">
                         {/* 1. PULSANTE PER AVVIARE LA VOTAZIONE */}
                         {!myPlayer?.hasCalledEndVote && !lobby.endVote?.active && lobby.phase !== 'game_over' && (
-                             <button onClick={startEndVote} className="bg-red-600 hover:bg-red-500 text-white font-black px-3 py-1 rounded shadow text-xs flex items-center gap-1 transition-all" title="Proponi l'annullamento della partita">
+                             <button onClick={startEndVote} className="bg-red-600 hover:bg-red-500 text-white font-black px-2 sm:px-3 py-1.5 sm:py-1 rounded shadow text-[10px] sm:text-xs flex items-center justify-center gap-1 transition-all flex-1 sm:flex-none" title="Proponi l'annullamento della partita">
                                  🛑 STOP
                              </button>
                         )}
 
                         {/* PULSANTE RESET EMERGENZA (SOLO HOST) */}
                         {isHost && lobby.phase !== 'game_over' && lobby.phase !== 'season_setup' && (
-                             <button onClick={() => setShowResetConfirmModal(true)} className="bg-orange-600 hover:bg-orange-500 text-white font-black px-3 py-1 rounded shadow text-xs flex items-center gap-1 transition-all" title="Sblocca il gioco forzando il prossimo episodio">
+                             <button onClick={() => setShowResetConfirmModal(true)} className="bg-orange-600 hover:bg-orange-500 text-white font-black px-2 sm:px-3 py-1.5 sm:py-1 rounded shadow text-[10px] sm:text-xs flex items-center justify-center gap-1 transition-all flex-1 sm:flex-none" title="Sblocca il gioco forzando il prossimo episodio">
                                  <RefreshCw size={14}/> RESET
                              </button>
                         )}
 
                         {lobby.phase === 'social' && myPlayer.status === 'active' && (
                             (lobby.readyPlayers || []).includes(user.uid) ? (
-                                <div className="bg-green-600/50 text-green-200 px-4 py-1 rounded font-bold text-sm flex items-center gap-2 border border-green-500">
-                                    <CheckCircle size={16}/> HAI FINITO
+                                <div className="bg-green-600/50 text-green-200 px-2 sm:px-4 py-1.5 sm:py-1 rounded font-bold text-[10px] sm:text-sm flex items-center justify-center gap-1 sm:gap-2 border border-green-500 flex-1 sm:flex-none">
+                                    <CheckCircle size={14} className="hidden sm:block"/> HAI FINITO
                                 </div>
                             ) : (
-                                <button onClick={toggleReady} className="bg-green-600 hover:bg-green-500 text-white font-black px-4 py-1 rounded shadow text-sm flex items-center gap-2 animate-pulse">
-                                    <CheckCircle size={16}/> HO FINITO
+                                <button onClick={toggleReady} className="bg-green-600 hover:bg-green-500 text-white font-black px-2 sm:px-4 py-1.5 sm:py-1 rounded shadow text-[10px] sm:text-sm flex items-center justify-center gap-1 sm:gap-2 animate-pulse flex-1 sm:flex-none">
+                                    <CheckCircle size={14} className="hidden sm:block"/> HO FINITO
                                 </button>
                             )
                         )}
@@ -9506,7 +9506,7 @@
                             <button 
                                 onClick={advanceGame} 
                                 disabled={isProcessing || pendingBequeathHumans.length > 0 || (lobby.phase === 'ghost_island' && Object.keys(lobby.ghostIslandData?.rolls || {}).length < lobby.ghostIslandData?.candidates.length) || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')}
-                                className={`${(isProcessing || pendingBequeathHumans.length > 0 || (lobby.phase === 'ghost_island' && Object.keys(lobby.ghostIslandData?.rolls || {}).length < lobby.ghostIslandData?.candidates.length) || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-4 py-1 rounded shadow text-sm flex items-center gap-2 transition-all`}
+                                className={`${(isProcessing || pendingBequeathHumans.length > 0 || (lobby.phase === 'ghost_island' && Object.keys(lobby.ghostIslandData?.rolls || {}).length < lobby.ghostIslandData?.candidates.length) || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-3 sm:px-4 py-2 sm:py-1 rounded shadow text-[10px] sm:text-sm flex items-center justify-center gap-1 sm:gap-2 transition-all w-full sm:w-auto mt-1 sm:mt-0`}
                             >
                             {isProcessing ? 'ATTENDI...' : pendingBequeathHumans.length > 0 
                                 ? `ATTESA LASCITO (${pendingBequeathHumans.length})`
