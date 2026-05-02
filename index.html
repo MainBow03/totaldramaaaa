@@ -11572,7 +11572,7 @@
                                              const myTeamActivePlayers = activePlayers.filter(ap => ap.team === myPlayer.team);
                                              const isOnlyMember = !isMerge && myTeamActivePlayers.length === 1 && p.team === lobby.losingTeam;
                                              
-                                             if (!canVoteFor || (p.uid === user.uid && !isOnlyMember && lobby.twistData?.type !== 'purge')) return null;
+                                             if (!canVoteFor || (p.uid === user.uid && !isOnlyMember && lobby.twistData?.type !== 'purge' && !isMerge)) return null;
                                              if (lobby.idolData?.activeEffects?.safetyUsedRound === lobby.round && lobby.idolData?.activeEffects?.safetyHolder === p.uid) return null;
                                              
                                              const iVotedFor = lobby.votes?.[user.uid] === p.uid;
