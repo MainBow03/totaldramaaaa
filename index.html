@@ -531,6 +531,50 @@
             animation: orbitDice2 3s linear infinite;
         }
 
+        /* 26. Il mio primo titolo: Stella nascente */
+        .cosmetic-primotitolo {
+            border: 3px solid #60a5fa !important;
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.8), inset 0 0 15px rgba(147, 197, 253, 0.5) !important;
+        }
+        .cosmetic-primotitolo::before {
+            content: '🌟';
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            font-size: 32px;
+            z-index: 20;
+            animation: spinStar 4s linear infinite;
+        }
+
+        /* 27. Collezionista di Anime: Aura Cacciatore di Anime */
+        .cosmetic-collezionista {
+            border: 3px solid #14b8a6 !important;
+            box-shadow: 0 0 35px rgba(20, 184, 166, 0.9), inset 0 0 20px rgba(45, 212, 191, 0.6) !important;
+            animation: soulGlow 2s infinite alternate;
+        }
+        .cosmetic-collezionista::before {
+            content: '🔮';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 34px;
+            z-index: 20;
+            animation: floatSoul 3s infinite ease-in-out alternate;
+            filter: drop-shadow(0 0 10px #2dd4bf);
+        }
+        .cosmetic-collezionista::after {
+            content: '';
+            position: absolute;
+            inset: -12px;
+            border: 2px dashed #0ea5e9;
+            border-radius: inherit;
+            animation: rotateRing 5s linear infinite;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
         /* --- STILI COSMETICI DI LIVELLO --- */
         .cosmetic-level-rame { border: 3px solid #b87333 !important; box-shadow: 0 0 10px rgba(184, 115, 51, 0.5) !important; }
         .cosmetic-level-ferro { border: 3px solid #94a3b8 !important; box-shadow: 0 0 10px rgba(148, 163, 184, 0.5) !important; }
@@ -590,6 +634,15 @@
         @keyframes blinkEvilEye { 0%, 90%, 100% { transform: rotate(45deg) scale3d(1, 1, 1); border-width: 2px; } 95% { transform: rotate(45deg) scale3d(0, 0, 1); border-width: 0px; } }
         @keyframes orbitDice1 { 0% { transform: rotate(0deg) translateY(-40px) rotate(0deg); } 100% { transform: rotate(360deg) translateY(-40px) rotate(-360deg); } }
         @keyframes orbitDice2 { 0% { transform: rotate(180deg) translateY(-40px) rotate(-180deg); } 100% { transform: rotate(540deg) translateY(-40px) rotate(-540deg); } }
+        @keyframes spinStar { 100% { transform: rotate(360deg); } }
+        @keyframes soulGlow {
+            0% { box-shadow: 0 0 30px rgba(20, 184, 166, 0.8), inset 0 0 15px rgba(45, 212, 191, 0.5); border-color: #14b8a6; }
+            100% { box-shadow: 0 0 50px rgba(6, 182, 212, 1), inset 0 0 30px rgba(34, 211, 238, 0.8); border-color: #06b6d4; }
+        }
+        @keyframes floatSoul {
+            0%, 100% { transform: translate(-50%, 0) scale(1); filter: drop-shadow(0 0 10px #2dd4bf); }
+            50% { transform: translate(-50%, -12px) scale(1.1); filter: drop-shadow(0 0 25px #06b6d4); }
+        }
 
         @keyframes crownFloat {
             0%, 100% { transform: translate(-50%, 0) scale(1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7)); }
@@ -817,6 +870,8 @@
                 'vittoriaschiacciante': 'cosmetic-imperatore', // Aura imperatore sfarzosa
                 'ilveggente': 'cosmetic-veggente', // Occhio oscuro in cima che blinka
                 'redeidadi': 'cosmetic-rededadi', // Dadi orbitanti
+                'primotitolo': 'cosmetic-primotitolo', // Stella nascente
+                'collezionista': 'cosmetic-collezionista', // Aura Cacciatore
                 // COSMETICI DI LIVELLO
                 'level_rame': 'cosmetic-level-rame',
                 'level_ferro': 'cosmetic-level-ferro',
@@ -2034,6 +2089,8 @@
                   vittoriaschiacciante: { progress: 0, unlocked: false },
                   ilveggente: { progress: 0, unlocked: false },
                   redeidadi: { progress: 0, unlocked: false },
+                  primotitolo: { progress: 0, unlocked: false },
+                  collezionista: { progress: 0, unlocked: false },
                   title_Marinette: { progress: 0, unlocked: false }
               };
               
@@ -2076,6 +2133,43 @@
                   return nextState;
               });
           };
+
+          // --- TRACKING TITOLI PER ACHIEVEMENTS MIO PRIMO TITOLO E COLLEZIONISTA ---
+          useEffect(() => {
+              const unlockedTitlesCount = Object.keys(achievements).filter(key => key.startsWith('title_') && achievements[key].unlocked).length;
+              let needsUpdate = false;
+              if (unlockedTitlesCount >= 1 && !achievements.primotitolo?.unlocked) needsUpdate = true;
+              if (unlockedTitlesCount !== (achievements.collezionista?.progress || 0) && !achievements.collezionista?.unlocked) needsUpdate = true;
+              
+              if (needsUpdate) {
+                  setAchievements(prev => {
+                      const nextState = { ...prev };
+                      let changed = false;
+                      const count = Object.keys(prev).filter(key => key.startsWith('title_') && prev[key].unlocked).length;
+                      
+                      if (count >= 1 && !prev.primotitolo?.unlocked) {
+                          nextState.primotitolo = { progress: 1, unlocked: true };
+                          changed = true;
+                          setTimeout(() => playSound('success'), 500);
+                      }
+                      
+                      if (!prev.collezionista?.unlocked) {
+                          const newProgress = Math.min(count, 5);
+                          if (newProgress !== (prev.collezionista?.progress || 0)) {
+                              nextState.collezionista = { progress: newProgress, unlocked: newProgress >= 5 };
+                              changed = true;
+                              if (newProgress >= 5) setTimeout(() => playSound('success'), 500);
+                          }
+                      }
+                      
+                      if (changed) {
+                          localStorage.setItem('td_achievements', JSON.stringify(nextState));
+                          return nextState;
+                      }
+                      return prev;
+                  });
+              }
+          }, [achievements]);
 
           const toggleEquipCosmetic = async (cosmeticId) => {
               const newCosmetic = equippedCosmetic === cosmeticId ? null : cosmeticId;
@@ -2493,6 +2587,7 @@
           const [showTitlesModal, setShowTitlesModal] = useState(false);
           const [showStatsModal, setShowStatsModal] = useState(false);
           const [showLevelCosmeticsModal, setShowLevelCosmeticsModal] = useState(false);
+          const [showTopPlayed, setShowTopPlayed] = useState(false);
           const [titlesSearchQuery, setTitlesSearchQuery] = useState("");
           const [config, setConfig] = useState({ 
               maxPlayers: 22, 
@@ -2510,17 +2605,48 @@
           });
           const [joinCode, setJoinCode] = useState('');
 
-          // Calcolo del personaggio preferito
-          const favChar = useMemo(() => {
-              if (!personalStats.personaggiGiocati) return { name: "Nessuno", count: 0 };
-              // FIX: Filtriamo i nomi validi dal ROSTER per ignorare vecchi salvataggi corrotti col nickname del giocatore
-              const validNames = ROSTER.map(r => r.name);
-              const entries = Object.entries(personalStats.personaggiGiocati).filter(([name]) => validNames.includes(name));
+          // Calcolo della Top 5 dei personaggi più giocati
+          const topPlayedChars = useMemo(() => {
+              if (!personalStats.personaggiGiocati) return [];
               
-              if (entries.length === 0) return { name: "Nessuno", count: 0 };
-              entries.sort((a, b) => b[1] - a[1]); // Ordina in modo decrescente
-              return { name: entries[0][0], count: entries[0][1] };
+              // Creiamo un set di tutti i nomi validi (base + skin)
+              const validNames = new Set();
+              ROSTER.forEach(r => {
+                  validNames.add(r.name);
+                  if (r.skins) {
+                      r.skins.forEach(s => validNames.add(s.name));
+                  }
+              });
+
+              // Filtriamo le entry salvate nel DB che corrispondono a nomi validi
+              const entries = Object.entries(personalStats.personaggiGiocati).filter(([name]) => validNames.has(name));
+              
+              if (entries.length === 0) return [];
+              
+              // Ordiniamo in base al count decrescente
+              entries.sort((a, b) => b[1] - a[1]);
+              
+              return entries.slice(0, 5).map(([topCharName, topCharCount]) => {
+                  // Troviamo l'immagine corretta
+                  let topCharImg = "";
+                  for (const r of ROSTER) {
+                      if (r.name === topCharName) {
+                          topCharImg = r.img;
+                          break;
+                      }
+                      if (r.skins) {
+                          const skin = r.skins.find(s => s.name === topCharName);
+                          if (skin) {
+                              topCharImg = skin.img;
+                              break;
+                          }
+                      }
+                  }
+                  return { name: topCharName, count: topCharCount, img: topCharImg };
+              });
           }, [personalStats.personaggiGiocati]);
+
+          const favChar = topPlayedChars.length > 0 ? topPlayedChars[0] : { name: "Nessuno", count: 0, img: "" };
 
           return (
             <div className="max-w-7xl mx-auto p-4 py-8 flex flex-col lg:flex-row gap-8 items-start">
@@ -3664,6 +3790,58 @@
                                   </div>
                               </div>
 
+                              {/* ACHIEVEMENT: IL MIO PRIMO TITOLO */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.primotitolo?.unlocked ? 'border-blue-400 bg-blue-900/20 shadow-[0_0_20px_rgba(96,165,250,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.primotitolo?.unlocked ? 'text-blue-400 drop-shadow-[0_0_5px_rgba(96,165,250,0.8)]' : 'text-slate-300'}`}>
+                                         <Star size={20} className={achievements.primotitolo?.unlocked ? 'text-blue-300' : 'text-slate-500'}/> Il Mio Primo Titolo!
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-blue-400 font-bold">
+                                         {achievements.primotitolo?.progress || 0} / 1
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Ottieni il tuo primo titolo personaggio esclusivo vincendo 3 stagioni.</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.primotitolo?.unlocked ? 'bg-blue-400 shadow-[0_0_10px_#60a5fa]' : 'bg-slate-500'}`} style={{ width: `${((achievements.primotitolo?.progress || 0) / 1) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.primotitolo?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('primotitolo')}
+                                             className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'primotitolo' ? 'bg-blue-400 text-black border-white shadow-[0_0_15px_rgba(96,165,250,1)]' : 'bg-slate-800 text-blue-400 border-blue-500 hover:bg-blue-900/50'}`}
+                                         >
+                                             {equippedCosmetic === 'primotitolo' ? 'EQUIPAGGIATO' : 'STELLA NASCENTE'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+
+                              {/* ACHIEVEMENT: COLLEZIONISTA DI ANIME */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.collezionista?.unlocked ? 'border-teal-400 bg-teal-950/80 shadow-[0_0_25px_rgba(20,184,166,0.6)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.collezionista?.unlocked ? 'text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.8)]' : 'text-slate-300'}`}>
+                                         <Crown size={20} className={achievements.collezionista?.unlocked ? 'text-teal-400' : 'text-slate-500'}/> Collezionista di Anime
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/80 px-2 py-1 rounded text-teal-400 font-bold border border-teal-900">
+                                         {achievements.collezionista?.progress || 0} / 5
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Ottieni 5 Titoli Personaggio esclusivi. Guadagni un'Aura di Livello Superiore.</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.collezionista?.unlocked ? 'bg-gradient-to-r from-teal-600 to-cyan-400 shadow-[0_0_10px_#2dd4bf]' : 'bg-slate-500'}`} style={{ width: `${((achievements.collezionista?.progress || 0) / 5) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.collezionista?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('collezionista')}
+                                             className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'collezionista' ? 'bg-teal-400 text-black border-white shadow-[0_0_15px_rgba(45,212,191,1)]' : 'bg-slate-900 text-teal-400 border-teal-600 hover:bg-teal-950 hover:text-teal-300'}`}
+                                         >
+                                             {equippedCosmetic === 'collezionista' ? 'EQUIPAGGIATA' : 'AURA COLLEZIONISTA'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+
                               <div className="p-4 border-2 border-dashed border-slate-700 bg-slate-800/50 rounded-xl text-center">
                                   <Lock size={24} className="mx-auto text-slate-500 mb-2"/>
                                   <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Altri trofei in arrivo...</p>
@@ -3823,7 +4001,7 @@
               {showStatsModal && (
                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in">
                       <div className="bg-slate-900 border-2 border-purple-500 rounded-2xl max-w-2xl w-full p-6 relative shadow-[0_0_30px_rgba(168,85,247,0.4)]">
-                          <button onClick={() => setShowStatsModal(false)} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full text-slate-300 hover:text-white"><X size={20}/></button>
+                          <button onClick={() => { setShowStatsModal(false); setShowTopPlayed(false); }} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full text-slate-300 hover:text-white"><X size={20}/></button>
                           
                           <h2 className="text-3xl text-purple-400 font-black mb-1 flex items-center gap-2 justify-center uppercase tracking-widest">
                               <BarChart size={32}/> Profilo Giocatore
@@ -3878,14 +4056,36 @@
                                   <div className="text-xs uppercase font-bold text-slate-400">Idoli Trovati</div>
                               </div>
 
-                              <div className="bg-slate-800 p-3 rounded-xl border border-slate-700 flex flex-col items-center justify-center text-center relative overflow-hidden group">
-                                  {ROSTER.find(c => c.name === favChar.name)?.img && <img src={ROSTER.find(c => c.name === favChar.name)?.img} className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity" />}
-                                  <Star size={24} className="text-yellow-300 mb-1 z-10"/>
+                              <div 
+                                  onClick={() => setShowTopPlayed(!showTopPlayed)}
+                                  className="bg-slate-800 p-3 rounded-xl border border-slate-700 flex flex-col items-center justify-center text-center relative overflow-hidden group cursor-pointer hover:border-yellow-400 transition-colors"
+                                  title="Clicca per vedere la Top 5 dei tuoi Main!"
+                              >
+                                  {favChar.img && <img src={favChar.img} className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity" />}
+                                  <Star size={24} className="text-yellow-300 mb-1 z-10 group-hover:scale-110 transition-transform"/>
                                   <div className="text-sm font-black text-white mb-0.5 truncate w-full z-10 px-1 drop-shadow-md">{favChar.name}</div>
                                   <div className="text-[10px] uppercase font-bold text-slate-300 z-10 bg-black/60 px-2 py-0.5 rounded-full border border-slate-600">Main ({favChar.count}x)</div>
                               </div>
                           </div>
                           
+                          {showTopPlayed && topPlayedChars.length > 0 && (
+                              <div className="mt-4 bg-slate-800 p-4 rounded-xl border border-yellow-500/50 animate-in slide-in-from-top-2">
+                                  <h3 className="text-sm text-yellow-400 font-bold uppercase mb-3 text-center">I Tuoi Top 5</h3>
+                                  <div className="flex flex-col gap-2 max-h-40 overflow-y-auto custom-scrollbar">
+                                      {topPlayedChars.map((char, idx) => (
+                                          <div key={char.name} className="flex items-center justify-between bg-slate-900 p-2 rounded-lg border border-slate-700">
+                                              <div className="flex items-center gap-3">
+                                                  <span className="font-black text-slate-500 w-4 text-center">{idx + 1}</span>
+                                                  <img src={char.img} className="w-8 h-8 rounded-full object-cover border border-slate-600" />
+                                                  <span className="font-bold text-sm text-white">{char.name}</span>
+                                              </div>
+                                              <span className="text-xs font-bold text-yellow-400 bg-yellow-900/30 px-2 py-1 rounded border border-yellow-500/30">{char.count}x</span>
+                                          </div>
+                                      ))}
+                                  </div>
+                              </div>
+                          )}
+
                           <div className="mt-6 bg-purple-900/30 p-4 rounded-xl border border-purple-500/50 text-center">
                               <div className="text-sm text-purple-200 font-bold uppercase mb-1">Win Rate Globale</div>
                               <div className="text-2xl font-black text-purple-400">
