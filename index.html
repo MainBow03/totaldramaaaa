@@ -841,6 +841,33 @@
           { name: "World Tour", bg: "https://i.pinimg.com/736x/63/c2/11/63c2118545514e7194efc88ae9cf7393.jpg", theme: "Aereo" }
         ];
 
+        // --- LISTA CANZONI FAKE PER I BOT (Ora solo link YouTube per l'autoplay) ---
+        const BOT_SONGS = [
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ", // Rick Astley
+            "https://www.youtube.com/watch?v=fJ9rUzIMcZQ", // Queen
+            "https://www.youtube.com/watch?v=L_jWHffIx5E", // Smash Mouth
+            "https://www.youtube.com/watch?v=68ugkg9RePc", // Eiffel 65
+            "https://www.youtube.com/watch?v=CevxZvSJLk8", // Katy Perry
+            "https://www.youtube.com/watch?v=QGJuMBdaqIw", // Lady Gaga
+            "https://www.youtube.com/watch?v=y6120QOlsfU", // Darude
+            "https://www.youtube.com/watch?v=I_izvAbhExY", // Avicii
+            "https://www.youtube.com/watch?v=dvgZvnPRbCE", // Coldplay
+            "https://www.youtube.com/watch?v=DyDfgMOUjCI", // Billie Eilish
+            "https://www.youtube.com/watch?v=4NRXx6U8ABQ", // The Weeknd
+            "https://www.youtube.com/watch?v=oRdxUFDoQe0", // Michael Jackson
+            "https://www.youtube.com/watch?v=LOZuxwVk7TU", // Britney Spears
+            "https://www.youtube.com/watch?v=UqyT8IEBkvY", // Bruno Mars
+            "https://www.youtube.com/watch?v=JGwWNGJdvx8"  // Ed Sheeran
+        ];
+
+        // Helper per estrarre l'ID da un link YouTube e mostrare video/thumbnail
+        const getYouTubeId = (url) => {
+            if (!url) return null;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        };
+
         // --- SISTEMA COSMETICI ---
         const getCosmeticClasses = (cosmeticId) => {
             if (!cosmeticId) return '';
@@ -2730,7 +2757,14 @@
                        </h3>
                        <div className="space-y-4 text-sm text-slate-300">
                            {/* AGGIORNAMENTO RECENTE IN CIMA */}
-                           <div className="border-l-2 border-indigo-500 pl-4 py-1">
+                           <div className="border-l-2 border-fuchsia-500 pl-4 py-1">
+                               <div className="font-bold text-white text-base">Music Battle & Autoplay YouTube! 🎧🎤</div>
+                               <ul className="list-disc pl-4 mt-2 space-y-2">
+                                   <li><strong className="text-fuchsia-400">Battaglia Musicale:</strong> Aggiunto un nuovo, rarissimo twist durante la fase Fusione! Inviate un link YouTube della vostra canzone preferita. L'Host avvierà l'ascolto dei brani in automatico tramite il player integrato in completo anonimato. La traccia più votata garantirà l'immunità al suo creatore! (Probabilità: 3% Normale, 8% Chaos).</li>
+                               </ul>
+                           </div>
+
+                           <div className="border-l-2 border-indigo-500 pl-4 py-1 opacity-60 hover:opacity-100 transition-opacity">
                                <div className="font-bold text-white text-base">Catena di Salvataggio & Redemption Island! 🔗🏝️</div>
                                <ul className="list-disc pl-4 mt-2 space-y-2">
                                    <li><strong className="text-indigo-400">Catena di Salvataggio:</strong> Aggiunto un nuovo letale colpo di scena durante la fase Fusione. Il migliore ai dadi ottiene l'immunità e sceglie chi salvare. Il salvato salverà un altro, creando una catena. <strong className="text-red-500">L'ultimo che rimane fuori dalla catena verrà eliminato all'istante!</strong> (Probabilità: 4% in Normale, 10% in Chaos).</li>
@@ -4893,6 +4927,10 @@
           
           const [popularitySelections, setPopularitySelections] = useState([]);
           const [nominationSelections, setNominationSelections] = useState([]);
+          
+          // --- STATI PER MUSIC BATTLE ---
+          const [musicSubmission, setMusicSubmission] = useState("");
+          const [musicVote, setMusicVote] = useState("");
 
           const [isProcessing, setIsProcessing] = useState(false);
           const processedAchievements = useRef(new Set()); // Riferimento per evitare conteggi doppi
@@ -5962,6 +6000,42 @@
                      return;
                  }
 
+                 // --- LOGICA CATENA DI SALVATAGGIO ---
+                 if (lobby.challengeData.type === 'chain_of_safety') {
+                     let maxRoll = -1;
+                     let winners = [];
+                     Object.entries(rolls).forEach(([uid, r]) => {
+                         if (r > maxRoll) { maxRoll = r; winners = [uid]; }
+                         else if (r === maxRoll) { winners.push(uid); }
+                     });
+
+                     if (winners.length > 1) {
+                         const winnerNames = winners.map(w => lobby.players.find(p => p.uid === w)?.name).join(", ");
+                         
+                         updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                             [`challengeData.players`]: winners,
+                             [`challengeData.rollingIndex`]: 0,
+                             [`challengeData.originalRolls`]: lobby.challengeData.originalRolls || rolls,
+                             [`challengeData.rolls`]: {},
+                             [`challengeData.isTieBreak`]: true,
+                             logs: arrayUnion(`PAREGGIO (${maxRoll})! Spareggio per iniziare la Catena tra: ${winnerNames}`)
+                         });
+                         return;
+                     }
+
+                     const winnerId = winners[0];
+                     
+                     updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                         [`challengeData.stage`]: 'chain_selection',
+                         [`challengeData.winner`]: [winnerId],
+                         [`challengeData.currentSelector`]: winnerId,
+                         [`challengeData.savedPlayers`]: [winnerId], // Il vincitore è automaticamente il primo salvato
+                         [`challengeData.pendingChainResolved`]: false,
+                         logs: arrayUnion(`I dadi sono tratti! ${lobby.players.find(p=>p.uid===winnerId).name} ha il punteggio più alto e inizierà la Catena di Salvataggio!`)
+                     });
+                     return;
+                 }
+
                  // --- LOGICA PURGE (LA NOTTE DEL GIUDIZIO) ---
                  if (lobby.challengeData.type === 'purge') {
                      let maxRoll = -1;
@@ -6287,6 +6361,64 @@
               }
           }, [lobby.challengeData, isHost, lobby.phase]);
 
+          // --- BOT MUSIC BATTLE LOGIC (INVIO E VOTO) ---
+          useEffect(() => {
+              if (!isHost || lobby.phase !== 'challenge' || lobby.challengeData?.type !== 'music_battle') return;
+
+              // 1. Invio Automatico Canzoni dei Bot
+              if (lobby.challengeData.stage === 'submission') {
+                  const activeBots = lobby.players.filter(p => p.status === 'active' && p.isBot);
+                  const submissions = lobby.challengeData.submissions || {};
+                  
+                  const botsNeedToSubmit = activeBots.filter(b => !submissions[b.uid]);
+                  if (botsNeedToSubmit.length > 0) {
+                      const timer = setTimeout(async () => {
+                          let newSubs = { ...submissions };
+                          botsNeedToSubmit.forEach(bot => {
+                              const randomSong = BOT_SONGS[Math.floor(Math.random() * BOT_SONGS.length)];
+                              newSubs[bot.uid] = randomSong;
+                          });
+                          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                              [`challengeData.submissions`]: newSubs
+                          });
+                      }, 2000);
+                      return () => clearTimeout(timer);
+                  }
+              }
+
+              // 2. Voto Automatico dei Bot
+              if (lobby.challengeData.stage === 'voting') {
+                  const activeBots = lobby.players.filter(p => p.status === 'active' && p.isBot);
+                  const votes = lobby.challengeData.votes || {};
+                  
+                  const botsNeedToVote = activeBots.filter(b => !votes[b.uid]);
+                  if (botsNeedToVote.length > 0) {
+                      const timer = setTimeout(async () => {
+                          let newVotes = { ...votes };
+                          // L'array delle canzoni rivelate è disponibile
+                          const availableSongs = lobby.challengeData.revealedSongs || [];
+                          
+                          botsNeedToVote.forEach(bot => {
+                              // Il bot non vota per la sua canzone
+                              const validSongs = availableSongs.filter(s => s.uid !== bot.uid);
+                              if (validSongs.length > 0) {
+                                  const randomVote = validSongs[Math.floor(Math.random() * validSongs.length)];
+                                  newVotes[bot.uid] = randomVote.uid;
+                              } else {
+                                  // Fallback: vota a caso se per qualche motivo c'è solo la sua
+                                  newVotes[bot.uid] = availableSongs[0]?.uid;
+                              }
+                          });
+                          
+                          await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                              [`challengeData.votes`]: newVotes
+                          });
+                      }, 4000); // 4 secondi per simulare che stiano ascoltando
+                      return () => clearTimeout(timer);
+                  }
+              }
+          }, [lobby.challengeData, isHost, lobby.phase]);
+
           // --- BOT FINAL SPEECH LOGIC ---
           useEffect(() => {
               if (!isHost || lobby.phase !== 'jury_speeches' || !lobby.juryData) return;
@@ -6516,6 +6648,84 @@
               
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   [`finalData.currentRolls.${user.uid}`]: roll
+              });
+          };
+
+          // --- MUSIC BATTLE HANDLERS ---
+          const submitMusic = async () => {
+              if (!musicSubmission.trim()) return;
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`challengeData.submissions.${user.uid}`]: musicSubmission.trim()
+              });
+          };
+
+          const nextMusicReview = async () => {
+              if (!isHost) return;
+              const currentIdx = lobby.challengeData.reviewIndex || 0;
+              const songs = lobby.challengeData.revealedSongs || [];
+              
+              if (currentIdx >= songs.length - 1) {
+                  // Passa alla votazione
+                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                      [`challengeData.stage`]: 'voting',
+                      logs: arrayUnion(`🎵 L'ascolto è terminato! È il momento di votare la canzone migliore!`)
+                  });
+              } else {
+                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                      [`challengeData.reviewIndex`]: currentIdx + 1
+                  });
+              }
+          };
+
+          const submitMusicVote = async () => {
+              if (!musicVote) return;
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  [`challengeData.votes.${user.uid}`]: musicVote
+              });
+          };
+
+          const resolveMusicBattle = async () => {
+              if (!isHost) return;
+              
+              const votesMap = lobby.challengeData.votes || {};
+              const counts = {};
+              
+              // Calcola i voti
+              Object.values(votesMap).forEach(votedUid => {
+                  counts[votedUid] = (counts[votedUid] || 0) + 1;
+              });
+
+              // Trova il massimo
+              let maxScore = -1;
+              let winners = [];
+              Object.entries(counts).forEach(([uid, score]) => {
+                  if (score > maxScore) { maxScore = score; winners = [uid]; }
+                  else if (score === maxScore) { winners.push(uid); }
+              });
+
+              // Se nessuno ha preso voti o pareggio completo, si fa a caso tra i vincitori per sbloccare
+              const winnerId = winners[Math.floor(Math.random() * winners.length)];
+              const winnerPlayer = lobby.players.find(p => p.uid === winnerId);
+
+              const updatedPlayers = lobby.players.map(p => {
+                  if (p.uid === winnerId) return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
+                  return p;
+              });
+
+              const { updatedPlayers: finalPlayers, newLogs } = generateBotSocialUpdates(updatedPlayers, [
+                  `🎵 MUSIC BATTLE FINITA!`,
+                  `🏆 La traccia vincitrice è stata scelta da ${winnerPlayer.name}! Ottiene l'immunità!`
+              ]);
+
+              await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                  players: finalPlayers,
+                  [`challengeData.stage`]: 'finished',
+                  [`challengeData.winner`]: [winnerId],
+                  immunity: [winnerId],
+                  losingTeam: "MERGE",
+                  readyPlayers: [],
+                  phase: 'social',
+                  logs: arrayUnion(...newLogs)
               });
           };
 
@@ -7147,7 +7357,19 @@
                           };
                           newLogs.push("Chris: È il momento del Test di Popolarità! Assegnate la vostra preferenza a 2 persone. Chi ottiene più cuori sarà immune stasera!");
                       }
-                      else if (rand < (isChaos ? 0.10 : 0.04)) {
+                      else if (rand < (isChaos ? 0.08 : 0.03)) { // TWIST: BATTAGLIA MUSICALE
+                           const rollers = activePlayers.map(p => p.uid);
+                           updates.challengeData = {
+                               type: 'music_battle',
+                               players: rollers,
+                               submissions: {},
+                               stage: 'submission',
+                               winner: null
+                           };
+                           newLogs.push("Chris: COLPO DI SCENA! Oggi non si suda, si balla! BATTAGLIA MUSICALE! 🎧");
+                           newLogs.push("Inviate il link YouTube o il titolo della vostra canzone. Le ascolteremo tutte alla cieca e chi prenderà più voti vincerà l'immunità!");
+                      }
+                      else if (rand < (isChaos ? 0.15 : 0.07)) {
                            const rollers = activePlayers.map(p => p.uid);
                            updates.challengeData = {
                                type: 'sudden_death',
@@ -10335,197 +10557,329 @@
                                          <span className="text-green-300">{lobby.twistData.toTeam}</span>
                                      </div>
                                      <p className="mt-4 text-orange-200 italic">"Mai mettersi troppo comodi!" - Chris</p>
-                                 </div>
-                            )}
+                             </div>
+                        )}
 
-                            {isMerge && lobby.challengeData && (
-                                lobby.challengeData.type === 'popularity_vote' ? (
-                                    <div className="text-center animate-in zoom-in w-full max-w-5xl">
-                                         <h2 className="text-4xl md:text-5xl font-black text-pink-500 mb-4 uppercase flex items-center justify-center gap-3 drop-shadow-lg">
-                                             <Heart size={40} className="fill-current"/> TEST DI POPOLARITÀ <Heart size={40} className="fill-current"/>
-                                         </h2>
-                                         
-                                         {lobby.challengeData.stage === 'voting' ? (
-                                             <>
-                                                 <p className="text-xl text-slate-300 mb-6 max-w-2xl mx-auto">
-                                                     Non ci sono sfide fisiche oggi! Seleziona le <strong>2 persone</strong> che vuoi salvare. Chi riceve più preferenze ottiene l'immunità dal falò.
-                                                 </p>
-                                                 
-                                                 {myPlayer.status !== 'active' ? (
-                                                     <div className="text-2xl font-black text-red-500 mb-8 bg-red-900/40 p-4 rounded-xl inline-block">SEI ELIMINATO, NON PUOI VOTARE</div>
-                                                 ) : lobby.challengeData.votes?.[user.uid] ? (
-                                                     <div className="text-2xl font-black text-green-400 mb-8 bg-green-900/40 p-4 rounded-xl inline-block flex items-center justify-center gap-2 max-w-sm mx-auto">
-                                                         <CheckCircle/> Preferenze Registrate!
-                                                     </div>
-                                                 ) : (
-                                                     <div className="mb-8">
-                                                         <div className="bg-slate-800 p-6 rounded-3xl border-4 border-pink-500 shadow-[0_0_40px_rgba(236,72,153,0.4)] relative mb-4">
-                                                             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-pink-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Seleziona 2 Giocatori</div>
-                                                             <div className="text-pink-300 font-bold mb-4">Selezionati: {popularitySelections.length}/2</div>
-                                                             
-                                                             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
-                                                                 {activePlayers
-                                                                     .filter(p => p.uid !== user.uid)
-                                                                     .map(p => {
-                                                                         const isSelected = popularitySelections.includes(p.uid);
-                                                                         const isDisabled = !isSelected && popularitySelections.length >= 2;
-                                                                         
-                                                                         return (
-                                                                             <button 
-                                                                                 key={p.uid}
-                                                                                 onClick={() => {
-                                                                                     if (isSelected) setPopularitySelections(prev => prev.filter(id => id !== p.uid));
-                                                                                     else if (popularitySelections.length < 2) setPopularitySelections(prev => [...prev, p.uid]);
-                                                                                 }}
-                                                                                 disabled={isDisabled}
-                                                                                 className={`p-3 rounded-2xl flex flex-col items-center border-2 transition-all ${isSelected ? 'bg-pink-900 border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.6)] scale-110 z-10' : isDisabled ? 'opacity-30 border-transparent bg-slate-800' : 'bg-slate-900 border-slate-700 hover:border-pink-500 hover:bg-slate-800'}`}
-                                                                             >
-                                                                                 <img src={p.character.img} className={`w-16 h-16 rounded-full mb-2 object-cover ${isSelected ? 'border-2 border-pink-400' : ''}`}/>
-                                                                                 <span className="text-xs font-bold text-center leading-tight w-full">{p.name}</span>
-                                                                             </button>
-                                                                         )
-                                                                     })
-                                                                 }
-                                                             </div>
-                                                         </div>
-                                                         
-                                                         <button 
-                                                             onClick={submitPopularityVote}
-                                                             disabled={popularitySelections.length !== 2}
-                                                             className={`px-12 py-4 rounded-xl font-black text-xl transition-all shadow-lg ${popularitySelections.length === 2 ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:scale-105 animate-bounce' : 'bg-slate-700 text-slate-500'}`}
-                                                         >
-                                                             <Heart size={24} className="inline mr-2" fill="currentColor"/> CONFERMA VOTI
-                                                         </button>
-                                                     </div>
-                                                 )}
+                        {isMerge && lobby.challengeData && (
+                            lobby.challengeData.type === 'music_battle' ? (
+                                <div className="text-center animate-in zoom-in w-full max-w-4xl">
+                                    <h2 className="text-4xl md:text-5xl font-black text-fuchsia-500 mb-4 uppercase flex items-center justify-center gap-3 drop-shadow-lg">
+                                        <Mic size={40} className="fill-current"/> MUSIC BATTLE <Mic size={40} className="fill-current"/>
+                                    </h2>
 
-                                                 {isHost && (
-                                                     <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700 max-w-sm mx-auto">
-                                                         <div className="text-sm font-bold text-slate-400 mb-2">Pannello Host</div>
-                                                         <div className="text-yellow-400 font-mono font-bold mb-4">
-                                                             Voti ricevuti: {Object.keys(lobby.challengeData.votes || {}).length} / {activePlayers.length}
-                                                         </div>
-                                                         <button onClick={resolvePopularityVote} className="w-full bg-green-600 hover:bg-green-500 text-white font-black py-2 rounded-lg shadow flex items-center justify-center gap-2">
-                                                             <Award/> CALCOLA RISULTATI
-                                                         </button>
-                                                     </div>
-                                                 )}
-                                             </>
-                                         ) : lobby.challengeData.stage === 'revealing' ? (
-                                             <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                                                 <h3 className="text-2xl font-bold mb-8 text-white uppercase tracking-widest bg-pink-900/40 px-6 py-2 rounded-full border border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.3)]">Risultati: Dal Meno Popolare</h3>
-                                                 <div className="flex flex-wrap justify-center gap-4">
-                                                     {lobby.challengeData.popularityResults.map((result, idx) => {
-                                                         const p = lobby.players.find(pl => pl.uid === result.uid);
-                                                         if (!p) return null;
-                                                         const isRevealed = idx <= lobby.challengeData.revealIndex;
-                                                         const maxScore = lobby.challengeData.popularityResults[lobby.challengeData.popularityResults.length - 1].score;
-                                                         const isTop = result.score === maxScore && result.score > 0;
-                                                         
-                                                         return (
-                                                             <div key={p.uid} className={`relative flex flex-col items-center p-3 rounded-xl border-2 transition-all duration-500 ${isRevealed ? (isTop && lobby.challengeData.revealIndex === lobby.challengeData.popularityResults.length - 1 ? 'border-pink-400 bg-pink-900/60 scale-125 shadow-[0_0_20px_rgba(236,72,153,0.8)] z-10 mx-4' : 'border-slate-500 bg-slate-800 scale-100 opacity-90') : 'border-slate-700 bg-slate-900 opacity-50 scale-90'}`}>
-                                                                 {isRevealed ? (
-                                                                     <img src={p.character.img} className="w-14 h-14 md:w-20 md:h-20 rounded-full mb-2 object-cover border-2 border-white/20"/>
-                                                                 ) : (
-                                                                     <div className="w-14 h-14 md:w-20 md:h-20 rounded-full mb-2 bg-slate-800 border-2 border-slate-600 flex items-center justify-center">
-                                                                         <span className="text-2xl md:text-4xl font-black text-slate-600">?</span>
-                                                                     </div>
-                                                                 )}
-                                                                 <div className="font-bold text-xs md:text-sm text-center truncate w-20 md:w-24">
-                                                                     {isRevealed ? p.name : "????"}
-                                                                 </div>
-                                                                 {isRevealed ? (
-                                                                     <div className={`mt-2 text-xl md:text-3xl font-black ${isTop && lobby.challengeData.revealIndex === lobby.challengeData.popularityResults.length - 1 ? 'text-pink-400 drop-shadow-md' : 'text-slate-300'}`}>
-                                                                         {result.score}
-                                                                     </div>
-                                                                 ) : (
-                                                                     <div className="mt-2 text-xl md:text-3xl font-black text-slate-600">?</div>
-                                                                 )}
-                                                                 {isRevealed && isTop && lobby.challengeData.revealIndex === lobby.challengeData.popularityResults.length - 1 && (
-                                                                     <div className="absolute -top-4 bg-pink-600 text-white text-[10px] font-black px-3 py-1 rounded-full border border-pink-400 animate-pulse shadow-lg">VINCITORE</div>
-                                                                 )}
-                                                             </div>
-                                                         )
-                                                     })}
-                                                 </div>
-                                                 {isHost && lobby.challengeData.revealIndex < lobby.challengeData.popularityResults.length - 1 && (
-                                                     <div className="mt-12 text-pink-400 font-bold animate-pulse text-lg">Clicca AVANTI in alto a destra per svelare il prossimo!</div>
-                                                 )}
-                                             </div>
-                                         ) : lobby.challengeData.stage === 'nomination' ? (
-                                             <div className="text-center animate-in zoom-in w-full max-w-5xl">
-                                                 <h2 className="text-4xl md:text-5xl font-black text-red-500 mb-4 uppercase flex items-center justify-center gap-3 drop-shadow-lg">
-                                                     <Skull size={40}/> SCELTA DEI NOMINATI <Skull size={40}/>
-                                                 </h2>
-                                                 {(() => {
-                                                     const activeCount = activePlayers.length;
-                                                     let baseNumToPick = 2;
-                                                     if (activeCount >= 60) baseNumToPick = 10;
-                                                     else if (activeCount >= 40) baseNumToPick = 8;
-                                                     else if (activeCount >= 30) baseNumToPick = 6;
-                                                     else if (activeCount >= 18) baseNumToPick = 5;
-                                                     else if (activeCount >= 10) baseNumToPick = 4;
-                                                     else if (activeCount >= 6) baseNumToPick = 3;
-                                                     
-                                                     const maxToPick = Math.min(baseNumToPick, activePlayers.length - lobby.challengeData.winner.length);
-                                                     
-                                                     return (
-                                                         <>
-                                                             <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-                                                                 COLPO DI SCENA! Il vincitore dell'immunità deve scegliere fino a <span className="font-bold text-yellow-400 bg-black/50 px-2 py-1 rounded">{maxToPick} BERSAGLI</span>. Solo loro potranno essere eliminati al falò!
-                                                             </p>
+                                    {lobby.challengeData.stage === 'submission' ? (
+                                        <div className="bg-slate-800 p-8 rounded-3xl border-4 border-fuchsia-500 shadow-[0_0_40px_rgba(217,70,239,0.4)] max-w-xl mx-auto">
+                                            <h3 className="text-2xl font-bold text-white mb-4">Scegli la tua canzone!</h3>
+                                            <p className="text-slate-300 mb-6 text-sm">
+                                                Incolla qui un <strong>link di YouTube</strong>.
+                                                Il player si avvierà in automatico e la tua scelta rimarrà anonima!
+                                            </p>
+                                            
+                                            {myPlayer.status !== 'active' ? (
+                                                <div className="text-xl font-black text-red-500 bg-red-900/40 p-4 rounded-xl">SEI ELIMINATO.</div>
+                                            ) : lobby.challengeData.submissions?.[user.uid] ? (
+                                                <div className="text-xl font-black text-green-400 bg-green-900/40 p-4 rounded-xl flex items-center justify-center gap-2">
+                                                    <CheckCircle/> Brano Inviato! Attendi gli altri...
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col gap-4">
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Es: https://www.youtube.com/watch?v=..."
+                                                        value={musicSubmission}
+                                                        onChange={(e) => setMusicSubmission(e.target.value)}
+                                                        className="w-full bg-slate-900 border-2 border-slate-600 rounded-xl p-4 text-white focus:border-fuchsia-500 outline-none"
+                                                    />
+                                                    <button 
+                                                        onClick={submitMusic}
+                                                        disabled={!musicSubmission.trim()}
+                                                        className="bg-fuchsia-600 hover:bg-fuchsia-500 disabled:bg-slate-700 text-white font-black py-4 rounded-xl shadow-lg transition"
+                                                    >
+                                                        INVIA CANZONE
+                                                    </button>
+                                                </div>
+                                            )}
 
-                                                             {lobby.challengeData.decider === user.uid ? (
-                                                                 <div className="bg-slate-800 p-8 rounded-3xl border-4 border-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.4)] relative">
-                                                                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Tocca a te! Seleziona fino a {maxToPick} giocatori.</div>
-                                                                     <div className="text-indigo-300 font-bold mb-4">Selezionati: {nominationSelections.length} / {maxToPick}</div>
-                                                                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-6">
-                                                                         {activePlayers
-                                                                             .filter(p => !lobby.challengeData.winner.includes(p.uid))
-                                                                             .map(p => {
-                                                                                 const isSelected = nominationSelections.includes(p.uid);
-                                                                                 const isDisabled = !isSelected && nominationSelections.length >= maxToPick;
+                                            {isHost && (
+                                                <div className="mt-8 pt-4 border-t border-slate-700">
+                                                    <div className="text-yellow-400 font-mono font-bold mb-4">
+                                                        Canzoni inviate: {Object.keys(lobby.challengeData.submissions || {}).length} / {activePlayers.length}
+                                                    </div>
+                                                    <button 
+                                                        onClick={async () => {
+                                                            // Mischia le canzoni e passa alla review
+                                                            const subs = lobby.challengeData.submissions || {};
+                                                            let revealedArray = Object.entries(subs).map(([uid, song]) => ({uid, song}));
+                                                            revealedArray.sort(() => Math.random() - 0.5); // Anonimizza l'ordine
+                                                            
+                                                            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                                                                [`challengeData.stage`]: 'review',
+                                                                [`challengeData.revealedSongs`]: revealedArray,
+                                                                [`challengeData.reviewIndex`]: 0,
+                                                                logs: arrayUnion(`🎵 I brani sono stati scelti! L'Host sta iniziando la sessione di ascolto...`)
+                                                            });
+                                                        }} 
+                                                        className="w-full bg-green-600 hover:bg-green-500 text-white font-black py-2 rounded-lg shadow"
+                                                    >
+                                                        FORZA INIZIO ASCOLTO
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : lobby.challengeData.stage === 'review' ? (
+                                        <div className="bg-slate-800 p-8 rounded-3xl border-4 border-cyan-500 shadow-[0_0_40px_rgba(6,182,212,0.4)] max-w-2xl mx-auto text-center">
+                                            <div className="text-cyan-400 font-black tracking-widest uppercase mb-2">Ascolto in corso</div>
+                                            <div className="text-slate-400 mb-6 font-mono">Brano {lobby.challengeData.reviewIndex + 1} di {lobby.challengeData.revealedSongs.length}</div>
+                                            
+                                            {(() => {
+                                                const currentSongObj = lobby.challengeData.revealedSongs[lobby.challengeData.reviewIndex];
+                                                if (!currentSongObj) return null;
+                                                
+                                                const songText = currentSongObj.song;
+                                                const videoId = getYouTubeId(songText);
 
-                                                                                 return (
-                                                                                 <button
-                                                                                     key={p.uid}
-                                                                                     onClick={() => {
-                                                                                         if (isSelected) setNominationSelections(prev => prev.filter(id => id !== p.uid));
-                                                                                         else if (nominationSelections.length < maxToPick) setNominationSelections(prev => [...prev, p.uid]);
-                                                                                     }}
-                                                                                     disabled={isDisabled}
-                                                                                     className={`bg-slate-900 p-3 rounded-2xl flex flex-col items-center border-2 transition-all shadow-lg ${isSelected ? 'border-red-500 bg-red-900/50 scale-110' : isDisabled ? 'opacity-30 border-transparent' : 'border-slate-700 hover:border-indigo-400'}`}
-                                                                                 >
-                                                                                     <img src={p.character.img} className={`w-16 h-16 rounded-full mb-2 object-cover ${isSelected ? 'border-2 border-red-500' : ''}`}/>
-                                                                                     <span className="text-xs font-bold text-center leading-tight w-full">{p.name}</span>
-                                                                                 </button>
-                                                                                 )
-                                                                             })
-                                                                         }
-                                                                     </div>
-                                                                     <button
-                                                                         onClick={() => submitPopularityNomination(nominationSelections)}
-                                                                         disabled={nominationSelections.length < maxToPick}
-                                                                         className={`px-12 py-4 rounded-xl font-black text-xl transition-all shadow-lg ${nominationSelections.length === maxToPick ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white hover:scale-105 animate-bounce' : 'bg-slate-700 text-slate-500'}`}
-                                                                     >
-                                                                         <Skull size={24} className="inline mr-2"/> CONFERMA BERSAGLI
-                                                                     </button>
-                                                                 </div>
-                                                             ) : (
-                                                                 <div className="flex flex-col items-center">
-                                                                     <img src={lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.character.img} className="w-32 h-32 rounded-full border-4 border-indigo-500 object-cover mb-4 animate-pulse"/>
-                                                                     <div className="text-2xl font-black text-indigo-300 bg-indigo-900/40 p-6 rounded-2xl border-2 border-indigo-500 inline-block shadow-lg">
-                                                                         <span className="opacity-80">In attesa che</span> {lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.name} <span className="opacity-80">scelga i bersagli...</span>
-                                                                     </div>
-                                                                 </div>
-                                                             )}
-                                                         </>
-                                                     );
-                                                 })()}
-                                             </div>
-                                         ) : null}
-                                    </div>
-                                ) : lobby.challengeData.stage === 'rolling' ? (
+                                                return (
+                                                    <div className="bg-slate-900 border-2 border-slate-700 p-6 rounded-2xl mb-8 flex flex-col items-center">
+                                                        {videoId ? (
+                                                            <div className="w-full max-w-lg aspect-video rounded-xl overflow-hidden shadow-[0_0_20px_rgba(6,182,212,0.5)] border-2 border-cyan-500">
+                                                                <iframe
+                                                                    width="100%"
+                                                                    height="100%"
+                                                                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                                                                    title="YouTube video player"
+                                                                    frameBorder="0"
+                                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                                    allowFullScreen
+                                                                ></iframe>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-center">
+                                                                <VolumeX size={48} className="mx-auto text-red-500 mb-4 animate-pulse"/>
+                                                                <div className="text-xl font-black text-red-400 italic break-words">Link YouTube non valido:<br/>{songText}</div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
+
+                                            {isHost ? (
+                                                <div>
+                                                    <p className="text-sm text-yellow-400 mb-4">Sei l'Host! Ascolta il brano e quando sei pronto passa al successivo.</p>
+                                                    <button 
+                                                        onClick={nextMusicReview}
+                                                        className="bg-cyan-600 hover:bg-cyan-500 text-white font-black py-4 px-8 rounded-xl shadow-lg transition"
+                                                    >
+                                                        {lobby.challengeData.reviewIndex >= lobby.challengeData.revealedSongs.length - 1 ? "PASSA ALLA VOTAZIONE" : "PROSSIMA CANZONE"}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="text-slate-400 animate-pulse font-bold text-lg">In attesa che l'Host passi alla prossima traccia...</div>
+                                            )}
+                                        </div>
+                                    ) : lobby.challengeData.stage === 'voting' ? (
+                                        <div className="max-w-4xl mx-auto">
+                                            <h3 className="text-2xl font-bold text-white mb-6">Qual è stata la canzone migliore?</h3>
+                                            
+                                            {myPlayer.status !== 'active' ? (
+                                                <div className="text-xl font-black text-red-500 bg-red-900/40 p-4 rounded-xl inline-block">SEI ELIMINATO.</div>
+                                            ) : lobby.challengeData.votes?.[user.uid] ? (
+                                                <div className="text-xl font-black text-green-400 bg-green-900/40 p-4 rounded-xl flex items-center justify-center gap-2 max-w-sm mx-auto">
+                                                    <CheckCircle/> Voto Registrato!
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                                                    {lobby.challengeData.revealedSongs.map((s, idx) => {
+                                                        const isMySong = s.uid === user.uid;
+                                                        const isSelected = musicVote === s.uid;
+                                                        const videoId = getYouTubeId(s.song);
+                                                        
+                                                        return (
+                                                            <button
+                                                                key={s.uid}
+                                                                onClick={() => setMusicVote(s.uid)}
+                                                                disabled={isMySong}
+                                                                className={`p-4 rounded-xl border-2 text-left transition-all ${isMySong ? 'bg-slate-800 border-slate-700 opacity-50 cursor-not-allowed' : isSelected ? 'bg-fuchsia-900 border-fuchsia-400 shadow-[0_0_15px_rgba(217,70,239,0.5)] scale-105' : 'bg-slate-900 border-slate-600 hover:border-fuchsia-500'}`}
+                                                            >
+                                                                <div className="text-xs text-slate-400 mb-2 font-bold uppercase tracking-widest">Canzone #{idx + 1}</div>
+                                                                {videoId ? (
+                                                                    <div className="w-full h-32 rounded-lg bg-cover bg-center border border-slate-700 mb-2" style={{backgroundImage: `url(https://img.youtube.com/vi/${videoId}/hqdefault.jpg)`}}></div>
+                                                                ) : (
+                                                                    <div className={`font-bold truncate mb-2 ${isSelected ? 'text-white' : 'text-slate-300'}`}>{s.song}</div>
+                                                                )}
+                                                                {isMySong && <div className="text-[10px] text-fuchsia-400 mt-2 font-black text-center bg-fuchsia-900/30 rounded py-1 border border-fuchsia-500/50">LA TUA CANZONE</div>}
+                                                            </button>
+                                                        )
+                                                    })}
+                                                </div>
+                                            )}
+
+                                            {!lobby.challengeData.votes?.[user.uid] && myPlayer.status === 'active' && (
+                                                <button 
+                                                    onClick={submitMusicVote}
+                                                    disabled={!musicVote}
+                                                    className="w-full max-w-md mx-auto block bg-fuchsia-600 hover:bg-fuchsia-500 disabled:bg-slate-700 text-white font-black py-4 rounded-xl shadow-lg transition"
+                                                >
+                                                    CONFERMA VOTO
+                                                </button>
+                                            )}
+
+                                            {isHost && (
+                                                <div className="mt-8 p-4 bg-slate-900 rounded-xl border border-slate-700 max-w-sm mx-auto">
+                                                    <div className="text-yellow-400 font-mono font-bold mb-4">
+                                                        Voti ricevuti: {Object.keys(lobby.challengeData.votes || {}).length} / {activePlayers.length}
+                                                    </div>
+                                                    <button 
+                                                        onClick={resolveMusicBattle} 
+                                                        className="w-full bg-green-600 hover:bg-green-500 text-white font-black py-2 rounded-lg shadow"
+                                                    >
+                                                        SVELA IL VINCITORE
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ) : lobby.challengeData.type === 'popularity_vote' ? (
+                                <div className="text-center animate-in zoom-in w-full max-w-4xl">
+                                    <h2 className="text-4xl md:text-5xl font-black text-pink-500 mb-4 uppercase flex items-center justify-center gap-3 drop-shadow-lg">
+                                        <Heart size={40} className="fill-current"/> TEST DI POPOLARITÀ <Heart size={40} className="fill-current"/>
+                                    </h2>
+                                    {lobby.challengeData.stage === 'voting' ? (
+                                        <div className="max-w-4xl mx-auto">
+                                            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">Assegna un cuore a 2 persone. Chi riceve più cuori sarà immune stasera!</p>
+                                            <div className="text-pink-400 font-bold mb-4 uppercase tracking-widest text-sm">Hai {2 - popularitySelections.length} cuori rimasti</div>
+                                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-8">
+                                                {activePlayers.filter(p => p.uid !== user.uid).map(p => {
+                                                    const isSelected = popularitySelections.includes(p.uid);
+                                                    return (
+                                                        <button 
+                                                            key={p.uid}
+                                                            onClick={() => {
+                                                                if(isSelected) setPopularitySelections(prev => prev.filter(id => id !== p.uid));
+                                                                else if(popularitySelections.length < 2) setPopularitySelections(prev => [...prev, p.uid]);
+                                                            }}
+                                                            className={`bg-slate-900 p-3 rounded-2xl flex flex-col items-center border-2 transition-all shadow-lg ${isSelected ? 'border-pink-500 ring-4 ring-pink-500/50 scale-110' : 'border-slate-700 hover:border-pink-400'}`}
+                                                        >
+                                                            <img src={p.character.img} className="w-16 h-16 rounded-full mb-2 object-cover"/>
+                                                            <span className="text-xs font-bold text-center leading-tight w-full truncate">{p.name}</span>
+                                                            {isSelected && <Heart size={16} className="text-pink-500 mt-2 fill-current"/>}
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
+                                            {lobby.challengeData.votes?.[user.uid] ? (
+                                                <div className="text-xl font-black text-green-400 bg-green-900/40 p-4 rounded-xl inline-block shadow-lg border border-green-500">VOTI REGISTRATI!</div>
+                                            ) : (
+                                                <button 
+                                                    onClick={submitPopularityVote}
+                                                    disabled={popularitySelections.length < 2}
+                                                    className="w-full bg-pink-600 hover:bg-pink-500 disabled:bg-slate-700 text-white font-black py-4 rounded-xl text-xl shadow-lg transition"
+                                                >
+                                                    CONFERMA CUORI
+                                                </button>
+                                            )}
+                                            {isHost && (
+                                                <div className="mt-8 pt-4 border-t border-slate-700 text-center">
+                                                    <div className="text-yellow-400 font-mono font-bold mb-4">Voti ricevuti: {Object.keys(lobby.challengeData.votes || {}).length} / {activePlayers.length}</div>
+                                                    <button onClick={resolvePopularityVote} className="w-full max-w-sm bg-green-600 hover:bg-green-500 text-white font-black py-2 rounded-lg shadow">FORZA RISULTATI</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : lobby.challengeData.stage === 'revealing' ? (
+                                        <div className="max-w-4xl mx-auto flex flex-col items-center">
+                                            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">Ecco i risultati del Test di Popolarità!</p>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                                                {lobby.challengeData.popularityResults.map((r, idx) => {
+                                                    const isRevealed = lobby.challengeData.revealIndex >= idx;
+                                                    const p = lobby.players.find(pl => pl.uid === r.uid);
+                                                    const isWinner = isRevealed && r.score === lobby.challengeData.popularityResults[lobby.challengeData.popularityResults.length - 1].score;
+                                                    return (
+                                                        <div key={r.uid} className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-500 ${isRevealed ? (isWinner ? 'border-pink-500 bg-pink-900/40 shadow-[0_0_20px_rgba(236,72,153,0.5)] scale-105' : 'border-slate-500 bg-slate-800') : 'border-slate-700 bg-slate-900 opacity-50'}`}>
+                                                            <div className="flex items-center gap-4">
+                                                                {isRevealed ? <img src={p?.character.img} className="w-12 h-12 rounded-full border-2 border-slate-400 object-cover"/> : <div className="w-12 h-12 rounded-full bg-slate-700 border-2 border-slate-600 flex items-center justify-center font-black text-slate-500">?</div>}
+                                                                <span className={`font-bold text-lg ${isRevealed ? 'text-white' : 'text-slate-500'}`}>{isRevealed ? p?.name : 'Sconosciuto'}</span>
+                                                            </div>
+                                                            {isRevealed && (
+                                                                <div className="flex items-center gap-2 font-black text-2xl text-pink-400">
+                                                                    {r.score} <Heart size={20} className="fill-current"/>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                            {isHost && lobby.challengeData.revealIndex < lobby.challengeData.popularityResults.length - 1 && (
+                                                <div className="mt-8 text-pink-400 font-bold animate-pulse">Premi SVELA POSIZIONE in alto a destra!</div>
+                                            )}
+                                        </div>
+                                    ) : lobby.challengeData.stage === 'nomination' ? (
+                                        <div className="max-w-4xl mx-auto flex flex-col items-center">
+                                            {(() => {
+                                                const activeCount = lobby.players.filter(p => p.status === 'active').length;
+                                                let maxToPick = 2;
+                                                if (activeCount >= 60) maxToPick = 10;
+                                                else if (activeCount >= 40) maxToPick = 8;
+                                                else if (activeCount >= 30) maxToPick = 6;
+                                                else if (activeCount >= 18) maxToPick = 5;
+                                                else if (activeCount >= 10) maxToPick = 4;
+                                                else if (activeCount >= 6) maxToPick = 3;
+
+                                                const availableToPick = activePlayers.filter(p => !lobby.challengeData.winner.includes(p.uid)).length;
+                                                maxToPick = Math.min(maxToPick, availableToPick);
+
+                                                return (
+                                                    <>
+                                                    <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
+                                                        <span className="font-bold text-pink-400">{lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.name}</span> ha vinto l'immunità e deve ora scegliere <span className="font-black text-red-500 bg-red-900/30 px-2 py-1 rounded">{maxToPick} BERSAGLI</span> per il falò!
+                                                    </p>
+                                                    {lobby.challengeData.decider === user.uid ? (
+                                                        <div className="bg-slate-800 p-8 rounded-3xl border-4 border-red-500 shadow-[0_0_40px_rgba(220,38,38,0.4)] relative w-full">
+                                                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white font-black px-6 py-1 rounded-full text-sm uppercase">Tocca a te!</div>
+                                                            <h3 className="text-xl font-bold text-red-300 mb-2">Seleziona i giocatori da mandare al televoto:</h3>
+                                                            <div className="text-red-400 font-bold mb-6 uppercase tracking-widest text-sm text-center">Ne hai scelti {nominationSelections.length} su {maxToPick}</div>
+                                                            
+                                                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-8">
+                                                                {activePlayers.filter(p => !lobby.challengeData.winner.includes(p.uid)).map(p => {
+                                                                    const isSelected = nominationSelections.includes(p.uid);
+                                                                    return (
+                                                                        <button 
+                                                                            key={p.uid}
+                                                                            onClick={() => {
+                                                                                if(isSelected) setNominationSelections(prev => prev.filter(id => id !== p.uid));
+                                                                                else if(nominationSelections.length < maxToPick) setNominationSelections(prev => [...prev, p.uid]);
+                                                                            }}
+                                                                            className={`bg-slate-900 p-3 rounded-2xl flex flex-col items-center border-2 transition-all shadow-lg ${isSelected ? 'border-red-500 ring-4 ring-red-500/50 scale-110' : 'border-slate-700 hover:border-red-400'}`}
+                                                                        >
+                                                                            <img src={p.character.img} className="w-16 h-16 rounded-full mb-2 object-cover"/>
+                                                                            <span className="text-[10px] sm:text-xs font-bold text-center leading-tight w-full">{p.name}</span>
+                                                                            {isSelected && <Skull size={16} className="text-red-500 mt-2"/>}
+                                                                        </button>
+                                                                    )
+                                                                })}
+                                                            </div>
+                                                            <button
+                                                                onClick={() => submitPopularityNomination(nominationSelections)}
+                                                                disabled={nominationSelections.length < maxToPick}
+                                                                className={`w-full py-4 rounded-xl font-black text-xl transition-all shadow-lg ${nominationSelections.length === maxToPick ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white hover:scale-105 animate-bounce' : 'bg-slate-700 text-slate-500'}`}
+                                                            >
+                                                                <Skull size={24} className="inline mr-2"/> CONFERMA BERSAGLI
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col items-center">
+                                                            <img src={lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.character.img} className="w-32 h-32 rounded-full border-4 border-indigo-500 object-cover mb-4 animate-pulse"/>
+                                                            <div className="text-2xl font-black text-indigo-300 bg-indigo-900/40 p-6 rounded-2xl border-2 border-indigo-500 inline-block shadow-lg">
+                                                                <span className="opacity-80">In attesa che</span> {lobby.players.find(p=>p.uid===lobby.challengeData.decider)?.name} <span className="opacity-80">scelga i bersagli...</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ) : lobby.challengeData.stage === 'rolling' ? (
                                 <div className="text-center animate-pulse w-full max-w-4xl">
                                     <h2 className="text-3xl font-bold mb-4 uppercase flex items-center justify-center gap-3">
                                         {lobby.challengeData.type === 'sudden_death' && <AlertOctagon size={40} className="text-red-600"/>}
