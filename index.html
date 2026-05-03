@@ -840,6 +840,23 @@
             0%, 46%, 48%, 100% { transform: scaleY(1); opacity: 1; filter: brightness(1); }
             47%, 49% { transform: scaleY(0.1); opacity: 0.8; filter: brightness(0.5); }
         }
+
+        /* 29. Chi fa da se: Lupo solitario */
+        .cosmetic-chifadase {
+            border: 3px solid #94a3b8 !important;
+            box-shadow: 0 0 25px rgba(148, 163, 184, 0.8), inset 0 0 15px rgba(100, 116, 139, 0.5) !important;
+        }
+        .cosmetic-chifadase::before {
+            content: '🐺';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            z-index: 20;
+            filter: drop-shadow(0 0 5px rgba(148,163,184,0.8));
+            animation: floatGhost 3s infinite ease-in-out alternate;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white">
@@ -1000,6 +1017,7 @@
                 'primotitolo': 'cosmetic-primotitolo', // Stella nascente
                 'collezionista': 'cosmetic-collezionista', // Aura Cacciatore
                 'terrorepuro': 'cosmetic-terrore', // Ombra oscura con occhi rossi
+                'chifadase': 'cosmetic-chifadase', // Lupo solitario
                 // COSMETICI DI LIVELLO
                 'level_rame': 'cosmetic-level-rame',
                 'level_ferro': 'cosmetic-level-ferro',
@@ -1065,7 +1083,7 @@
 		  { name: "Courtney", img: "https://i.pinimg.com/736x/ad/94/34/ad9434468d4a502c89ea01c0249e8899.jpg", speeches: ["Sono l'unica qui con un vero piano d'investimento per questi soldi. Votatemi, è la scelta logica.", "Se non vinco io, chiamerò i miei avvocati e vi farò causa tutti quanti!"], alignment: 'villain' },
 		  { name: "Lindsay", img: "https://i.pinimg.com/736x/d7/bf/82/d7bf8237867c96050d1244518ce1ffef.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/d7/bf/82/d7bf8237867c96050d1244518ce1ffef.jpg" }, { name: "Lindsay Wonder Woman", img: "https://i.pinimg.com/1200x/ed/96/df/ed96df179eaa7030663473c575067cb4.jpg" }], speeches: ["Dovete votare per me perché i miei capelli sono stati perfetti per tutto il tempo! Grazie!", "Aspetta, ma se vinco io... divento la regina dell'isola? Siii, votatemi! Ciao Tyson!"] },
 		  { name: "Bowie", img: "https://i.pinimg.com/1200x/03/6c/0f/036c0ffe4fcd39d5840ed60a2fb104c3.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/1200x/03/6c/0f/036c0ffe4fcd39d5840ed60a2fb104c3.jpg" }, { name: "Sunglasses Bowie", img: "https://i.pinimg.com/736x/d3/91/42/d391428a22df64623c40c21e5f7180c7.jpg" }], speeches: ["Ammettetelo, senza di me questa stagione sarebbe stata noiosissima. Merito la corona.", "Ho manipolato le votazioni dal giorno uno. Sono il re strategico di questa edizione."], alignment: 'villain' },
-		  { name: "Raj", img: "https://i.pinimg.com/736x/05/b2/97/05b297c32cd4507adbd7b0c7ce84fb3a.jpg" },
+		  { name: "Raj", img: "https://i.pinimg.com/736x/05/b2/97/05b297c32cd4507adbd7b0c7ce84fb3a.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/05/b2/97/05b297c32cd4507adbd7b0c7ce84fb3a.jpg" }, { name: "Eiaculato Raj", img: "https://i.pinimg.com/736x/c8/e7/c3/c8e7c3ca754b247760d7ff9440418711.jpg" }] },
           { name: "Conan", img: "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/19/fe/f0/19fef0cf0b848e1f5fe54d9b641af4ce.jpg" }, { name: "Shinichi", img: "https://i.pinimg.com/736x/7f/b5/48/7fb54863b62a2b153990cb87901be037.jpg" }] },
           { name: "Ran", img: "https://i.pinimg.com/1200x/46/ee/c7/46eec75f3a3eeb4846216dfdd7083ff4.jpg" },
           { name: "Rias", img: "https://i.pinimg.com/736x/d1/a7/df/d1a7df7bfe5769c39e9b66041144e4eb.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/d1/a7/df/d1a7df7bfe5769c39e9b66041144e4eb.jpg" }, { name: "Rias 1", img: "https://i.pinimg.com/736x/1a/78/25/1a78254f10cf901400c8c53ab7aedacf.jpg" }, { name: "Rias 2", img: "https://i.pinimg.com/736x/38/f3/d5/38f3d5d530a3409b0062d4af99c8bc14.jpg" }, { name: "Rias 3", img: "https://i.pinimg.com/736x/3f/d3/3d/3fd33de23e28a9579097a87a9611662a.jpg" }, { name: "Rias 4", img: "https://i.pinimg.com/736x/55/af/c3/55afc32a82bd924c48e336e891acc1f3.jpg" }] },
@@ -1188,7 +1206,7 @@
 		  { name: "Frankie", img: "https://i.pinimg.com/736x/c0/ae/bb/c0aebba7d0b329e4a8e26f92d36a857a.jpg" },
 		  { name: "Shego", img: "https://i.pinimg.com/736x/54/70/77/5470771ee32d3350ffa08f921bb3d1ad.jpg", alignment: 'villain' },
 		  { name: "Ariana Grande", img: "https://media.tenor.com/1u94p6qR01gAAAAM/ariana-grande-eternal-sunshine.gif", skins: [{ name: "Default", img: "https://media.tenor.com/1u94p6qR01gAAAAM/ariana-grande-eternal-sunshine.gif" }, { name: "Ariana 1", img: "https://i.pinimg.com/1200x/2d/85/23/2d8523c2f95a47cdc2f68f428da59e44.jpg" }, { name: "Ariana 2", img: "https://i.pinimg.com/736x/92/45/a3/9245a3787d5a46529f4188d88386cb4d.jpg" }, { name: "Ariana 3", img: "https://i.pinimg.com/originals/b7/de/f4/b7def4c28e8839bfe5d0c29e2450c82f.gif" }], speeches: ["Grazie a tutti i miei fan per avermi supportata fino a qui! Yuh! 🤍 Votatemi e il mio prossimo singolo sarà dedicato a voi!", "Sono passata dal pop al fango di quest'isola, e sono ancora flawless. Datemi la corona, thank you, next!"] },
-		  { name: "Will", img: "https://i.pinimg.com/originals/88/80/73/8880736b5695844044e0e38c8063a1ff.gif", speeches: ["Ho sempre guidato il mio gruppo con il Cuore. Se mi darete il vostro voto, dimostrerete che l'unione fa la forza!", "Abbiamo superato sfide magiche e ostacoli impossibili. Prometto di usare questa vittoria per fare del bene!"] },
+		  { name: "Will", img: "https://i.pinimg.com/originals/88/80/73/8880736b5695844044e0e38c8063a1ff.gif", skins: [{ name: "Default", img: "https://i.pinimg.com/originals/88/80/73/8880736b5695844044e0e38c8063a1ff.gif" }, { name: "Masked Will", img: "https://i.pinimg.com/736x/b7/ed/8f/b7ed8fcde45ac6655ab907c69d822938.jpg" }], speeches: ["Ho sempre guidato il mio gruppo con il Cuore. Se mi darete il vostro voto, dimostrerete che l'unione fa la forza!", "Abbiamo superato sfide magiche e ostacoli impossibili. Prometto di usare questa vittoria per fare del bene!"] },
           { name: "Hannibal", img: "https://i.pinimg.com/originals/bf/3a/fb/bf3afbc8242baf434cf064871298b5d3.gif", skins: [{ name: "Default", img: "https://i.pinimg.com/originals/bf/3a/fb/bf3afbc8242baf434cf064871298b5d3.gif" }, { name: "Hannibal 1", img: "https://i.pinimg.com/736x/9c/4e/18/9c4e185a823598e771131f7724392995.jpg" }, { name: "Blood Hannibal", img: "https://i.pinimg.com/1200x/01/ca/db/01cadbc63ec87dcfcb6e8cfe85e37f50.jpg" }], speeches: ["Ho preparato una cena speciale per stasera. Spero non ci siate voi nel menu.", "La scortesia è inaccettabile. Votatemi, o ne pagherete le conseguenze."], alignment: "villain", isNew: true },
           { name: "Emma Frost", img: "https://i.pinimg.com/736x/39/01/ad/3901ad70e16a220efc02c5c8005ea0f4.jpg", skins: [{ name: "Default", img: "https://i.pinimg.com/736x/39/01/ad/3901ad70e16a220efc02c5c8005ea0f4.jpg" }, { name: "Emma Frost 1", img: "https://i.pinimg.com/736x/56/82/5e/56825e171b75f2e0c03b563203962778.jpg" }], speeches: ["I diamanti sono i migliori amici di una ragazza. Ma un milione di dollari non fa male.", "Siete tutti come libri aperti per me. E so già chi perderà."], alignment: "villain", isNew: true },
 		  { name: "Carlos Oliveira", img: "https://i.pinimg.com/originals/32/0d/d1/320dd13031f1aba8a2d3d9b9837174f4.gif", skins: [{ name: "Default", img: "https://i.pinimg.com/originals/32/0d/d1/320dd13031f1aba8a2d3d9b9837174f4.gif" }, { name: "Carlos 1", img: "https://i.pinimg.com/736x/3b/32/29/3b3229d97074aac59eceb564b01601e8.jpg" }, { name: "Carlos 2", img: "https://i.pinimg.com/736x/c3/3e/60/c33e605cb3df44bdb47d56ee48423f18.jpg" }], speeches: ["In un mondo pieno di mostri, voi siete stati la mia squadra. Votate per me, vi ho guardato le spalle fin dall'inizio.", "Non lascio mai un civile indietro, figuriamoci una finale. Sono un sopravvissuto nato, merito il vostro voto."] },
@@ -2220,6 +2238,7 @@
                   primotitolo: { progress: 0, unlocked: false },
                   collezionista: { progress: 0, unlocked: false },
                   terrorepuro: { progress: 0, unlocked: false },
+                  chifadase: { progress: 0, unlocked: false },
                   title_Marinette: { progress: 0, unlocked: false }
               };
               
@@ -4009,6 +4028,32 @@
                                  </div>
                               </div>
 
+                              {/* ACHIEVEMENT: CHI FA DA SÉ, FA PER TRE */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.chifadase?.unlocked ? 'border-slate-400 bg-slate-900/40 shadow-[0_0_20px_rgba(148,163,184,0.3)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                  <div className="flex justify-between items-center mb-2">
+                                      <span className={`font-black text-lg flex items-center gap-2 ${achievements.chifadase?.unlocked ? 'text-slate-300 drop-shadow-[0_0_5px_rgba(148,163,184,0.8)]' : 'text-slate-400'}`}>
+                                          <Shield size={20} className={achievements.chifadase?.unlocked ? 'text-slate-400' : 'text-slate-500'}/> Chi fa da sé, fa per tre
+                                      </span>
+                                      <span className="text-xs font-mono bg-black/80 px-2 py-1 rounded text-slate-300 font-bold border border-slate-700">
+                                          {achievements.chifadase?.progress || 0} / 3
+                                      </span>
+                                  </div>
+                                  <p className="text-sm text-slate-400 mb-3">Vinci una stagione senza aver fatto nemmeno un'alleanza (0 alleati a fine gioco), per 3 volte.</p>
+                                  <div className="flex items-center justify-between mt-2">
+                                      <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                          <div className={`h-full rounded-full transition-all duration-1000 ${achievements.chifadase?.unlocked ? 'bg-gradient-to-r from-slate-500 to-slate-300 shadow-[0_0_10px_#94a3b8]' : 'bg-slate-600'}`} style={{ width: `${((achievements.chifadase?.progress || 0) / 3) * 100}%` }}></div>
+                                      </div>
+                                      {achievements.chifadase?.unlocked && (
+                                          <button 
+                                              onClick={() => toggleEquipCosmetic('chifadase')}
+                                              className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'chifadase' ? 'bg-slate-300 text-black border-white shadow-[0_0_15px_rgba(255,255,255,1)]' : 'bg-slate-900 text-slate-400 border-slate-500 hover:bg-slate-800'}`}
+                                          >
+                                              {equippedCosmetic === 'chifadase' ? 'EQUIPAGGIATO' : 'AURA LUPO'}
+                                          </button>
+                                      )}
+                                  </div>
+                              </div>
+
                               <div className="p-4 border-2 border-dashed border-slate-700 bg-slate-800/50 rounded-xl text-center">
                                   <Lock size={24} className="mx-auto text-slate-500 mb-2"/>
                                   <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Altri trofei in arrivo...</p>
@@ -5315,6 +5360,11 @@
                                   updateAchievement('vittoriaschiacciante', 1, 1);
                               }
                           }
+
+                          // NUOVO ACHIEVEMENT: CHI FA DA SÈ (Nessuna alleanza)
+                          if (!myPlayer.alliances || myPlayer.alliances.length === 0) {
+                              updateAchievement('chifadase', 1, 3);
+                          }
                       }
 
                       // Achievement: Donne al Potere
@@ -5727,22 +5777,27 @@
               if (lobby.phase !== 'challenge' || lobby.challengeData?.stage !== 'purge_selection') return;
               
               const deciderPlayer = lobby.players.find(p => p.uid === lobby.challengeData.decider);
-              const chosenTarget = lobby.players.find(p => p.uid === chosenTargetId);
               
-              const finalTargets = [...new Set([...lobby.challengeData.autoTargets, chosenTargetId])];
+              let finalTargets = [];
+              let chosenTarget = null;
+              let logsToAdd = [`${deciderPlayer.name} VINCE L'IMMUNITÀ!`];
+
+              if (chosenTargetId === 'skip') {
+                   finalTargets = lobby.players.filter(p => p.status === 'active' && !lobby.challengeData.winner.includes(p.uid)).map(p => p.uid);
+                   logsToAdd.push(`🤝 ${deciderPlayer.name.toUpperCase()} HA SCELTO DI NON CONDANNARE NESSUNO! Ha optato per uno scontro onesto.`);
+              } else {
+                   chosenTarget = lobby.players.find(p => p.uid === chosenTargetId);
+                   finalTargets = [...new Set([...lobby.challengeData.autoTargets, chosenTargetId])];
+                   logsToAdd.push(`🎯 ${deciderPlayer.name.toUpperCase()} HA SCELTO DI CONDANNARE ${chosenTarget.name.toUpperCase()}!`);
+              }
+
               const targetNames = finalTargets.map(id => lobby.players.find(p => p.uid === id)?.name).join(", ");
-              const winnerName = deciderPlayer.name;
+              logsToAdd.push(`⚠️ I bersagli finali sono ${targetNames}. SOLO LORO POTRANNO ESSERE VOTATI AL FALÒ!`);
 
               let updatedPlayersTemp = lobby.players.map(p => {
                    if (lobby.challengeData.winner.includes(p.uid)) return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
                    return p;
               });
-
-              let logsToAdd = [
-                   `${winnerName} VINCE L'IMMUNITÀ!`,
-                   `🎯 ${winnerName.toUpperCase()} HA SCELTO DI CONDANNARE ${chosenTarget.name.toUpperCase()}!`,
-                   `⚠️ I bersagli finali sono ${targetNames}. SOLO LORO POTRANNO ESSERE VOTATI AL FALÒ!`
-              ];
 
               if (chosenTarget && chosenTarget.isBot && Math.random() < 0.30) {
                   const targetIdx = updatedPlayersTemp.findIndex(p => p.uid === chosenTargetId);
@@ -5783,6 +5838,31 @@
               });
 
               const deciderId = lobby.challengeData.currentSelector;
+
+              if (targetId === 'skip') {
+                  const deciderPlayer = lobby.players.find(p => p.uid === deciderId);
+                  const vulnerable = lobby.players.filter(p => p.status === 'active' && p.uid !== deciderId).map(p => p.uid);
+
+                  let logsToAdd = [
+                      `🤝 ${deciderPlayer.name.toUpperCase()} HA SCELTO DI NON SALVARE NESSUNO! Manda tutti al televoto per uno scontro onesto.`
+                  ];
+
+                  const { updatedPlayers, newLogs } = generateBotSocialUpdates(lobby.players, logsToAdd);
+
+                  await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
+                      players: updatedPlayers,
+                      [`challengeData.stage`]: 'finished',
+                      [`challengeData.pendingChainResolved`]: false,
+                      immunity: [deciderId], 
+                      losingTeam: "MERGE",
+                      readyPlayers: [],
+                      phase: 'social',
+                      twistData: { type: 'purge', targets: vulnerable },
+                      logs: arrayUnion(...newLogs)
+                  });
+                  return;
+              }
+
               const savedPlayers = lobby.challengeData.savedPlayers || [];
               const newSaved = [...savedPlayers, targetId];
               
@@ -6876,34 +6956,45 @@
               if (lobby.phase !== 'challenge' || lobby.challengeData?.stage !== 'nomination') return;
 
               const deciderPlayer = lobby.players.find(p => p.uid === lobby.challengeData.decider);
-              const targetNames = chosenTargets.map(id => lobby.players.find(p => p.uid === id)?.name).join(", ");
+              let finalTargets = [];
+              let logsToAdd = [];
+
+              if (chosenTargets === 'skip') {
+                  finalTargets = lobby.players.filter(p => p.status === 'active' && !lobby.challengeData.winner.includes(p.uid)).map(p => p.uid);
+                  logsToAdd.push(`🤝 ${deciderPlayer.name.toUpperCase()} HA SCELTO DI NON BERSAGLIARE NESSUNO IN PARTICOLARE! Ha deciso per uno scontro onesto.`);
+              } else {
+                  finalTargets = chosenTargets;
+                  const targetNames = finalTargets.map(id => lobby.players.find(p => p.uid === id)?.name).join(", ");
+                  logsToAdd.push(`🎯 ${deciderPlayer.name.toUpperCase()} HA SCELTO I BERSAGLI! Solo ${targetNames} potranno essere votati stasera!`);
+              }
 
               let updatedPlayers = [...lobby.players];
-              let logsToAdd = [`🎯 ${deciderPlayer.name.toUpperCase()} HA SCELTO I BERSAGLI! Solo ${targetNames} potranno essere votati stasera!`];
 
-              chosenTargets.forEach(targetId => {
-                  const targetPlayer = updatedPlayers.find(p => p.uid === targetId);
-                  if (targetPlayer && targetPlayer.isBot && Math.random() < 0.30) {
-                      const targetIdx = updatedPlayers.findIndex(p => p.uid === targetId);
-                      const currentRel = updatedPlayers[targetIdx].relationships[deciderPlayer.uid] || 0;
-                      updatedPlayers[targetIdx].relationships = {
-                          ...updatedPlayers[targetIdx].relationships,
-                          [deciderPlayer.uid]: Math.max(-10, currentRel - 1)
-                      };
-                      logsToAdd.push(`💢 ${targetPlayer.name} se l'è presa per essere stato mandato a rischio da ${deciderPlayer.name}! (-1 Relaz)`);
-                      
-                      if (lobby.challengeData.decider === user.uid) {
-                          updateAchievement('tiseioffeso', 1, 15);
+              if (Array.isArray(chosenTargets)) {
+                  chosenTargets.forEach(targetId => {
+                      const targetPlayer = updatedPlayers.find(p => p.uid === targetId);
+                      if (targetPlayer && targetPlayer.isBot && Math.random() < 0.30) {
+                          const targetIdx = updatedPlayers.findIndex(p => p.uid === targetId);
+                          const currentRel = updatedPlayers[targetIdx].relationships[deciderPlayer.uid] || 0;
+                          updatedPlayers[targetIdx].relationships = {
+                              ...updatedPlayers[targetIdx].relationships,
+                              [deciderPlayer.uid]: Math.max(-10, currentRel - 1)
+                          };
+                          logsToAdd.push(`💢 ${targetPlayer.name} se l'è presa per essere stato mandato a rischio da ${deciderPlayer.name}! (-1 Relaz)`);
+                          
+                          if (lobby.challengeData.decider === user.uid) {
+                              updateAchievement('tiseioffeso', 1, 15);
+                          }
                       }
-                  }
-              });
+                  });
+              }
 
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                   players: updatedPlayers,
                   [`challengeData.stage`]: 'finished',
                   readyPlayers: [],
                   phase: 'social',
-                  twistData: { type: 'purge', targets: chosenTargets }, // Blocca i voti solo su questi 4
+                  twistData: { type: 'purge', targets: finalTargets }, // Blocca i voti solo su questi 4
                   logs: arrayUnion(...logsToAdd)
               });
           };
@@ -11066,7 +11157,7 @@
                                                                             }}
                                                                             className={`bg-slate-900 p-3 rounded-2xl flex flex-col items-center border-2 transition-all shadow-lg ${isSelected ? 'border-red-500 ring-4 ring-red-500/50 scale-110' : 'border-slate-700 hover:border-red-400'}`}
                                                                         >
-                                                                            <img src={p.character.img} className="w-16 h-16 rounded-full mb-2 object-cover"/>
+                                                                            <img src={p.character.img} className="w-16 h-16 rounded-full mb-2 object-cover border-2 border-transparent"/>
                                                                             <span className="text-[10px] sm:text-xs font-bold text-center leading-tight w-full">{p.name}</span>
                                                                             {isSelected && <Skull size={16} className="text-red-500 mt-2"/>}
                                                                         </button>
@@ -11080,6 +11171,14 @@
                                                             >
                                                                 <Skull size={24} className="inline mr-2"/> CONFERMA BERSAGLI
                                                             </button>
+                                                            {activePlayers.length === 3 && (
+                                                                <button
+                                                                    onClick={() => submitPopularityNomination('skip')}
+                                                                    className="w-full mt-3 bg-yellow-600 hover:bg-yellow-500 text-white py-3 rounded-xl font-black shadow-lg transition-all border-2 border-yellow-400"
+                                                                >
+                                                                    NON SCEGLIERE NESSUNO (Sfida Onesta)
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     ) : (
                                                         <div className="flex flex-col items-center">
@@ -11287,6 +11386,14 @@
                                                      ))
                                                  }
                                              </div>
+                                             {activePlayers.length === 3 && (
+                                                 <button
+                                                     onClick={() => submitPurgeChoice('skip')}
+                                                     className="w-full mt-6 bg-yellow-600 hover:bg-yellow-500 text-white py-3 rounded-xl font-black shadow-lg transition-all border-2 border-yellow-400"
+                                                 >
+                                                     NON SCEGLIERE NESSUNO (Sfida Onesta)
+                                                 </button>
+                                             )}
                                          </div>
                                      ) : (
                                          <div className="text-2xl font-black text-indigo-300 animate-pulse bg-indigo-900/40 p-8 rounded-2xl border-2 border-indigo-500 inline-block shadow-lg">
@@ -11338,6 +11445,14 @@
                                                      ))
                                                  }
                                              </div>
+                                             {activePlayers.length === 3 && lobby.challengeData.savedPlayers.length === 1 && (
+                                                 <button
+                                                     onClick={() => submitChainChoice('skip')}
+                                                     className="w-full mt-6 bg-yellow-600 hover:bg-yellow-500 text-white py-3 rounded-xl font-black shadow-lg transition-all border-2 border-yellow-400"
+                                                 >
+                                                     NON SCEGLIERE NESSUNO (Annulla e manda al Falò)
+                                                 </button>
+                                             )}
                                          </div>
                                      ) : (
                                          <div className="flex flex-col items-center">
