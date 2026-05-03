@@ -576,13 +576,13 @@
         }
 
         /* --- STILI COSMETICI DI LIVELLO --- */
-        .cosmetic-level-rame { border: 3px solid #b87333 !important; box-shadow: 0 0 10px rgba(184, 115, 51, 0.5) !important; }
-        .cosmetic-level-ferro { border: 3px solid #94a3b8 !important; box-shadow: 0 0 10px rgba(148, 163, 184, 0.5) !important; }
-        .cosmetic-level-bronzo { border: 3px solid #cd7f32 !important; box-shadow: 0 0 15px rgba(205, 127, 50, 0.6) !important; }
-        .cosmetic-level-argento { border: 3px solid #e2e8f0 !important; box-shadow: 0 0 20px rgba(226, 232, 240, 0.7), inset 0 0 10px rgba(255,255,255,0.5) !important; }
-        .cosmetic-level-oro { border: 3px solid #fbbf24 !important; box-shadow: 0 0 25px rgba(251, 191, 36, 0.8), inset 0 0 15px rgba(251, 191, 36, 0.5) !important; }
-        .cosmetic-level-diamante { border: 3px solid #67e8f9 !important; box-shadow: 0 0 30px rgba(103, 232, 249, 0.9), inset 0 0 20px rgba(165, 243, 252, 0.6) !important; }
-        .cosmetic-level-ascendente { border: 3px solid #34d399 !important; box-shadow: 0 0 30px rgba(52, 211, 153, 0.9), inset 0 0 20px rgba(16, 185, 129, 0.6) !important; }
+        .cosmetic-level-rame { border: 3px solid #b87333 !important; box-shadow: 0 0 15px rgba(184, 115, 51, 0.7), inset 0 0 10px rgba(184, 115, 51, 0.4) !important; }
+        .cosmetic-level-ferro { border: 3px solid #94a3b8 !important; box-shadow: 0 0 15px rgba(148, 163, 184, 0.7), inset 0 0 12px rgba(100, 116, 139, 0.5) !important; }
+        .cosmetic-level-bronzo { border: 3px solid #cd7f32 !important; box-shadow: 0 0 20px rgba(205, 127, 50, 0.8), inset 0 0 15px rgba(205, 127, 50, 0.5) !important; }
+        .cosmetic-level-argento { border: 3px solid #e2e8f0 !important; box-shadow: 0 0 25px rgba(226, 232, 240, 0.9), inset 0 0 15px rgba(255, 255, 255, 0.8) !important; filter: contrast(1.1) brightness(1.1); }
+        .cosmetic-level-oro { border: 3px solid #fbbf24 !important; box-shadow: 0 0 30px rgba(251, 191, 36, 1), inset 0 0 20px rgba(251, 191, 36, 0.6) !important; animation: pulseGold 2s infinite alternate; }
+        .cosmetic-level-diamante { border: 3px solid #22d3ee !important; box-shadow: 0 0 35px rgba(34, 211, 238, 1), inset 0 0 25px rgba(103, 232, 249, 0.8) !important; animation: pulseDiamond 1.5s infinite alternate; filter: contrast(1.2); }
+        .cosmetic-level-ascendente { border: 3px solid #10b981 !important; box-shadow: 0 0 40px rgba(16, 185, 129, 1), inset 0 0 25px rgba(52, 211, 153, 0.8) !important; animation: pulseAscendant 2.5s infinite alternate; }
         
         /* PRO TIER (Effetti energetici Rossi) */
         .cosmetic-level-pro1 { border: 3px solid #f87171 !important; box-shadow: 0 0 30px rgba(248, 113, 113, 0.9) !important; }
@@ -622,6 +622,9 @@
         @keyframes masterGlow { 0% { filter: hue-rotate(0deg) drop-shadow(0 0 20px #ec4899); } 100% { filter: hue-rotate(90deg) drop-shadow(0 0 40px #8b5cf6); } }
         
         /* Nuove animazioni per gli effetti senza emoji */
+        @keyframes pulseGold { 0% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.8), inset 0 0 15px rgba(251, 191, 36, 0.5); } 100% { box-shadow: 0 0 40px rgba(251, 191, 36, 1), inset 0 0 25px rgba(251, 191, 36, 0.8); border-color: #fcd34d !important; } }
+        @keyframes pulseDiamond { 0% { box-shadow: 0 0 25px rgba(34, 211, 238, 0.8), inset 0 0 15px rgba(103, 232, 249, 0.6); } 100% { box-shadow: 0 0 45px rgba(34, 211, 238, 1), inset 0 0 30px rgba(165, 243, 252, 0.9); border-color: #a5f3fc !important; } }
+        @keyframes pulseAscendant { 0% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.8), inset 0 0 20px rgba(52, 211, 153, 0.6); } 100% { box-shadow: 0 0 50px rgba(16, 185, 129, 1), inset 0 0 35px rgba(110, 231, 183, 0.9); border-color: #6ee7b7 !important; } }
         @keyframes cyberScan { 0% { top: -20px; } 100% { top: 100%; } }
         @keyframes radarSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes fireFlicker { 0% { box-shadow: 0 0 10px #ef4444, inset 0 0 15px #f97316; border-color: #ef4444; } 100% { box-shadow: 0 0 25px #dc2626, inset 0 0 30px #fb923c; border-color: #fca5a5; } }
@@ -739,6 +742,31 @@
         @keyframes pulseVoid {
             0% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 5px #000); }
             100% { transform: scale(1.3) rotate(15deg); filter: drop-shadow(0 0 20px #581c87); }
+        }
+
+        /* 28. Terrore Puro: Ombra oscura e occhi rossi */
+        .cosmetic-terrore {
+            border: 3px solid #1e293b !important;
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 1), inset 0 -20px 20px rgba(0, 0, 0, 0.8) !important;
+            position: relative;
+        }
+        .cosmetic-terrore::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            margin-left: -12px;
+            width: 6px;
+            height: 6px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            box-shadow: 18px 0 0 #ef4444, 0 0 10px #ef4444, 18px 0 10px #ef4444;
+            z-index: 20;
+            animation: blinkRedEyes 4s infinite;
+        }
+        @keyframes blinkRedEyes {
+            0%, 46%, 48%, 100% { transform: scaleY(1); opacity: 1; filter: brightness(1); }
+            47%, 49% { transform: scaleY(0.1); opacity: 0.8; filter: brightness(0.5); }
         }
     </style>
 </head>
@@ -899,6 +927,7 @@
                 'redeidadi': 'cosmetic-rededadi', // Dadi orbitanti
                 'primotitolo': 'cosmetic-primotitolo', // Stella nascente
                 'collezionista': 'cosmetic-collezionista', // Aura Cacciatore
+                'terrorepuro': 'cosmetic-terrore', // Ombra oscura con occhi rossi
                 // COSMETICI DI LIVELLO
                 'level_rame': 'cosmetic-level-rame',
                 'level_ferro': 'cosmetic-level-ferro',
@@ -2118,6 +2147,7 @@
                   redeidadi: { progress: 0, unlocked: false },
                   primotitolo: { progress: 0, unlocked: false },
                   collezionista: { progress: 0, unlocked: false },
+                  terrorepuro: { progress: 0, unlocked: false },
                   title_Marinette: { progress: 0, unlocked: false }
               };
               
@@ -3252,6 +3282,32 @@
                                  </div>
                               </div>
 
+                              {/* ACHIEVEMENT: TERRORE PURO */}
+                              <div className={`p-4 rounded-xl border-2 transition-all ${achievements.terrorepuro?.unlocked ? 'border-red-900 bg-red-950/40 shadow-[0_0_20px_rgba(220,38,38,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
+                                 <div className="flex justify-between items-center mb-2">
+                                     <span className={`font-black text-lg flex items-center gap-2 ${achievements.terrorepuro?.unlocked ? 'text-red-600 drop-shadow-[0_0_5px_rgba(220,38,38,0.8)]' : 'text-slate-300'}`}>
+                                         <Skull size={20} className={achievements.terrorepuro?.unlocked ? 'text-red-500' : 'text-slate-500'}/> Terrore Puro
+                                     </span>
+                                     <span className="text-xs font-mono bg-black/50 px-2 py-1 rounded text-red-600 font-bold">
+                                         {achievements.terrorepuro?.progress || 0} / 20
+                                     </span>
+                                 </div>
+                                 <p className="text-sm text-slate-400 mb-3">Usa l'azione "Minaccia" con successo su 20 giocatori diversi.</p>
+                                 <div className="flex items-center justify-between mt-2">
+                                     <div className="w-full bg-slate-900 rounded-full h-2.5 shadow-inner border border-slate-700 overflow-hidden mr-4 relative">
+                                         <div className={`h-full rounded-full transition-all duration-1000 ${achievements.terrorepuro?.unlocked ? 'bg-red-700 shadow-[0_0_10px_#b91c1c]' : 'bg-slate-500'}`} style={{ width: `${((achievements.terrorepuro?.progress || 0) / 20) * 100}%` }}></div>
+                                     </div>
+                                     {achievements.terrorepuro?.unlocked && (
+                                         <button 
+                                             onClick={() => toggleEquipCosmetic('terrorepuro')}
+                                             className={`text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-lg border whitespace-nowrap transition-all ${equippedCosmetic === 'terrorepuro' ? 'bg-red-950 text-red-400 border-red-500 shadow-[0_0_15px_rgba(220,38,38,1)]' : 'bg-slate-900 text-red-700 border-red-900 hover:bg-black hover:text-red-500'}`}
+                                         >
+                                             {equippedCosmetic === 'terrorepuro' ? 'EQUIPAGGIATO' : 'AURA TERRORE'}
+                                         </button>
+                                     )}
+                                 </div>
+                              </div>
+
                               {/* ACHIEVEMENT: SOPRAVVISSUTO */}
                               <div className={`p-4 rounded-xl border-2 transition-all ${achievements.sopravvissuto?.unlocked ? 'border-orange-500 bg-orange-900/20 shadow-[0_0_15px_rgba(249,115,22,0.2)]' : 'border-slate-700 bg-slate-800 opacity-80'}`}>
                                  <div className="flex justify-between items-center mb-2">
@@ -4190,11 +4246,11 @@
               if (!p.character) {
                 const available = ROSTER.filter(r => !usedNames.has(r.name) && themeFilter(r));
                 // FALLBACK DI SICUREZZA: se la lista filtrata è vuota, pesca da tutti
-                let random = available.length > 0 
+                let randomChar = available.length > 0 
                     ? available[Math.floor(Math.random() * available.length)]
                     : ROSTER[Math.floor(Math.random() * ROSTER.length)];
                 
-                usedNames.add(random.name);
+                usedNames.add(randomChar.name);
                 
                 let finalBotChar = { ...randomChar };
                 // Assegna una skin casuale anche ai bot se disponibili!
@@ -6374,10 +6430,20 @@
                   if (botsNeedToSubmit.length > 0) {
                       const timer = setTimeout(async () => {
                           let newSubs = { ...submissions };
+                          const usedSongs = new Set(Object.values(newSubs)); // Traccia le canzoni già scelte
+                          
                           botsNeedToSubmit.forEach(bot => {
-                              const randomSong = BOT_SONGS[Math.floor(Math.random() * BOT_SONGS.length)];
+                              // Filtra le canzoni per trovare quelle non ancora usate
+                              let availableSongs = BOT_SONGS.filter(song => !usedSongs.has(song));
+                              
+                              // Se i bot in gara sono più delle canzoni disponibili, ripristina la lista
+                              if (availableSongs.length === 0) availableSongs = BOT_SONGS; 
+                              
+                              const randomSong = availableSongs[Math.floor(Math.random() * availableSongs.length)];
                               newSubs[bot.uid] = randomSong;
+                              usedSongs.add(randomSong); // Aggiunge la canzone al Set per non farla pescare al prossimo bot
                           });
+                          
                           await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
                               [`challengeData.submissions`]: newSubs
                           });
@@ -6695,37 +6761,24 @@
                   counts[votedUid] = (counts[votedUid] || 0) + 1;
               });
 
-              // Trova il massimo
-              let maxScore = -1;
-              let winners = [];
-              Object.entries(counts).forEach(([uid, score]) => {
-                  if (score > maxScore) { maxScore = score; winners = [uid]; }
-                  else if (score === maxScore) { winners.push(uid); }
+              // Assicurati che tutti abbiano un conteggio
+              const results = lobby.challengeData.revealedSongs.map(s => ({
+                  uid: s.uid,
+                  song: s.song,
+                  score: counts[s.uid] || 0
+              }));
+
+              // Ordina dal meno votato al più votato. A parità, random.
+              results.sort((a, b) => {
+                  if (a.score === b.score) return Math.random() - 0.5;
+                  return a.score - b.score;
               });
-
-              // Se nessuno ha preso voti o pareggio completo, si fa a caso tra i vincitori per sbloccare
-              const winnerId = winners[Math.floor(Math.random() * winners.length)];
-              const winnerPlayer = lobby.players.find(p => p.uid === winnerId);
-
-              const updatedPlayers = lobby.players.map(p => {
-                  if (p.uid === winnerId) return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
-                  return p;
-              });
-
-              const { updatedPlayers: finalPlayers, newLogs } = generateBotSocialUpdates(updatedPlayers, [
-                  `🎵 MUSIC BATTLE FINITA!`,
-                  `🏆 La traccia vincitrice è stata scelta da ${winnerPlayer.name}! Ottiene l'immunità!`
-              ]);
 
               await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'lobbies', lobbyId), {
-                  players: finalPlayers,
-                  [`challengeData.stage`]: 'finished',
-                  [`challengeData.winner`]: [winnerId],
-                  immunity: [winnerId],
-                  losingTeam: "MERGE",
-                  readyPlayers: [],
-                  phase: 'social',
-                  logs: arrayUnion(...newLogs)
+                  [`challengeData.stage`]: 'revealing',
+                  [`challengeData.musicResults`]: results,
+                  [`challengeData.revealIndex`]: -1,
+                  logs: arrayUnion(`I voti sono chiusi! Inizia lo spoglio musicale!`)
               });
           };
 
@@ -7592,6 +7645,49 @@
                                };
                           }
                       }
+                  }
+              }
+              else if (lobby.challengeData?.type === 'music_battle' && lobby.challengeData?.stage === 'revealing') {
+                  const { musicResults, revealIndex } = lobby.challengeData;
+                  if (revealIndex < musicResults.length - 1) {
+                      updates = {
+                          [`challengeData.revealIndex`]: increment(1)
+                      };
+                      if (revealIndex + 1 === musicResults.length - 1) {
+                         playSound('victory');
+                      } else {
+                         playSound('roll');
+                      }
+                  } else {
+                      const maxVotes = musicResults[musicResults.length - 1].score;
+                      const winners = musicResults.filter(r => r.score === maxVotes).map(r => r.uid);
+                      
+                      // Se nessuno ha preso voti o pareggio completo, si fa a caso tra i vincitori per sbloccare
+                      const winnerId = winners[Math.floor(Math.random() * winners.length)];
+                      const winnerPlayer = lobby.players.find(p => p.uid === winnerId);
+                      const winningSong = musicResults.find(s => s.uid === winnerId)?.song || "Sconosciuta";
+
+                      const updatedPlayersTemp = lobby.players.map(p => {
+                          if (p.uid === winnerId) return { ...p, immunityWins: (p.immunityWins || 0) + 1 };
+                          return p;
+                      });
+
+                      const { updatedPlayers, newLogs } = generateBotSocialUpdates(updatedPlayersTemp, [
+                          `🎵 MUSIC BATTLE FINITA!`,
+                          `🏆 La traccia vincitrice è "${winningSong}", scelta da ${winnerPlayer.name}! Ottiene l'immunità!`
+                      ]);
+
+                      updates = {
+                          players: updatedPlayers,
+                          [`challengeData.stage`]: 'finished',
+                          [`challengeData.winner`]: [winnerId],
+                          [`challengeData.winningSong`]: winningSong,
+                          immunity: [winnerId],
+                          losingTeam: "MERGE",
+                          readyPlayers: [],
+                          phase: 'social',
+                          logs: arrayUnion(...newLogs)
+                      };
                   }
               }
               else if ((lobby.challengeData?.type === 'sudden_death' || lobby.challengeData?.type === 'chain_of_safety') && lobby.challengeData?.stage === 'finished') {
@@ -8879,6 +8975,7 @@
                           if (Math.random() < 0.30) {
                               updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [user.uid]: 10 };
                               msg = `☠️ Hai minacciato ${targetName}! (SUCCESSO) Per paura, ti obbedirà ciecamente (Relazione +10).`;
+                              achieved = 'terrorepuro';
                           } else {
                               updatedPlayers[targetIdx].relationships = { ...updatedPlayers[targetIdx].relationships, [user.uid]: -10 };
                               msg = `💢 La minaccia è fallita! ${targetName} non ha paura di te e ora ti vuole fuori (Relazione -10).`;
@@ -9184,6 +9281,7 @@
                       if (result.achieved === 'itremoschettieri') updateAchievement('itremoschettieri', 1, 10);
                       if (result.achieved === 'dolcezza') updateAchievement('dolcezza', 1, 30);
                       if (result.achieved === 'preferitodichris') updateAchievement('preferitodichris', 1, 50);
+                      if (result.achieved === 'terrorepuro') updateAchievement('terrorepuro', 1, 20);
 
                       setHasActed(true);
                       setSelectedPlayer(null);
@@ -9927,8 +10025,8 @@
                         {isHost && lobby.phase !== 'final_showdown' && lobby.phase !== 'season_setup' && lobby.phase !== 'redemption' && (
                             <button 
                                 onClick={advanceGame} 
-                                disabled={isProcessing || pendingBequeathHumans.length > 0 || (lobby.phase === 'ghost_island' && Object.keys(lobby.ghostIslandData?.rolls || {}).length < lobby.ghostIslandData?.candidates.length) || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')}
-                                className={`${(isProcessing || pendingBequeathHumans.length > 0 || (lobby.phase === 'ghost_island' && Object.keys(lobby.ghostIslandData?.rolls || {}).length < lobby.ghostIslandData?.candidates.length) || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'voting')) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-3 sm:px-4 py-2 sm:py-1 rounded shadow text-[10px] sm:text-sm flex items-center justify-center gap-1 sm:gap-2 transition-all w-full sm:w-auto mt-1 sm:mt-0`}
+                                disabled={isProcessing || pendingBequeathHumans.length > 0 || (lobby.phase === 'ghost_island' && Object.keys(lobby.ghostIslandData?.rolls || {}).length < lobby.ghostIslandData?.candidates.length) || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && (lobby.challengeData?.type === 'popularity_vote' || lobby.challengeData?.type === 'music_battle') && lobby.challengeData?.stage === 'voting')}
+                                className={`${(isProcessing || pendingBequeathHumans.length > 0 || (lobby.phase === 'ghost_island' && Object.keys(lobby.ghostIslandData?.rolls || {}).length < lobby.ghostIslandData?.candidates.length) || (lobby.phase === 'voting' && pendingVotesCount > 0) || (lobby.phase === 'social' && pendingReadyCount > 0) || (lobby.phase === 'idol_hunt' && lobby.idolData.stage === 'selection') || (lobby.phase === 'jury_speeches' && pendingSpeechesCount > 0) || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'voting' && pendingJuryVotesCount > 0) || (lobby.phase === 'challenge' && (lobby.challengeData?.type === 'popularity_vote' || lobby.challengeData?.type === 'music_battle') && lobby.challengeData?.stage === 'voting')) ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-black'} font-black px-3 sm:px-4 py-2 sm:py-1 rounded shadow text-[10px] sm:text-sm flex items-center justify-center gap-1 sm:gap-2 transition-all w-full sm:w-auto mt-1 sm:mt-0`}
                             >
                             {isProcessing ? 'ATTENDI...' : pendingBequeathHumans.length > 0 
                                 ? `ATTESA LASCITO (${pendingBequeathHumans.length})`
@@ -9948,8 +10046,8 @@
                                                         ? 'INIZIA SPOGLIO'
                                                         : lobby.phase === 'ceremony' || (lobby.phase === 'jury_vote' && lobby.juryData.stage === 'revealing')
                                                             ? (lobby.ceremonyData?.finalReveal ? (lobby.ceremonyData?.tieMatch ? 'SPAREGGIO' : 'FINISCI') : 'RIVELA') 
-                                                            : lobby.phase === 'challenge' && lobby.challengeData?.type === 'popularity_vote' && lobby.challengeData?.stage === 'revealing'
-                                                                ? (lobby.challengeData.revealIndex < lobby.challengeData.popularityResults.length - 1 ? 'SVELA POSIZIONE' : 'PROCLAMA VINCITORI')
+                                                            : lobby.phase === 'challenge' && (lobby.challengeData?.type === 'popularity_vote' || lobby.challengeData?.type === 'music_battle') && lobby.challengeData?.stage === 'revealing'
+                                                                ? (lobby.challengeData.revealIndex < (lobby.challengeData.popularityResults || lobby.challengeData.musicResults).length - 1 ? 'SVELA POSIZIONE' : 'PROCLAMA VINCITORI')
                                                                 : lobby.phase === 'ghost_island' ? 'RISOLVI GHOST ISLAND' 
                                                                 : lobby.phase === 'grand_finale_top6' 
                                                                     ? (lobby.top6Data.revealIndex < lobby.top6Data.players.length - 1 ? 'SVELA POSIZIONE' : 'VAI ALLA CLASSIFICA')
@@ -10732,9 +10830,44 @@
                                                         onClick={resolveMusicBattle} 
                                                         className="w-full bg-green-600 hover:bg-green-500 text-white font-black py-2 rounded-lg shadow"
                                                     >
-                                                        SVELA IL VINCITORE
+                                                        FORZA RISULTATI
                                                     </button>
                                                 </div>
+                                            )}
+                                        </div>
+                                    ) : lobby.challengeData.stage === 'revealing' ? (
+                                        <div className="max-w-4xl mx-auto flex flex-col items-center">
+                                            <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">Ecco i risultati della Music Battle!</p>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                                                {lobby.challengeData.musicResults.map((r, idx) => {
+                                                    const isRevealed = lobby.challengeData.revealIndex >= idx;
+                                                    const p = lobby.players.find(pl => pl.uid === r.uid);
+                                                    const isWinner = isRevealed && r.score === lobby.challengeData.musicResults[lobby.challengeData.musicResults.length - 1].score;
+                                                    
+                                                    return (
+                                                        <div key={r.uid} className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all duration-500 ${isRevealed ? (isWinner ? 'border-fuchsia-500 bg-fuchsia-900/40 shadow-[0_0_20px_rgba(217,70,239,0.5)] scale-105' : 'border-slate-500 bg-slate-800') : 'border-slate-700 bg-slate-900 opacity-50'}`}>
+                                                            <div className="flex items-center gap-4 max-w-[70%]">
+                                                                {isRevealed ? (
+                                                                    <img src={p?.character.img} className="w-12 h-12 rounded-full border-2 border-slate-400 object-cover flex-shrink-0"/>
+                                                                ) : (
+                                                                    <div className="w-12 h-12 rounded-full bg-slate-700 border-2 border-slate-600 flex items-center justify-center font-black text-slate-500 flex-shrink-0">?</div>
+                                                                )}
+                                                                <div className="flex flex-col overflow-hidden w-full">
+                                                                    <span className={`font-bold text-lg truncate ${isRevealed ? 'text-white' : 'text-slate-500'}`}>{isRevealed ? p?.name : 'Sconosciuto'}</span>
+                                                                    <span className="text-xs text-slate-400 truncate">{r.song}</span>
+                                                                </div>
+                                                            </div>
+                                                            {isRevealed && (
+                                                                <div className="flex items-center gap-2 font-black text-2xl text-fuchsia-400 flex-shrink-0">
+                                                                    {r.score} <Vote size={20} className="fill-current"/>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                            {isHost && lobby.challengeData.revealIndex < lobby.challengeData.musicResults.length - 1 && (
+                                                <div className="mt-8 text-fuchsia-400 font-bold animate-pulse">Premi SVELA POSIZIONE in alto a destra!</div>
                                             )}
                                         </div>
                                     ) : null}
