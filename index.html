@@ -579,10 +579,73 @@
         .cosmetic-level-rame { border: 3px solid #b87333 !important; box-shadow: 0 0 15px rgba(184, 115, 51, 0.7), inset 0 0 10px rgba(184, 115, 51, 0.4) !important; }
         .cosmetic-level-ferro { border: 3px solid #94a3b8 !important; box-shadow: 0 0 15px rgba(148, 163, 184, 0.7), inset 0 0 12px rgba(100, 116, 139, 0.5) !important; }
         .cosmetic-level-bronzo { border: 3px solid #cd7f32 !important; box-shadow: 0 0 20px rgba(205, 127, 50, 0.8), inset 0 0 15px rgba(205, 127, 50, 0.5) !important; }
-        .cosmetic-level-argento { border: 3px solid #e2e8f0 !important; box-shadow: 0 0 25px rgba(226, 232, 240, 0.9), inset 0 0 15px rgba(255, 255, 255, 0.8) !important; filter: contrast(1.1) brightness(1.1); }
-        .cosmetic-level-oro { border: 3px solid #fbbf24 !important; box-shadow: 0 0 30px rgba(251, 191, 36, 1), inset 0 0 20px rgba(251, 191, 36, 0.6) !important; animation: pulseGold 2s infinite alternate; }
-        .cosmetic-level-diamante { border: 3px solid #22d3ee !important; box-shadow: 0 0 35px rgba(34, 211, 238, 1), inset 0 0 25px rgba(103, 232, 249, 0.8) !important; animation: pulseDiamond 1.5s infinite alternate; filter: contrast(1.2); }
-        .cosmetic-level-ascendente { border: 3px solid #10b981 !important; box-shadow: 0 0 40px rgba(16, 185, 129, 1), inset 0 0 25px rgba(52, 211, 153, 0.8) !important; animation: pulseAscendant 2.5s infinite alternate; }
+        
+        .cosmetic-level-argento { 
+            border: 3px solid #e2e8f0 !important; 
+            box-shadow: 0 0 25px rgba(226, 232, 240, 0.9), inset 0 0 20px rgba(255, 255, 255, 1) !important; 
+            position: relative;
+            overflow: hidden !important;
+        }
+        .cosmetic-level-argento::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+            animation: sweepSilver 2.5s infinite linear; z-index: 20; pointer-events: none; mix-blend-mode: overlay;
+        }
+        .cosmetic-level-argento::after {
+            content: ''; position: absolute; inset: 0; box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.9);
+            animation: silverSparkle 1.5s infinite alternate; z-index: 20; pointer-events: none;
+        }
+
+        .cosmetic-level-oro { 
+            border: 3px solid #fbbf24 !important; 
+            box-shadow: 0 0 30px rgba(251, 191, 36, 1), inset 0 0 25px rgba(251, 191, 36, 0.8) !important; 
+            animation: pulseGold 2s infinite alternate;
+            position: relative; overflow: hidden !important;
+        }
+        .cosmetic-level-oro::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(253, 230, 138, 0.7) 10%, transparent 20%, transparent 40%, rgba(253, 230, 138, 0.7) 50%, transparent 60%);
+            animation: rotateGoldRing 5s linear infinite; z-index: 20; pointer-events: none; mix-blend-mode: overlay;
+        }
+        .cosmetic-level-oro::after {
+            content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, transparent, rgba(251, 191, 36, 0.4));
+            animation: goldShimmer 1.5s infinite alternate; z-index: 20; pointer-events: none; mix-blend-mode: color-dodge;
+        }
+
+        .cosmetic-level-diamante { 
+            border: 3px solid #22d3ee !important; 
+            box-shadow: 0 0 35px rgba(34, 211, 238, 1), inset 0 0 30px rgba(165, 243, 252, 1) !important; 
+            animation: pulseDiamond 1.5s infinite alternate;
+            position: relative; overflow: hidden !important;
+        }
+        .cosmetic-level-diamante::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.9) 50%, transparent 60%);
+            background-size: 200% 200%; animation: diamondGlint 3s infinite ease-in-out;
+            z-index: 20; pointer-events: none; mix-blend-mode: overlay;
+        }
+        .cosmetic-level-diamante::after {
+            content: ''; position: absolute; top: 5%; left: 5%; right: 5%; bottom: 5%;
+            border: 2px dashed rgba(255, 255, 255, 0.6); border-radius: inherit;
+            animation: rotateRing 6s infinite linear; z-index: 20; pointer-events: none; mix-blend-mode: overlay;
+        }
+
+        .cosmetic-level-ascendente { 
+            border: 3px solid #10b981 !important; 
+            box-shadow: 0 0 40px rgba(16, 185, 129, 1), inset 0 0 25px rgba(52, 211, 153, 0.8) !important; 
+            animation: pulseAscendant 2s infinite alternate; 
+            position: relative; overflow: hidden !important; 
+        }
+        .cosmetic-level-ascendente::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent 0%, rgba(110, 231, 183, 0.5) 15%, transparent 30%, transparent 50%, rgba(110, 231, 183, 0.5) 65%, transparent 80%);
+            animation: rotateRingReverse 4s linear infinite; z-index: 20; pointer-events: none; mix-blend-mode: color-dodge;
+        }
+        .cosmetic-level-ascendente::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(to top, transparent, rgba(52, 211, 153, 0.6) 50%, transparent);
+            background-size: 100% 200%; animation: ascendFlow 1.5s linear infinite; z-index: 20; pointer-events: none; mix-blend-mode: screen;
+        }
         
         /* PRO TIER (Effetti energetici Rossi) */
         .cosmetic-level-pro1 { border: 3px solid #f87171 !important; box-shadow: 0 0 30px rgba(248, 113, 113, 0.9) !important; }
@@ -625,6 +688,15 @@
         @keyframes pulseGold { 0% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.8), inset 0 0 15px rgba(251, 191, 36, 0.5); } 100% { box-shadow: 0 0 40px rgba(251, 191, 36, 1), inset 0 0 25px rgba(251, 191, 36, 0.8); border-color: #fcd34d !important; } }
         @keyframes pulseDiamond { 0% { box-shadow: 0 0 25px rgba(34, 211, 238, 0.8), inset 0 0 15px rgba(103, 232, 249, 0.6); } 100% { box-shadow: 0 0 45px rgba(34, 211, 238, 1), inset 0 0 30px rgba(165, 243, 252, 0.9); border-color: #a5f3fc !important; } }
         @keyframes pulseAscendant { 0% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.8), inset 0 0 20px rgba(52, 211, 153, 0.6); } 100% { box-shadow: 0 0 50px rgba(16, 185, 129, 1), inset 0 0 35px rgba(110, 231, 183, 0.9); border-color: #6ee7b7 !important; } }
+        
+        /* Animazioni interne per cosmetici Argento, Oro e Diamante */
+        @keyframes sweepSilver { 0% { transform: translate(-100%, -100%) rotate(45deg); } 50%, 100% { transform: translate(100%, 100%) rotate(45deg); } }
+        @keyframes silverSparkle { 0% { opacity: 0.5; filter: brightness(1); } 100% { opacity: 1; filter: brightness(1.3); } }
+        @keyframes rotateGoldRing { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes goldShimmer { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+        @keyframes diamondGlint { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes ascendFlow { 0% { background-position: 0 200%; } 100% { background-position: 0 0%; } }
+
         @keyframes cyberScan { 0% { top: -20px; } 100% { top: 100%; } }
         @keyframes radarSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes fireFlicker { 0% { box-shadow: 0 0 10px #ef4444, inset 0 0 15px #f97316; border-color: #ef4444; } 100% { box-shadow: 0 0 25px #dc2626, inset 0 0 30px #fb923c; border-color: #fca5a5; } }
