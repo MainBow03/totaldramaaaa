@@ -4235,21 +4235,27 @@
                               </div>
                           </div>
                           
-                          {showTopPlayed && topPlayedChars.length > 0 && (
+                          {showTopPlayed && (
                               <div className="mt-4 bg-slate-800 p-4 rounded-xl border border-yellow-500/50 animate-in slide-in-from-top-2">
-                                  <h3 className="text-sm text-yellow-400 font-bold uppercase mb-3 text-center">I Tuoi Top 5</h3>
-                                  <div className="flex flex-col gap-2 max-h-40 overflow-y-auto custom-scrollbar">
-                                      {topPlayedChars.map((char, idx) => (
-                                          <div key={char.name} className="flex items-center justify-between bg-slate-900 p-2 rounded-lg border border-slate-700">
-                                              <div className="flex items-center gap-3">
-                                                  <span className="font-black text-slate-500 w-4 text-center">{idx + 1}</span>
-                                                  <img src={char.img} className="w-8 h-8 rounded-full object-cover border border-slate-600" />
-                                                  <span className="font-bold text-sm text-white">{char.name}</span>
+                                  <h3 className="text-sm text-yellow-400 font-bold uppercase mb-3 text-center">I Tuoi Personaggi Preferiti (Main)</h3>
+                                  {topPlayedChars.length > 0 ? (
+                                      <div className="flex flex-col gap-2 max-h-40 overflow-y-auto custom-scrollbar">
+                                          {topPlayedChars.map((char, idx) => (
+                                              <div key={char.name} className="flex items-center justify-between bg-slate-900 p-2 rounded-lg border border-slate-700">
+                                                  <div className="flex items-center gap-3">
+                                                      <span className="font-black text-slate-500 w-4 text-center">{idx + 1}</span>
+                                                      <img src={char.img} className="w-8 h-8 rounded-full object-cover border border-slate-600" />
+                                                      <span className="font-bold text-sm text-white">{char.name}</span>
+                                                  </div>
+                                                  <span className="text-xs font-bold text-yellow-400 bg-yellow-900/30 px-2 py-1 rounded border border-yellow-500/30">{char.count}x</span>
                                               </div>
-                                              <span className="text-xs font-bold text-yellow-400 bg-yellow-900/30 px-2 py-1 rounded border border-yellow-500/30">{char.count}x</span>
-                                          </div>
-                                      ))}
-                                  </div>
+                                          ))}
+                                      </div>
+                                  ) : (
+                                      <div className="text-center text-slate-400 text-xs italic py-4">
+                                          Nessun personaggio registrato.<br/>Gioca e concludi una stagione per salvare i tuoi Main!
+                                      </div>
+                                  )}
                               </div>
                           )}
 
