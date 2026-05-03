@@ -949,20 +949,20 @@
 
         // --- LISTA REQUISITI LIVELLI COSMETICI ---
         const LEVEL_COSMETICS_REQ = [
-            { id: 'level_rame', name: 'Rame', req: 10, color: 'text-[#b87333]', border: 'border-[#b87333]' },
-            { id: 'level_ferro', name: 'Ferro', req: 15, color: 'text-slate-400', border: 'border-slate-400' },
+            { id: 'level_rame', name: 'Rame', req: 5, color: 'text-[#b87333]', border: 'border-[#b87333]' },
+            { id: 'level_ferro', name: 'Ferro', req: 10, color: 'text-slate-400', border: 'border-slate-400' },
             { id: 'level_bronzo', name: 'Bronzo', req: 20, color: 'text-[#cd7f32]', border: 'border-[#cd7f32]' },
-            { id: 'level_argento', name: 'Argento', req: 25, color: 'text-gray-300', border: 'border-gray-300' },
-            { id: 'level_oro', name: 'Oro', req: 30, color: 'text-yellow-400', border: 'border-yellow-400' },
-            { id: 'level_diamante', name: 'Diamante', req: 35, color: 'text-cyan-300', border: 'border-cyan-300' },
-            { id: 'level_ascendente', name: 'Ascendente', req: 40, color: 'text-emerald-400', border: 'border-emerald-400' },
-            { id: 'level_pro1', name: 'PRO I', req: 45, color: 'text-red-400', border: 'border-red-400' },
-            { id: 'level_pro2', name: 'PRO II', req: 50, color: 'text-red-500', border: 'border-red-500' },
-            { id: 'level_pro3', name: 'PRO III', req: 55, color: 'text-red-600', border: 'border-red-600' },
-            { id: 'level_campione1', name: 'Campione I', req: 60, color: 'text-purple-400', border: 'border-purple-400' },
-            { id: 'level_campione2', name: 'Campione II', req: 65, color: 'text-purple-500', border: 'border-purple-500' },
-            { id: 'level_campione3', name: 'Campione III', req: 75, color: 'text-purple-600', border: 'border-purple-600' },
-            { id: 'level_master', name: 'MASTER', req: 80, color: 'text-fuchsia-500', border: 'border-fuchsia-500' }
+            { id: 'level_argento', name: 'Argento', req: 30, color: 'text-gray-300', border: 'border-gray-300' },
+            { id: 'level_oro', name: 'Oro', req: 40, color: 'text-yellow-400', border: 'border-yellow-400' },
+            { id: 'level_diamante', name: 'Diamante', req: 50, color: 'text-cyan-300', border: 'border-cyan-300' },
+            { id: 'level_ascendente', name: 'Ascendente', req: 60, color: 'text-emerald-400', border: 'border-emerald-400' },
+            { id: 'level_pro1', name: 'PRO I', req: 70, color: 'text-red-400', border: 'border-red-400' },
+            { id: 'level_pro2', name: 'PRO II', req: 80, color: 'text-red-500', border: 'border-red-500' },
+            { id: 'level_pro3', name: 'PRO III', req: 90, color: 'text-red-600', border: 'border-red-600' },
+            { id: 'level_campione1', name: 'Campione I', req: 100, color: 'text-purple-400', border: 'border-purple-400' },
+            { id: 'level_campione2', name: 'Campione II', req: 110, color: 'text-purple-500', border: 'border-purple-500' },
+            { id: 'level_campione3', name: 'Campione III', req: 120, color: 'text-purple-600', border: 'border-purple-600' },
+            { id: 'level_master', name: 'MASTER', req: 130, color: 'text-fuchsia-500', border: 'border-fuchsia-500' }
         ];
 
         // AGGIUNTE LE FRASI (SPEECHES) AI PERSONAGGI PRINCIPALI
@@ -2626,15 +2626,20 @@
           </div>
         );
 
-        // --- CALCOLO LIVELLO ---
+        // --- CALCOLO LIVELLO (Nuovo Bilanciamento) ---
         const getLevelInfo = (exp) => {
             const totalExp = exp || 0;
-            const level = Math.floor(Math.sqrt(totalExp / 100)) + 1;
-            const currentLevelBaseExp = Math.pow(level - 1, 2) * 100;
-            const nextLevelBaseExp = Math.pow(level, 2) * 100;
-            const expIntoLevel = totalExp - currentLevelBaseExp;
+            // Nuova formula più bilanciata e accessibile
+            const x = (-100 + Math.sqrt(10000 + 40 * totalExp)) / 20;
+            const level = Math.floor(x) + 1;
+            
+            const currentLevelBaseExp = 10 * Math.pow(level - 1, 2) + 100 * (level - 1);
+            const nextLevelBaseExp = 10 * Math.pow(level, 2) + 100 * level;
+            
+            const expIntoLevel = Math.floor(totalExp - currentLevelBaseExp);
             const expNeeded = nextLevelBaseExp - currentLevelBaseExp;
-            const progressPercent = (expIntoLevel / expNeeded) * 100;
+            const progressPercent = Math.max(0, Math.min(100, (expIntoLevel / expNeeded) * 100));
+            
             return { level, progressPercent, expIntoLevel, expNeeded, nextLevelBaseExp };
         };
 
